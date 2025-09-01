@@ -12,5 +12,6 @@ public interface ClienteDAO {
 	void update(Cliente cliente);
 	void delete(int id);
 	void deleteAll();
+	List<Cliente> findClientesOrdenadosPorFacturacion();
 	
 }

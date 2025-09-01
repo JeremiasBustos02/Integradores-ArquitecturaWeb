@@ -132,4 +132,40 @@ public class MySQLProductoDAO implements ProductoDAO {
 		}
 	}
 
+	@Override
+	public Producto findProductoMasRecaudador() {
+		// SQL que calcula la recaudación total por producto (cantidad * valor) 
+		// y retorna el producto con mayor recaudación
+		final String sql = "SELECT p.idProducto, p.nombre, p.valor, " +
+						   "SUM(fp.cantidad * p.valor) as recaudacion_total " +
+						   "FROM Producto p " +
+						   "INNER JOIN FacturaProducto fp ON p.idProducto = fp.idProducto " +
+						   "GROUP BY p.idProducto, p.nombre, p.valor " +
+						   "ORDER BY recaudacion_total DESC " +
+						   "LIMIT 1";
+		
+		try (PreparedStatement ps = conn.prepareStatement(sql);
+			 ResultSet rs = ps.executeQuery()) {
+			
+			if (rs.next()) {
+				int idProducto = rs.getInt("idProducto");
+				String nombre = rs.getString("nombre");
+				float valor = rs.getFloat("valor");
+				float recaudacionTotal = rs.getFloat("recaudacion_total");
+				
+				System.out.println("Producto más recaudador: " + nombre + 
+								 " (ID: " + idProducto + ") - Recaudación total: $" + recaudacionTotal);
+				
+				return new Producto(idProducto, nombre, valor);
+			} else {
+				System.out.println("No se encontraron productos con ventas");
+				return null;
+			}
+		} catch (Exception e) {
+			System.out.println("Error al buscar el producto más recaudador");
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 }

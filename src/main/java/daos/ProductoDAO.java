@@ -12,4 +12,5 @@ public interface ProductoDAO {
 	void update(Producto producto);
 	void delete(int id);
 	void deleteAll();
+	Producto findProductoMasRecaudador();
 }

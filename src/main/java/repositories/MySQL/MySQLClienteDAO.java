@@ -132,4 +132,38 @@ public class MySQLClienteDAO implements ClienteDAO {
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public List<Cliente> findClientesOrdenadosPorFacturacion() {
+		// SQL que calcula el total facturado por cliente y los ordena de mayor a menor
+		final String sql = "SELECT c.idCliente, c.nombre, c.email, " +
+						   "COALESCE(SUM(fp.cantidad * p.valor), 0) as total_facturado " +
+						   "FROM Cliente c " +
+						   "LEFT JOIN Factura f ON c.idCliente = f.idCliente " +
+						   "LEFT JOIN FacturaProducto fp ON f.idFactura = fp.idFactura " +
+						   "LEFT JOIN Producto p ON fp.idProducto = p.idProducto " +
+						   "GROUP BY c.idCliente, c.nombre, c.email " +
+						   "ORDER BY total_facturado DESC";
+		
+		List<Cliente> clientes = new ArrayList<>();
+		
+		try (PreparedStatement ps = conn.prepareStatement(sql);
+			 ResultSet rs = ps.executeQuery()) {
+			
+			while (rs.next()) {
+				int idCliente = rs.getInt("idCliente");
+				String nombre = rs.getString("nombre");
+				String email = rs.getString("email");
+				
+				Cliente cliente = new Cliente(idCliente, nombre, email);
+				clientes.add(cliente);
+			}
+			
+		} catch (SQLException e) {
+			System.out.println("Error al buscar clientes ordenados por facturación");
+			e.printStackTrace();
+		}
+		
+		return clientes;
+	}
 }

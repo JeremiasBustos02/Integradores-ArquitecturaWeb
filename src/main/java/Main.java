@@ -63,6 +63,29 @@ public class Main {
 		}
 		System.out.println("------------------------------------");
 		
+		// Obtener el producto más recaudador
+		Producto productoMasRecaudador = productoDAO.findProductoMasRecaudador();
+		if (productoMasRecaudador != null) {
+			System.out.println("El producto que más recaudó es: " + 
+							 productoMasRecaudador.getNombre() + 
+							 " (ID: " + productoMasRecaudador.getIdProducto() + 
+							 ") con un valor de: $" + productoMasRecaudador.getValor() + " por unidad.");
+		} else {
+			System.out.println("No se pudo determinar el producto más recaudador");
+		}
+		System.out.println("------------------------------------");
+		
+		// Obtener clientes ordenados por facturación
+		List<Cliente> clientesOrdenados = clienteDAO.findClientesOrdenadosPorFacturacion();
+		System.out.println("Clientes ordenados por monto total facturado (mayor a menor):");
+		for (int i = 0; i < clientesOrdenados.size(); i++) {
+			Cliente cliente = clientesOrdenados.get(i);
+			System.out.println((i + 1) + ". " + cliente.getNombre() + 
+							 " (ID: " + cliente.getIdCliente() + 
+							 ") - Email: " + cliente.getEmail());
+		}
+		System.out.println("------------------------------------");
+		
 		System.out.println("Fin del programa.");
 		
 	}
