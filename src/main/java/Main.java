@@ -80,9 +80,11 @@ public class Main {
 		System.out.println("Clientes ordenados por monto total facturado (mayor a menor):");
 		for (int i = 0; i < clientesOrdenados.size(); i++) {
 			Cliente cliente = clientesOrdenados.get(i);
+			String totalFacturadoStr = "$" + cliente.getTotalFacturado();
 			System.out.println((i + 1) + ". " + cliente.getNombre() + 
 							 " (ID: " + cliente.getIdCliente() + 
-							 ") - Email: " + cliente.getEmail());
+							 ") - Email: " + cliente.getEmail() +
+							 " - Total facturado: " + totalFacturadoStr);
 		}
 		System.out.println("------------------------------------");
 		

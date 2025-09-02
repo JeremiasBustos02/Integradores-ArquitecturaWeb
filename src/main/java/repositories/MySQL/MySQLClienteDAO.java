@@ -154,8 +154,9 @@ public class MySQLClienteDAO implements ClienteDAO {
 				int idCliente = rs.getInt("idCliente");
 				String nombre = rs.getString("nombre");
 				String email = rs.getString("email");
+				float totalFacturado = rs.getFloat("total_facturado");
 				
-				Cliente cliente = new Cliente(idCliente, nombre, email);
+				Cliente cliente = new Cliente(idCliente, nombre, email, totalFacturado);
 				clientes.add(cliente);
 			}
 			
@@ -166,4 +167,5 @@ public class MySQLClienteDAO implements ClienteDAO {
 		
 		return clientes;
 	}
+
 }
