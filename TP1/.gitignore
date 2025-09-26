@@ -1,0 +1,24 @@
+# MySQL data
+mysql-data/
+
+# Archivos de Eclipse
+.metadata/
+.project
+.classpath
+.settings/
+
+# Archivos binarios compilados
+bin/
+build/
+
+# Archivos de log y temporales
+*.log
+*.tmp
+
+# Archivos específicos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos generados por Gradle o Maven (si los tenés)
+.gradle/
+target/
