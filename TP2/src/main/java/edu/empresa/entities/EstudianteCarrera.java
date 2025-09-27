@@ -8,6 +8,7 @@ import java.time.LocalDate;
 @Table(name = "Estudiante_Carrera")
 public class EstudianteCarrera {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
     @ManyToOne

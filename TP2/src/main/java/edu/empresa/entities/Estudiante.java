@@ -37,7 +37,7 @@ public class Estudiante {
     @Column
     private String ciudad;
 
-    @OneToMany(mappedBy = "estudiante")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "estudiante")
     private List<EstudianteCarrera> carreras = new ArrayList<>();
 
 
