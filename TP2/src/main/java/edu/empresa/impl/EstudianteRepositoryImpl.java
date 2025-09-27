@@ -45,19 +45,27 @@ public class EstudianteRepositoryImpl implements EstudianteRepository {
 
     @Override
     public List<Estudiante> buscarTodos() {
-        return em.createQuery("SELECT e FROM Estudiante e ", Estudiante.class).getResultList();
+        return em.createQuery("SELECT e " +
+                "FROM Estudiante e ", Estudiante.class)
+                .getResultList();
     }
 
     @Override
     public List<Estudiante> buscarPorGenero(String genero) {
 
-        return em.createQuery("SELECT e FROM Estudiante e WHERE e.genero LIKE ?1", Estudiante.class).setParameter
-                (1, genero).getResultList();
+        return em.createQuery("SELECT e " +
+                "FROM Estudiante e " +
+                "WHERE e.genero LIKE ?1", Estudiante.class)
+                .setParameter(1, genero)
+                .getResultList();
     }
 
     @Override
     public List<Estudiante> buscarTodosOrderByNombre() {
-        return em.createQuery("SELECT E FROM Estudiante E order by nombre desc", Estudiante.class).getResultList();
+        return em.createQuery("SELECT E " +
+                "FROM Estudiante E " +
+                "order by nombre desc", Estudiante.class)
+                .getResultList();
     }
 
 }

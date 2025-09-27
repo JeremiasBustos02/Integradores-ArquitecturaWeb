@@ -17,7 +17,8 @@ public class CarreraRepositoryImpl implements CarreraRepository {
 
     @Override
     public List<Estudiante> getCarrerasConEstudiantes() {
-        return em.createQuery("SELECT c, COUNT(e)AS cantidad FROM Carrera c " +
+        return em.createQuery("SELECT c, COUNT(e)AS cantidad " +
+                "FROM Carrera c " +
                 "JOIN EstudianteCarrera ec ON ec.carrera = c " +
                 "JOIN ec.estudiante e " +
                 "GROUP BY c " +
@@ -33,7 +34,15 @@ public class CarreraRepositoryImpl implements CarreraRepository {
             return new ArrayList<>();
         }
 
-        return em.createQuery("SELECT e from EstudianteCarrera ec join ec.estudiante e join ec.carrera c where c.id_carrera= ?1 and e.ciudad LIKE ?2", Estudiante.class).setParameter(1, c.getIdCarrera()).setParameter(2, ciudad).getResultList();
+        return em.createQuery(
+                "SELECT e from EstudianteCarrera ec " +
+                "join ec.estudiante e " +
+                "join ec.carrera c " +
+                "where c.id_carrera= ?1 " +
+                "   and e.ciudad LIKE ?2", Estudiante.class)
+                .setParameter(1, c.getIdCarrera())
+                .setParameter(2, ciudad)
+                .getResultList();
     }
 
     @Override
