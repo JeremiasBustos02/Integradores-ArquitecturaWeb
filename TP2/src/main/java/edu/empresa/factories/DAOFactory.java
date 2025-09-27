@@ -1,8 +1,10 @@
 package edu.empresa.factories;
 
 import edu.empresa.impl.CarreraRepositoryImpl;
+import edu.empresa.impl.EstudianteCarreraImpl;
 import edu.empresa.impl.EstudianteRepositoryImpl;
 import edu.empresa.repositories.CarreraRepository;
+import edu.empresa.repositories.EstudianteCarreraRepository;
 import edu.empresa.repositories.EstudianteRepository;
 import jakarta.persistence.EntityManager;
 
@@ -26,4 +28,6 @@ public class DAOFactory {
     public CarreraRepository getCarreraDAO(EntityManager em) {
         return new CarreraRepositoryImpl(em);
     }
+
+    public EstudianteCarreraRepository getEstudianteCarreraDAO(EntityManager em) {return new EstudianteCarreraImpl(em);}
 }

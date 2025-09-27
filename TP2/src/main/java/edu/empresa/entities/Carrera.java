@@ -32,4 +32,12 @@ public class Carrera {
     public int getIdCarrera() {
         return id_carrera;
     }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public int getDuracion() {
+        return duracion;
+    }
 }
