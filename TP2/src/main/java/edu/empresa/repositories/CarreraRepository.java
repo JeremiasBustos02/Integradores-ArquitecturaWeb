@@ -9,4 +9,5 @@ public interface CarreraRepository {
     List<Estudiante> getCarrerasConEstudiantes();
     List<Estudiante> getEstudiantesByCarrera(Carrera c,String ciudad);
     void altaCarrera(int id,String nombre,int duracion);
+    Carrera buscarPorId(int id);
 }

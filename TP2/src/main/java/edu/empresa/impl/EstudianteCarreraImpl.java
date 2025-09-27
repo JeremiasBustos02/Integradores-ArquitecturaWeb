@@ -16,17 +16,17 @@ public class EstudianteCarreraImpl implements EstudianteCarreraRepository {
     }
 
     @Override
-    public void anotarEstudiante(int id, Estudiante estu, Carrera c, LocalDate inscripcion, LocalDate graduacion, int antiguedad) {
+    public void anotarEstudiante(int id, Estudiante estu, Carrera c, int inscripcion, int graduacion, int antiguedad) {
         try {
             em.getTransaction().begin();
             Estudiante nuevo = em.find(Estudiante.class, estu.getDni());
             if (nuevo != null) {
                 Carrera car = em.find(Carrera.class, c.getIdCarrera());
                 if (car != null) {
-                    EstudianteCarrera ec = new EstudianteCarrera(id, estu, c, LocalDate.now(), graduacion, antiguedad);
+                    EstudianteCarrera ec = new EstudianteCarrera(id, nuevo, car, inscripcion, graduacion, antiguedad);
                     em.persist(ec);
                     em.getTransaction().commit();
-                    System.out.println("Estudiante " + estu + " anotado en " + c);
+                    System.out.println("Estudiante " + estu.getNombre() + " anotado en " + car.getNombre());
                 } else {//rollback de carrera
                     if (em.getTransaction().isActive()) {
                         em.getTransaction().rollback();
@@ -44,7 +44,8 @@ public class EstudianteCarreraImpl implements EstudianteCarreraRepository {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
-            System.err.println("Error al anotar al estudiante en la carreara");
+            e.printStackTrace();
+            System.err.println("Error al anotar al estudiante en la carrera");
         }
     }
 }

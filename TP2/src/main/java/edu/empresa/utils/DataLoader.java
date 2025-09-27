@@ -1,5 +1,6 @@
 package edu.empresa.utils;
 
+import edu.empresa.dto.EstudianteCarreraDTO;
 import edu.empresa.entities.Carrera;
 import edu.empresa.entities.Estudiante;
 import edu.empresa.entities.EstudianteCarrera;
@@ -10,6 +11,7 @@ import edu.empresa.repositories.EstudianteCarreraRepository;
 import edu.empresa.repositories.EstudianteRepository;
 import jakarta.persistence.EntityManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DataLoader {
@@ -28,12 +30,12 @@ public class DataLoader {
     }
 
     public void loadData() {
-        List<Estudiante> estudiantes = loadEsstudiantes("src/main/resources/csv_files/estudiantes.csv");
-        List<Carrera> carreras = loadCarreras("src/main/resources/csv_files/carreras.csv");
-        loadEstudianteCarrera("src/main/resources/csv_files/estudianteCarrera.csv", estudiantes, carreras);
+        loadEsstudiantes("src/main/resources/csv_files/estudiantes.csv");
+        loadCarreras("src/main/resources/csv_files/carreras.csv");
+        loadEstudianteCarrera("src/main/resources/csv_files/estudianteCarrera.csv");
     }
 
-    private List<Estudiante> loadEsstudiantes(String filePath) {
+    private void loadEsstudiantes(String filePath) {
         List<Estudiante> estudiantes = csvReader.leerArchivoEstudiantes(filePath);
         for (Estudiante estudiante : estudiantes) {
             estudianteRepository.altaEstudiante(
@@ -46,10 +48,9 @@ public class DataLoader {
                     estudiante.getCiudad()
             );
         }
-        return estudiantes;
     }
 
-    private List<Carrera> loadCarreras(String filePath) {
+    private void loadCarreras(String filePath) {
         List<Carrera> carreras = csvReader.leerArchivoCarreras(filePath);
         for (Carrera carrera : carreras) {
             carreraRepository.altaCarrera(
@@ -58,12 +59,30 @@ public class DataLoader {
                     carrera.getDuracion()
             );
         }
-        return carreras;
     }
 
-    private void loadEstudianteCarrera(String filePath, List<Estudiante> estudiantes, List<Carrera> carreras) {
-        List<EstudianteCarrera> estudianteCarreras = csvReader.leerArchivoEstudiantesCarreras(filePath, estudiantes, carreras);
-        for (EstudianteCarrera estudianteCarrera : estudianteCarreras) {
+    private void loadEstudianteCarrera(String filePath) {
+        List<EstudianteCarreraDTO> ecDTO = csvReader.leerArchivoEstudiantesCarreras(filePath);
+        List<EstudianteCarrera> estudiantesCarreras = new ArrayList<>();
+
+        for (EstudianteCarreraDTO estudianteCarreraDTO : ecDTO) {
+            Estudiante estudiante = estudianteRepository.buscarPorDNI(estudianteCarreraDTO.getIdEstudiante());
+            Carrera carrera = carreraRepository.buscarPorId(estudianteCarreraDTO.getIdCarrera());
+
+            if (estudiante != null && carrera != null) {
+                EstudianteCarrera ec = new EstudianteCarrera(
+                        estudianteCarreraDTO.getId(),
+                        estudiante,
+                        carrera,
+                        estudianteCarreraDTO.getInscripcion(),
+                        estudianteCarreraDTO.getGraduacion(),
+                        estudianteCarreraDTO.getAntiguedad()
+                );
+                estudiantesCarreras.add(ec);
+            }
+        }
+
+        for (EstudianteCarrera estudianteCarrera : estudiantesCarreras) {
             estudianteCarreraRepository.anotarEstudiante(
                     estudianteCarrera.getId(),
                     estudianteCarrera.getEstudiante(),

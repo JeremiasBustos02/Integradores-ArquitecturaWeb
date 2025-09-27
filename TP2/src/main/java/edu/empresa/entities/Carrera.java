@@ -9,7 +9,6 @@ import java.util.List;
 @Table(name = "Carrera")
 public class Carrera {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id_carrera;
     @Column
     private String nombre;

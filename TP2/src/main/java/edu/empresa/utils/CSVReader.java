@@ -1,5 +1,6 @@
 package edu.empresa.utils;
 
+import edu.empresa.dto.EstudianteCarreraDTO;
 import edu.empresa.entities.Carrera;
 import edu.empresa.entities.Estudiante;
 import edu.empresa.entities.EstudianteCarrera;
@@ -58,41 +59,20 @@ public class CSVReader {
         return carreras;
     }
 
-    public List<EstudianteCarrera> leerArchivoEstudiantesCarreras(
-            String rutaArchivo,
-            List<Estudiante> estudiantes,
-            List<Carrera> carreras) {
-        List<EstudianteCarrera> estudiantesCarreras = new ArrayList<>();
-
-        // Mapas para acceder rápido a los objetos por ID
-        Map<Integer, Estudiante> mapaEstudiantes = estudiantes.stream()
-                .collect(Collectors.toMap(Estudiante::getDni, e -> e));
-        Map<Integer, Carrera> mapaCarreras = carreras.stream()
-                .collect(Collectors.toMap(Carrera::getIdCarrera, c -> c));
-
+    public List<EstudianteCarreraDTO> leerArchivoEstudiantesCarreras(String rutaArchivo) {
+        List<EstudianteCarreraDTO> estudiantesCarreras = new ArrayList<>();
 
         try (CSVParser parser = CSVFormat.DEFAULT.withHeader().parse(new FileReader(rutaArchivo))) {
             for (CSVRecord record : parser) {
                 int id = Integer.parseInt(record.get("id"));
                 int idEstudiante = Integer.parseInt(record.get("id_estudiante"));
                 int idCarrera = Integer.parseInt(record.get("id_carrera"));
-
-                // Convertir las fechas
-                String inscripcionStr = record.get("inscripcion");
-                String graduacionStr = record.get("graduacion");
-
-                LocalDate inscripcion = LocalDate.of(Integer.parseInt(inscripcionStr), 1, 1); // año, mes, día
-                LocalDate graduacion = graduacionStr.equals("0") ? null : LocalDate.of(Integer.parseInt(graduacionStr), 1, 1);
-
+                int inscripcion = Integer.parseInt(record.get("inscripcion"));
+                int graduacion = Integer.parseInt(record.get("graduacion"));
                 int antiguedad = Integer.parseInt(record.get("antiguedad"));
 
-                // Buscar objetos por ID
-                Estudiante e = mapaEstudiantes.get(idEstudiante);
-                Carrera c = mapaCarreras.get(idCarrera);
-
-                // Crear objeto EstudianteCarrera
-                EstudianteCarrera ec = new EstudianteCarrera(id, e, c, inscripcion, graduacion, antiguedad);
-                estudiantesCarreras.add(ec);
+                EstudianteCarreraDTO ecDTO = new EstudianteCarreraDTO(id, idEstudiante, idCarrera, inscripcion, graduacion, antiguedad);
+                estudiantesCarreras.add(ecDTO);
             }
             System.out.println("Archivo estudiante_carrera.csv leído correctamente.");
         } catch (IOException ex) {

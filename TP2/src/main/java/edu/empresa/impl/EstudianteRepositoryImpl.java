@@ -39,6 +39,11 @@ public class EstudianteRepositoryImpl implements EstudianteRepository {
     }
 
     @Override
+    public Estudiante buscarPorDNI(int dni) {
+        return em.find(Estudiante.class, dni);
+    }
+
+    @Override
     public Estudiante buscarPorLU(int lu) {
         return em.find(Estudiante.class, lu);
     }

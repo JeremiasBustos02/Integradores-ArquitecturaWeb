@@ -62,7 +62,13 @@ public class CarreraRepositoryImpl implements CarreraRepository {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
+            e.printStackTrace();
             System.err.println("Error al crear carrera");
         }
+    }
+
+    @Override
+    public Carrera buscarPorId(int id) {
+        return em.find(Carrera.class, id);
     }
 }

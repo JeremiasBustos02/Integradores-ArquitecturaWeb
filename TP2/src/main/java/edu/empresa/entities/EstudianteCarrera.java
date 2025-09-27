@@ -8,7 +8,6 @@ import java.time.LocalDate;
 @Table(name = "Estudiante_Carrera")
 public class EstudianteCarrera {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
     @ManyToOne
@@ -20,10 +19,10 @@ public class EstudianteCarrera {
     private Carrera carrera;
 
     @Column(nullable = false)
-    private LocalDate inscripcion;
+    private int inscripcion;
 
     @Column(nullable = true)
-    private LocalDate graduacion;
+    private int graduacion;
 
     @Column
     private int antiguedad;
@@ -32,7 +31,7 @@ public class EstudianteCarrera {
         super();
     }
 
-    public EstudianteCarrera(int id, Estudiante estudiante, Carrera carrera, LocalDate inscripcion, LocalDate graduacion, int antiguedad) {
+    public EstudianteCarrera(int id, Estudiante estudiante, Carrera carrera, int inscripcion, int graduacion, int antiguedad) {
         this.id = id;
         this.estudiante = estudiante;
         this.carrera = carrera;
@@ -66,19 +65,19 @@ public class EstudianteCarrera {
         this.carrera = carrera;
     }
 
-    public LocalDate getInscripcion() {
+    public int getInscripcion() {
         return inscripcion;
     }
 
-    public void setInscripcion(LocalDate inscripcion) {
+    public void setInscripcion(int inscripcion) {
         this.inscripcion = inscripcion;
     }
 
-    public LocalDate getGraduacion() {
+    public int getGraduacion() {
         return graduacion;
     }
 
-    public void setGraduacion(LocalDate graduacion) {
+    public void setGraduacion(int graduacion) {
         this.graduacion = graduacion;
     }
 
