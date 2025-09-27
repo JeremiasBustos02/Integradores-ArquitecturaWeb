@@ -40,4 +40,52 @@ public class EstudianteCarrera {
         this.antiguedad = antiguedad;
     }
 
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Estudiante getEstudiante() {
+        return estudiante;
+    }
+
+    public void setEstudiante(Estudiante estudiante) {
+        this.estudiante = estudiante;
+    }
+
+    public Carrera getCarrera() {
+        return carrera;
+    }
+
+    public void setCarrera(Carrera carrera) {
+        this.carrera = carrera;
+    }
+
+    public LocalDate getInscripcion() {
+        return inscripcion;
+    }
+
+    public void setInscripcion(LocalDate inscripcion) {
+        this.inscripcion = inscripcion;
+    }
+
+    public LocalDate getGraduacion() {
+        return graduacion;
+    }
+
+    public void setGraduacion(LocalDate graduacion) {
+        this.graduacion = graduacion;
+    }
+
+    public int getAntiguedad() {
+        return antiguedad;
+    }
+
+    public void setAntiguedad(int antiguedad) {
+        this.antiguedad = antiguedad;
+    }
 }
