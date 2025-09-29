@@ -67,11 +67,10 @@ public class DataLoader {
 
         for (EstudianteCarreraDTO estudianteCarreraDTO : ecDTO) {
             Estudiante estudiante = estudianteRepository.buscarPorDNI(estudianteCarreraDTO.getIdEstudiante());
-            Carrera carrera = carreraRepository.buscarPorId(estudianteCarreraDTO.getIdCarrera());
+            Carrera carrera = carreraRepository.buscarCarreraPorId(estudianteCarreraDTO.getIdCarrera());
 
             if (estudiante != null && carrera != null) {
                 EstudianteCarrera ec = new EstudianteCarrera(
-                        estudianteCarreraDTO.getId(),
                         estudiante,
                         carrera,
                         estudianteCarreraDTO.getInscripcion(),
@@ -84,7 +83,6 @@ public class DataLoader {
 
         for (EstudianteCarrera estudianteCarrera : estudiantesCarreras) {
             estudianteCarreraRepository.anotarEstudiante(
-                    estudianteCarrera.getId(),
                     estudianteCarrera.getEstudiante(),
                     estudianteCarrera.getCarrera(),
                     estudianteCarrera.getInscripcion(),
