@@ -1,5 +1,6 @@
 package edu.empresa.impl;
 
+import edu.empresa.dto.CarreraDTO;
 import edu.empresa.entities.Carrera;
 import edu.empresa.entities.Estudiante;
 import edu.empresa.repositories.CarreraRepository;
@@ -68,7 +69,20 @@ public class CarreraRepositoryImpl implements CarreraRepository {
     }
 
     @Override
-    public Carrera buscarPorId(int id) {
+    public Carrera buscarCarreraPorId(int id) {
         return em.find(Carrera.class, id);
+    }
+
+    @Override
+    public CarreraDTO buscarPorId(int id) {
+        Carrera carrera = em.find(Carrera.class, id);
+        if (carrera != null) {
+            return new CarreraDTO(
+                carrera.getIdCarrera(),
+                carrera.getNombre(),
+                carrera.getDuracion()
+            );
+        }
+        return null;
     }
 }

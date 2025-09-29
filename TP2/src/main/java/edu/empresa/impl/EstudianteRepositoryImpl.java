@@ -1,5 +1,6 @@
 package edu.empresa.impl;
 
+import edu.empresa.dto.EstudianteDTO;
 import edu.empresa.entities.Estudiante;
 import edu.empresa.repositories.EstudianteRepository;
 import jakarta.persistence.EntityManager;
@@ -43,34 +44,62 @@ public class EstudianteRepositoryImpl implements EstudianteRepository {
         return em.find(Estudiante.class, dni);
     }
 
+
+    // Métodos que retornan DTOs
     @Override
-    public Estudiante buscarPorLU(int lu) {
-        return em.find(Estudiante.class, lu);
+    public EstudianteDTO buscarPorLU(int lu) {
+        try {
+            Estudiante estudiante = em.createQuery("SELECT e FROM Estudiante e WHERE e.lu = :lu", Estudiante.class)
+                    .setParameter("lu", lu)
+                    .getSingleResult();
+            return convertirADTO(estudiante);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Override
-    public List<Estudiante> buscarTodos() {
-        return em.createQuery("SELECT e " +
-                "FROM Estudiante e ", Estudiante.class)
+    public List<EstudianteDTO> buscarTodos() {
+        List<Estudiante> estudiantes = em.createQuery("SELECT e FROM Estudiante e", Estudiante.class)
                 .getResultList();
+        return convertirListaADTO(estudiantes);
     }
 
     @Override
-    public List<Estudiante> buscarPorGenero(String genero) {
-
-        return em.createQuery("SELECT e " +
-                "FROM Estudiante e " +
-                "WHERE e.genero LIKE ?1", Estudiante.class)
+    public List<EstudianteDTO> buscarPorGenero(String genero) {
+        List<Estudiante> estudiantes = em.createQuery("SELECT e FROM Estudiante e WHERE e.genero = ?1", Estudiante.class)
                 .setParameter(1, genero)
                 .getResultList();
+        return convertirListaADTO(estudiantes);
     }
 
     @Override
-    public List<Estudiante> buscarTodosOrderByNombre() {
-        return em.createQuery("SELECT E " +
-                "FROM Estudiante E " +
-                "order by nombre desc", Estudiante.class)
+    public List<EstudianteDTO> buscarTodosOrderByNombre() {
+        List<Estudiante> estudiantes = em.createQuery("SELECT e FROM Estudiante e ORDER BY e.nombre DESC", Estudiante.class)
                 .getResultList();
+        return convertirListaADTO(estudiantes);
+    }
+
+    // Métodos auxiliares para conversión
+    private EstudianteDTO convertirADTO(Estudiante estudiante) {
+        if (estudiante == null) return null;
+        return new EstudianteDTO(
+            estudiante.getDni(),
+            estudiante.getNombre(),
+            estudiante.getApellido(),
+            estudiante.getEdad(),
+            estudiante.getGenero(),
+            estudiante.getLu(),
+            estudiante.getCiudad()
+        );
+    }
+
+    private List<EstudianteDTO> convertirListaADTO(List<Estudiante> estudiantes) {
+        List<EstudianteDTO> dtos = new ArrayList<>();
+        for (Estudiante estudiante : estudiantes) {
+            dtos.add(convertirADTO(estudiante));
+        }
+        return dtos;
     }
 
 }

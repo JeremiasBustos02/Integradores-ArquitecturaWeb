@@ -8,6 +8,7 @@ import java.time.LocalDate;
 @Table(name = "Estudiante_Carrera")
 public class EstudianteCarrera {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
     @ManyToOne
@@ -31,8 +32,8 @@ public class EstudianteCarrera {
         super();
     }
 
-    public EstudianteCarrera(int id, Estudiante estudiante, Carrera carrera, int inscripcion, int graduacion, int antiguedad) {
-        this.id = id;
+    // Constructor sin ID para auto increment
+    public EstudianteCarrera(Estudiante estudiante, Carrera carrera, int inscripcion, int graduacion, int antiguedad) {
         this.estudiante = estudiante;
         this.carrera = carrera;
         this.inscripcion = inscripcion;

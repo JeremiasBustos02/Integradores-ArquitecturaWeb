@@ -6,5 +6,5 @@ import edu.empresa.entities.Estudiante;
 import java.time.LocalDate;
 
 public interface EstudianteCarreraRepository {
-    void anotarEstudiante(int id , Estudiante e, Carrera c, int inscripcion,int graduacion,int antiguedad);
+    void anotarEstudiante(Estudiante e, Carrera c, int inscripcion, int graduacion, int antiguedad);
 }
