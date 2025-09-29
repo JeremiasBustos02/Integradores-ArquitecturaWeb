@@ -26,7 +26,6 @@ public class EstudianteCarreraImpl implements EstudianteCarreraRepository {
                     EstudianteCarrera ec = new EstudianteCarrera(nuevo, car, inscripcion, graduacion, antiguedad);
                     em.persist(ec);
                     em.getTransaction().commit();
-                    System.out.println("Estudiante " + estu.getNombre() + " anotado en " + car.getNombre());
                 } else {//rollback de carrera
                     if (em.getTransaction().isActive()) {
                         em.getTransaction().rollback();

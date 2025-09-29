@@ -14,6 +14,11 @@ public class DataDelete {
             em.createQuery("DELETE FROM Carrera").executeUpdate();
 
             em.getTransaction().commit();
+
+            em.getTransaction().begin();
+            em.createNativeQuery("ALTER TABLE Estudiante_Carrera AUTO_INCREMENT = 1").executeUpdate();
+            em.getTransaction().commit();
+
             System.out.println("Todos los datos eliminados correctamente.");
         } catch (Exception e) {
             if (em.getTransaction().isActive()) {
