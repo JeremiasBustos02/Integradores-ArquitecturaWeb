@@ -12,6 +12,7 @@ import edu.empresa.repositories.EstudianteRepository;
 import edu.empresa.utils.DataDelete;
 import edu.empresa.utils.DataLoader;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 
@@ -55,6 +56,10 @@ public class Main {
         generoBuscado = "Male";
         recuperarEstudiantesPorGenero(generoBuscado);
         System.out.println("------------------------------------");
+
+        System.out.println("Ejercicio F) - Recuperar las carreras con estudiantes inscriptos, y ordenar por cantidad de inscriptos");
+        recuperarCarrerasConInscriptos();
+
     }
 
     private static void darAltaNuevoEstudiante(Estudiante nuevoEstudiante) {
@@ -74,6 +79,7 @@ public class Main {
 
         } catch (Exception e) {
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            e.printStackTrace();
             System.err.println("Error al crear el estudiante: " + e.getMessage());
         } finally {
             em.close();
@@ -106,6 +112,7 @@ public class Main {
             em.getTransaction().commit();
         } catch (Exception e) {
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            e.printStackTrace();
             System.err.println("Error al matricular al estudiante: " + e.getMessage());
         } finally {
             em.close();
@@ -137,6 +144,7 @@ public class Main {
             }
             System.out.println("--------------------------------------------------------------------------------");
         } catch (Exception e) {
+            e.printStackTrace();
             System.err.println("Error al listar estudiantes: " + e.getMessage());
         } finally {
             em.close();
@@ -165,6 +173,7 @@ public class Main {
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
             System.err.println("Error al buscar estudiante por LU: " + e.getMessage());
         } finally {
             em.close();
@@ -201,7 +210,37 @@ public class Main {
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
             System.err.println("Error al buscar estudiantes por género: " + e.getMessage());
+        } finally {
+            em.close();
+        }
+    }
+
+    public static void recuperarCarrerasConInscriptos() {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            DAOFactory factory = DAOFactory.getInstance();
+            CarreraRepository carreraRepo = factory.getCarreraDAO(em);
+
+            List<CarreraDTO> carreras = carreraRepo.recuperarCarrerasConInscriptos();
+
+            System.out.println("LISTADO DE CARRERAS CON ESTUDIANTES INSCRIPTOS (ORDENADO POR CANTIDAD DE INSCRIPTOS):");
+            System.out.printf("%-10s %-25s %-10s %-15s%n",
+                    "ID", "NOMBRE", "DURACIÓN", "CANT. INSCRIPTOS");
+
+            for (CarreraDTO carrera : carreras) {
+                System.out.printf("%-10d %-25s %-10d %-15d%n",
+                        carrera.getIdCarrera(),
+                        carrera.getNombre(),
+                        carrera.getDuracion(),
+                        carrera.getCantidadInscriptos()
+                );
+            }
+            System.out.println("--------------------------------------------------------------------------------");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Error al listar carreras con inscriptos: " + e.getMessage());
         } finally {
             em.close();
         }

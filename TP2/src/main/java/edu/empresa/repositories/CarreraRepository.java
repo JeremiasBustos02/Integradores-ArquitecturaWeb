@@ -15,4 +15,6 @@ public interface CarreraRepository {
     
     // Método que retorna DTO (para capa de presentación)
     CarreraDTO buscarPorId(int id);
+
+    List<CarreraDTO> recuperarCarrerasConInscriptos();
 }

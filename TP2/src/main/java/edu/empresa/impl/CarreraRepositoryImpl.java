@@ -18,7 +18,7 @@ public class CarreraRepositoryImpl implements CarreraRepository {
 
     @Override
     public List<Estudiante> getCarrerasConEstudiantes() {
-        return em.createQuery("SELECT c, COUNT(e)AS cantidad " +
+        return em.createQuery("SELECT c, COUNT(e) AS cantidad " +
                 "FROM Carrera c " +
                 "JOIN EstudianteCarrera ec ON ec.carrera = c " +
                 "JOIN ec.estudiante e " +
@@ -85,4 +85,18 @@ public class CarreraRepositoryImpl implements CarreraRepository {
         }
         return null;
     }
+
+    @Override
+    public List<CarreraDTO> recuperarCarrerasConInscriptos() {
+        String jpql = "SELECT new edu.empresa.dto.CarreraDTO(c.id_carrera, c.nombre, c.duracion, COUNT(ec)) " +
+                "FROM Carrera c " +
+                "JOIN c.estudiantes ec " +
+                "GROUP BY c.id_carrera, c.nombre, c.duracion " +
+                "HAVING COUNT(ec) > 0 " +
+                "ORDER BY COUNT(ec) DESC";
+
+        List<CarreraDTO> resultados = em.createQuery(jpql, CarreraDTO.class).getResultList();
+        return resultados;
+    }
+
 }

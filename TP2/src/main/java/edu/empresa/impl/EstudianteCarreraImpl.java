@@ -1,5 +1,6 @@
 package edu.empresa.impl;
 
+import edu.empresa.dto.CarreraDTO;
 import edu.empresa.entities.Carrera;
 import edu.empresa.entities.Estudiante;
 import edu.empresa.entities.EstudianteCarrera;
@@ -7,6 +8,7 @@ import edu.empresa.repositories.EstudianteCarreraRepository;
 import jakarta.persistence.EntityManager;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class EstudianteCarreraImpl implements EstudianteCarreraRepository {
     EntityManager em;

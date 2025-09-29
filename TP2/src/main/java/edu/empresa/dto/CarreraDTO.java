@@ -4,6 +4,7 @@ public class CarreraDTO {
     private int idCarrera;
     private String nombre;
     private int duracion;
+    private long cantidadInscriptos;
 
     public CarreraDTO() {
         super();
@@ -13,6 +14,13 @@ public class CarreraDTO {
         this.idCarrera = idCarrera;
         this.nombre = nombre;
         this.duracion = duracion;
+    }
+
+    public CarreraDTO(int idCarrera, String nombre, int duracion, long cantidadInscriptos) {
+        this.idCarrera = idCarrera;
+        this.nombre = nombre;
+        this.duracion = duracion;
+        this.cantidadInscriptos = cantidadInscriptos;
     }
 
     public int getIdCarrera() {
@@ -37,6 +45,14 @@ public class CarreraDTO {
 
     public void setDuracion(int duracion) {
         this.duracion = duracion;
+    }
+
+    public void setCantidadInscriptos(long cantidadInscriptos) {
+        this.cantidadInscriptos = cantidadInscriptos;
+    }
+
+    public long getCantidadInscriptos() {
+        return cantidadInscriptos;
     }
 
     @Override
