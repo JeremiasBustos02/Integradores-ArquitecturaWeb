@@ -102,4 +102,17 @@ public class EstudianteRepositoryImpl implements EstudianteRepository {
         return dtos;
     }
 
+    @Override
+    public List<EstudianteDTO> buscarTodosPorCarreraYCiudad(int idCarrera, String ciudad) {
+        List<Estudiante> estudiantes = em.createQuery(
+                "SELECT e from EstudianteCarrera ec " +
+                "join ec.estudiante e " +
+                "join ec.carrera c " +
+                "where c.id_carrera= ?1 " +
+                "   and e.ciudad LIKE ?2", Estudiante.class)
+                .setParameter(1, idCarrera)
+                .setParameter(2, ciudad)
+                .getResultList();
+        return convertirListaADTO(estudiantes);
+    }
 }

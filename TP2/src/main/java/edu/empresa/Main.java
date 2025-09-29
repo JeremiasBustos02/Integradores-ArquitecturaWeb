@@ -59,8 +59,15 @@ public class Main {
 
         System.out.println("Ejercicio F) - Recuperar las carreras con estudiantes inscriptos, y ordenar por cantidad de inscriptos");
         recuperarCarrerasConInscriptos();
+        System.out.println("------------------------------------");
+
+        System.out.println("Ejercicio G) - Recuperar los estudiantes de una determinada carrera, filtrado por ciudad de residencia");
+        String ciudadResidencia = "Rauch";
+        recuperarEstudiantesPorCarreraYCiudad(idCarrera, ciudadResidencia);
+        System.out.println("------------------------------------");
 
     }
+
 
     private static void darAltaNuevoEstudiante(Estudiante nuevoEstudiante) {
         EntityManager em = JPAUtil.getEntityManager();
@@ -244,5 +251,53 @@ public class Main {
         } finally {
             em.close();
         }
+    }
+
+    private static void recuperarEstudiantesPorCarreraYCiudad(int idCarrera, String ciudadResidencia) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            DAOFactory factory = DAOFactory.getInstance();
+            CarreraRepository carreraRepo = factory.getCarreraDAO(em);
+            EstudianteRepository estudianteRepo = factory.getEstudianteDAO(em);
+
+            Carrera carrera = carreraRepo.buscarCarreraPorId(idCarrera);
+            if (carrera == null) {
+                System.out.println("No se encontró la carrera con ID: " + idCarrera);
+                return;
+            }
+
+            List<EstudianteDTO> estudiantes = estudianteRepo.buscarTodosPorCarreraYCiudad(idCarrera, ciudadResidencia);
+
+            System.out.println("LISTADO DE ESTUDIANTES INSCRIPTOS EN " + carrera.getNombre() +
+                    " Y RESIDENTES EN " + ciudadResidencia + ":");
+
+            if (estudiantes.isEmpty()) {
+                System.out.println("No hay estudiantes inscriptos en " + carrera.getNombre() +
+                        " que residan en " + ciudadResidencia + ".");
+            } else {
+                System.out.printf("%-10s %-15s %-15s %-5s %-12s %-10s %-15s%n",
+                        "DNI", "NOMBRE", "APELLIDO", "EDAD", "GÉNERO", "LU", "CIUDAD");
+
+                for (EstudianteDTO estudiante : estudiantes) {
+                    System.out.printf("%-10d %-15s %-15s %-5d %-12s %-10d %-15s%n",
+                            estudiante.getDni(),
+                            estudiante.getNombre(),
+                            estudiante.getApellido(),
+                            estudiante.getEdad(),
+                            estudiante.getGenero(),
+                            estudiante.getLu(),
+                            estudiante.getCiudad()
+                    );
+                }
+                System.out.println("--------------------------------------------------------------------------------");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Error al buscar estudiantes por carrera y ciudad: " + e.getMessage());
+        } finally {
+            em.close();
+        }
+
     }
 }

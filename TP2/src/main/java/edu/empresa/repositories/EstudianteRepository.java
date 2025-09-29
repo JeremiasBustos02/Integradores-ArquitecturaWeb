@@ -14,4 +14,5 @@ public interface EstudianteRepository {
     List<EstudianteDTO> buscarTodos();
     List<EstudianteDTO> buscarPorGenero(String genero);
     List<EstudianteDTO> buscarTodosOrderByNombre();
+    List<EstudianteDTO> buscarTodosPorCarreraYCiudad(int idCarrera, String ciudad);
 }
