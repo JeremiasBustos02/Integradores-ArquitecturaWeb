@@ -2,6 +2,7 @@ package edu.empresa;
 
 import edu.empresa.dto.CarreraDTO;
 import edu.empresa.dto.EstudianteDTO;
+import edu.empresa.dto.GenerarReporteDTO;
 import edu.empresa.entities.Carrera;
 import edu.empresa.entities.Estudiante;
 import edu.empresa.entities.EstudianteCarrera;
@@ -14,6 +15,7 @@ import edu.empresa.utils.DataLoader;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
+
 import java.util.List;
 
 public class Main {
@@ -30,7 +32,7 @@ public class Main {
                 42123678, "Nahuel", "Ruppel", 26, "Male", 249305, "Tandil"
         );
 
-        System.out.println("Ejercicio a) - Dar de alta un estudiante");
+        System.out.println("Punto 2) Ejercicio a) - Dar de alta un estudiante");
         darAltaNuevoEstudiante(nuevoEstudiante);
         System.out.println("------------------------------------");
 
@@ -64,6 +66,12 @@ public class Main {
         System.out.println("Ejercicio G) - Recuperar los estudiantes de una determinada carrera, filtrado por ciudad de residencia");
         String ciudadResidencia = "Rauch";
         recuperarEstudiantesPorCarreraYCiudad(idCarrera, ciudadResidencia);
+        System.out.println("------------------------------------");
+
+        System.out.println("Punto 3) - Generar un reporte de las carreras, que para cada carrera incluya información de los\n" +
+                "inscriptos y egresados por año. Se deben ordenar las carreras alfabéticamente, y presentar\n" +
+                "los años de manera cronológica.");
+        obtenerReporte();
         System.out.println("------------------------------------");
 
     }
@@ -300,4 +308,41 @@ public class Main {
         }
 
     }
-}
+
+    public static void obtenerReporte() {
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            DAOFactory factory = DAOFactory.getInstance();
+            CarreraRepository carreraRepo = factory.getCarreraDAO(em);
+
+            List<GenerarReporteDTO> reportes = carreraRepo.generarReporteCarreras();
+
+            if (reportes == null || reportes.isEmpty()) {
+                System.out.println("No hay datos para el reporte.");
+                return;
+            }
+
+            System.out.println("-------------------");
+            // NombreCarrera | Año | Inscriptos | Egresados
+            System.out.printf("%-40s %6s %12s %12s%n", "CARRERA", "ANIO", "INSCRIPTOS", "EGRESADOS");
+            System.out.println("--------------------------------------------------------------------------------");
+
+            for (GenerarReporteDTO g : reportes) {
+                System.out.printf(
+                        "%-40s %6d %12d %12d%n",
+                        g.getNombreCarrera(),
+                        g.getAnio(),
+                        g.getInscriptos(),
+                        g.getEgresados()
+                );
+            }
+        } catch (Exception e) {
+            System.err.println("Error al obtener reporte:");
+            e.printStackTrace(System.err);
+        } finally {
+                em.close();
+            }
+        }
+    }
+

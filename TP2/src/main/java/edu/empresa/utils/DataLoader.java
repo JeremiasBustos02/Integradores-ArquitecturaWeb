@@ -30,6 +30,7 @@ public class DataLoader {
     }
 
     public void loadData() {
+        //Cambiar por absolute path si no funciona
         loadEsstudiantes("src/main/resources/csv_files/estudiantes.csv");
         loadCarreras("src/main/resources/csv_files/carreras.csv");
         loadEstudianteCarrera("src/main/resources/csv_files/estudianteCarrera.csv");

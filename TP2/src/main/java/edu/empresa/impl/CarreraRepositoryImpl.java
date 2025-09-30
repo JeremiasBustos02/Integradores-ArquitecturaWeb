@@ -1,13 +1,14 @@
 package edu.empresa.impl;
 
 import edu.empresa.dto.CarreraDTO;
+import edu.empresa.dto.GenerarReporteDTO;
 import edu.empresa.entities.Carrera;
 import edu.empresa.entities.Estudiante;
+import edu.empresa.factories.JPAUtil;
 import edu.empresa.repositories.CarreraRepository;
 import jakarta.persistence.EntityManager;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class CarreraRepositoryImpl implements CarreraRepository {
     EntityManager em;
@@ -36,11 +37,11 @@ public class CarreraRepositoryImpl implements CarreraRepository {
         }
 
         return em.createQuery(
-                "SELECT e from EstudianteCarrera ec " +
-                "join ec.estudiante e " +
-                "join ec.carrera c " +
-                "where c.id_carrera= ?1 " +
-                "   and e.ciudad LIKE ?2", Estudiante.class)
+                        "SELECT e from EstudianteCarrera ec " +
+                                "join ec.estudiante e " +
+                                "join ec.carrera c " +
+                                "where c.id_carrera= ?1 " +
+                                "   and e.ciudad LIKE ?2", Estudiante.class)
                 .setParameter(1, c.getIdCarrera())
                 .setParameter(2, ciudad)
                 .getResultList();
@@ -74,13 +75,25 @@ public class CarreraRepositoryImpl implements CarreraRepository {
     }
 
     @Override
+    public List<CarreraDTO> obtenerTodasCarreras() {
+        List<Carrera> carreras = em.createQuery("SELECT C FROM Carrera C", Carrera.class).getResultList();
+        if (carreras == null) return new ArrayList<>();
+        List<CarreraDTO> cDtos = new ArrayList<>();
+        for (Carrera c : carreras) {
+            CarreraDTO carrera = new CarreraDTO(c.getIdCarrera(), c.getNombre(), c.getDuracion());
+            cDtos.add(carrera);
+        }
+        return cDtos;
+    }
+
+    @Override
     public CarreraDTO buscarPorId(int id) {
         Carrera carrera = em.find(Carrera.class, id);
         if (carrera != null) {
             return new CarreraDTO(
-                carrera.getIdCarrera(),
-                carrera.getNombre(),
-                carrera.getDuracion()
+                    carrera.getIdCarrera(),
+                    carrera.getNombre(),
+                    carrera.getDuracion()
             );
         }
         return null;
@@ -99,4 +112,49 @@ public class CarreraRepositoryImpl implements CarreraRepository {
         return resultados;
     }
 
+    @Override
+    public List<GenerarReporteDTO> generarReporteCarreras() {
+        // obtenemos años de inscripcion y graduacion sin repetir
+        List<Integer> años = em.createQuery(
+                "SELECT DISTINCT ec.inscripcion FROM EstudianteCarrera ec WHERE ec.inscripcion IS NOT NULL AND ec.inscripcion > 0 " +
+                        "UNION " +
+                        "SELECT DISTINCT ec.graduacion FROM EstudianteCarrera ec WHERE ec.graduacion IS NOT NULL AND ec.graduacion > 0",
+                Integer.class
+        ).getResultList();
+
+        List<GenerarReporteDTO> reporte = new ArrayList<>();
+
+        // contamos graduados y inscriptos por año
+        for (Integer año : años) {
+            List<Object[]> datosAño = em.createQuery(
+                            "SELECT c.nombre, c.id_carrera, " +
+                                    "COUNT(CASE WHEN ec.inscripcion = :anio THEN 1 ELSE NULL END), " +
+                                    "COUNT(CASE WHEN ec.graduacion = :anio THEN 1 ELSE NULL END) " +
+                                    "FROM EstudianteCarrera ec JOIN ec.carrera c " +
+                                    "WHERE ec.inscripcion = :anio OR ec.graduacion = :anio " +
+                                    "GROUP BY c.nombre, c.id_carrera " +
+                                    "ORDER BY c.nombre",
+                            Object[].class
+                    ).setParameter("anio", año)
+                    .getResultList();
+            //los asignamos al dto
+            for (Object[] dato : datosAño) {
+                String nombreCarrera = (String) dato[0];
+                int idCarrera = ((Number) dato[1]).intValue();
+                long inscriptos = ((Number) dato[2]).longValue();
+                long egresados = ((Number) dato[3]).longValue();
+
+                if (inscriptos > 0 || egresados > 0) {
+                    reporte.add(new GenerarReporteDTO(nombreCarrera, idCarrera, año, inscriptos, egresados));
+                }
+            }
+        }
+
+
+        reporte.sort(Comparator
+                .comparing(GenerarReporteDTO::getNombreCarrera)
+                .thenComparing(GenerarReporteDTO::getAnio));
+
+        return reporte;
+    }
 }
