@@ -6,7 +6,6 @@ import edu.empresa.entities.Estudiante;
 import java.util.List;
 
 public interface EstudianteRepository {
-    // Métodos que manejan entidades (para operaciones internas)
     Estudiante altaEstudiante(int dni,String nombre, String apellido, int edad, String genero, int lu, String ciudad);
     Estudiante buscarPorDNI(int dni);
 

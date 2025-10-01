@@ -115,7 +115,7 @@ public class CarreraRepositoryImpl implements CarreraRepository {
     @Override
     public List<GenerarReporteDTO> generarReporteCarreras() {
         // obtenemos años de inscripcion y graduacion sin repetir
-        List<Integer> años = em.createQuery(
+        List<Integer> anios = em.createQuery(
                 "SELECT DISTINCT ec.inscripcion FROM EstudianteCarrera ec WHERE ec.inscripcion IS NOT NULL AND ec.inscripcion > 0 " +
                         "UNION " +
                         "SELECT DISTINCT ec.graduacion FROM EstudianteCarrera ec WHERE ec.graduacion IS NOT NULL AND ec.graduacion > 0",
@@ -125,8 +125,8 @@ public class CarreraRepositoryImpl implements CarreraRepository {
         List<GenerarReporteDTO> reporte = new ArrayList<>();
 
         // contamos graduados y inscriptos por año
-        for (Integer año : años) {
-            List<Object[]> datosAño = em.createQuery(
+        for (Integer anio : anios) {
+            List<Object[]> datosAnio = em.createQuery(
                             "SELECT c.nombre, c.id_carrera, " +
                                     "COUNT(CASE WHEN ec.inscripcion = :anio THEN 1 ELSE NULL END), " +
                                     "COUNT(CASE WHEN ec.graduacion = :anio THEN 1 ELSE NULL END) " +
@@ -135,17 +135,17 @@ public class CarreraRepositoryImpl implements CarreraRepository {
                                     "GROUP BY c.nombre, c.id_carrera " +
                                     "ORDER BY c.nombre",
                             Object[].class
-                    ).setParameter("anio", año)
+                    ).setParameter("anio", anio)
                     .getResultList();
             //los asignamos al dto
-            for (Object[] dato : datosAño) {
+            for (Object[] dato : datosAnio) {
                 String nombreCarrera = (String) dato[0];
                 int idCarrera = ((Number) dato[1]).intValue();
                 long inscriptos = ((Number) dato[2]).longValue();
                 long egresados = ((Number) dato[3]).longValue();
 
                 if (inscriptos > 0 || egresados > 0) {
-                    reporte.add(new GenerarReporteDTO(nombreCarrera, idCarrera, año, inscriptos, egresados));
+                    reporte.add(new GenerarReporteDTO(nombreCarrera, idCarrera, anio, inscriptos, egresados));
                 }
             }
         }

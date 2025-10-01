@@ -16,8 +16,6 @@ public class GenerarReporteDTO {
         this.egresados = egresados;
     }
 
-    // Puedes añadir otros constructores si solo usas uno de los campos en la consulta
-
     public String getNombreCarrera() {
         return nombreCarrera;
     }
