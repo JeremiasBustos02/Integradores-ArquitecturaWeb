@@ -18,5 +18,5 @@ El **diagrama entidad–relación** representa la información desde la perspect
 - Representa las **relaciones** entre entidades.
 - M = Mandatory (NOT NULL)
 - O = Optional (NULLEABLE)
-  
-![DER](https://github.com/user-attachments/assets/4ee11b92-fa71-4aae-9032-d4b1e137950c)
+
+![DER (1)](https://github.com/user-attachments/assets/bbb83a3d-54f7-4ee6-8a5e-5be572189eeb)
