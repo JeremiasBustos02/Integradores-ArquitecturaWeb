@@ -1,9 +1,11 @@
 package edu.empresa.utils;
 
+
+
+
 import edu.empresa.dto.EstudianteCarreraDTO;
-import edu.empresa.entities.Carrera;
-import edu.empresa.entities.Estudiante;
-import edu.empresa.entities.EstudianteCarrera;
+import edu.empresa.model.Carrera;
+import edu.empresa.model.Estudiante;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
