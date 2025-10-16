@@ -48,7 +48,6 @@ public class LoadDatabase {
 
                 if (estudianteOpt.isPresent() && carreraOpt.isPresent()) {
                     EstudianteCarrera ec = new EstudianteCarrera();
-                    ec.setId(dto.getId()); // solo si querés mantener el mismo ID del CSV
                     ec.setEstudiante(estudianteOpt.get());
                     ec.setCarrera(carreraOpt.get());
                     ec.setInscripcion(dto.getInscripcion());
