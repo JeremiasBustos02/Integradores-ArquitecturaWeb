@@ -6,18 +6,48 @@ package edu.empresa.utils;
 import edu.empresa.dto.EstudianteCarreraDTO;
 import edu.empresa.model.Carrera;
 import edu.empresa.model.Estudiante;
+import edu.empresa.model.EstudianteCarrera;
+import edu.empresa.repository.CarreraRepository;
+import edu.empresa.repository.EstudianteCarreraRepository;
+import edu.empresa.repository.EstudianteRepository;
+import jakarta.transaction.Transactional;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.logging.Logger;
 
-
+@Component
 public class CSVReader {
+    @Autowired
+    private CarreraRepository carreraRepository;
 
+    @Autowired
+    private EstudianteRepository estudianteRepository;
+
+    @Autowired
+    private EstudianteCarreraRepository estudianteCarreraRepository;
+
+    @Transactional
+    public void cargarDatos() throws IOException {
+        System.out.printf("---CARGANDO DATOS---");
+        cargarCarrera();
+        cargarEstudiantes();/* hay un error con cargar estudiantes
+        cargarEstudianteCarrera();*/
+        System.out.printf("---CARGA COMPLETADA---");
+
+    }
+/*
     public List<Estudiante> leerArchivoEstudiantes(String rutaArchivo) {
         List<Estudiante> estudiantes = new ArrayList<>();
 
@@ -39,8 +69,85 @@ public class CSVReader {
         }
         return estudiantes;
     }
+*/
 
-    public List<Carrera> leerArchivoCarreras(String rutaArchivo) {
+    public void cargarCarrera() throws IOException {
+        //Cambiar path por absoluth si no funciona
+        File archivoCSV = ResourceUtils.getFile("src/main/resources/csv/carreras.csv");
+
+        try (FileReader reader = new FileReader(archivoCSV);
+             CSVParser csvParser = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(reader)) {
+
+            for (CSVRecord csvRecord : csvParser) {
+                Carrera c = new Carrera();
+                c.setNombre(csvRecord.get("carrera"));
+                int id = Integer.parseInt(csvRecord.get("id_carrera"));
+                c.setId_carrera(id);
+                int duracion = Integer.parseInt(csvRecord.get("duracion"));
+                c.setDuracion(duracion);
+
+                carreraRepository.save(c);
+            }
+        }
+    }
+    public void cargarEstudiantes() throws IOException {
+        //Cambiar path por absoluth si no funciona
+        File archivoCSV = ResourceUtils.getFile("src/main/resources/csv/estudiantes.csv");
+
+        try (FileReader reader = new FileReader(archivoCSV);
+             CSVParser csvParser = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(reader)) {
+
+            for (CSVRecord csvRecord : csvParser) {
+                Estudiante e = new Estudiante();
+
+                int dni = Integer.parseInt(csvRecord.get("DNI"));
+                e.setDni(dni);
+                e.setNombre(csvRecord.get("nombre"));
+                e.setApellido(csvRecord.get("apellido"));
+                int edad = Integer.parseInt(csvRecord.get("edad"));
+                e.setEdad(edad);
+                e.setGenero(csvRecord.get("genero"));
+                e.setCiudad(csvRecord.get("ciudad"));
+                int legajo = Integer.parseInt(csvRecord.get("LU"));
+                e.setLu(legajo);
+
+
+                estudianteRepository.save(e);
+            }
+        }
+    }
+    public void cargarEstudianteCarrera() throws IOException {
+        //Cambiar path por absoluth si no funciona
+        File archivoCSV = ResourceUtils.getFile("src/main/resources/csv/estudianteCarrera.csv");
+
+        try (FileReader reader = new FileReader(archivoCSV);
+             CSVParser csvParser = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(reader)) {
+
+            for (CSVRecord csvRecord : csvParser) {
+                int id = Integer.parseInt(csvRecord.get("id"));
+                int idEstudiante = Integer.parseInt(csvRecord.get("id_estudiante"));
+                 Optional<Estudiante> es= estudianteRepository.findById(idEstudiante);
+                Estudiante e;
+                if (es.isPresent()) {e = es.get();}
+                else throw  new RuntimeException("No existe estudiante");
+                int idCarrera = Integer.parseInt(csvRecord.get("id_carrera"));
+                java.util.Optional<Carrera> c= carreraRepository.findById(idCarrera);
+                Carrera carrera;
+                if (c.isPresent()) {carrera = c.get();}
+                else throw  new RuntimeException("No existe estudiante");
+
+                int inscripcion = Integer.parseInt(csvRecord.get("inscripcion"));
+                int graduacion = Integer.parseInt(csvRecord.get("graduacion"));
+                int antiguedad = Integer.parseInt(csvRecord.get("antiguedad"));
+
+                EstudianteCarrera ec = new EstudianteCarrera(id, e, carrera, inscripcion, graduacion, antiguedad);
+                estudianteCarreraRepository.save(ec);
+            }
+        }
+    }
+/*
+
+ public List<Carrera> leerArchivoCarreras(String rutaArchivo) {
         List<Carrera> carreras = new ArrayList<>();
 
         try (CSVParser parser = CSVFormat.DEFAULT.withHeader().parse(new FileReader(rutaArchivo))) {
@@ -57,6 +164,7 @@ public class CSVReader {
         }
         return carreras;
     }
+
 
     public List<EstudianteCarreraDTO> leerArchivoEstudiantesCarreras(String rutaArchivo) {
         List<EstudianteCarreraDTO> estudiantesCarreras = new ArrayList<>();
@@ -79,5 +187,5 @@ public class CSVReader {
         }
 
         return estudiantesCarreras;
-    }
+    }*/
 }
