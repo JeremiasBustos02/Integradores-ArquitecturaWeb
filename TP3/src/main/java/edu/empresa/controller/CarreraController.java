@@ -44,7 +44,10 @@ public class CarreraController {
     }
 
     @GetMapping("/carreraInscriptos")
-    @ApiOperation(value = "Obtener todas las carreras con inscriptos")
+    @ApiOperation(value = "Obtener carreras con estudiantes inscriptos ordenadas por cantidad",
+                  notes = "Retorna todas las carreras que tienen estudiantes inscriptos, " +
+                          "ordenadas de mayor a menor según la cantidad de inscriptos. " +
+                          "Incluye el ID, nombre, duración y cantidad de inscriptos de cada carrera.")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Carreras con inscriptos encontradas correctamente"),
             @ApiResponse(code = 500, message = "Error interno en el servidor")

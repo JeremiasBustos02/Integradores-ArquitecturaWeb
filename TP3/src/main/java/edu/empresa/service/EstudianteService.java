@@ -48,7 +48,7 @@ public class EstudianteService {
         }
 
         // Verificar que el LU no exista ya (es unique)
-        if (repository.findAll().stream().anyMatch(e -> e.getLu() == dto.getLu())) {
+        if (repository.findByLu(dto.getLu()).isPresent()) {
             throw new RuntimeException("Ya existe un estudiante con el número de legajo (LU) " + dto.getLu());
         }
 
@@ -76,6 +76,49 @@ public class EstudianteService {
             saved.getLu(),
             saved.getCiudad()
         );
+    }
+
+    /**
+     * Busca un estudiante por su número de libreta universitaria (LU)
+     * @param lu número de libreta universitaria
+     * @return EstudianteDTO si se encuentra el estudiante
+     * @throws RuntimeException si no se encuentra el estudiante
+     */
+    @Transactional
+    public EstudianteDTO getEstudianteByLU(int lu) {
+        Estudiante estudiante = repository.findByLu(lu)
+            .orElseThrow(() -> new RuntimeException("No se encontró estudiante con número de libreta (LU) " + lu));
+        
+        return new EstudianteDTO(
+            estudiante.getDni(),
+            estudiante.getNombre(),
+            estudiante.getApellido(),
+            estudiante.getEdad(),
+            estudiante.getGenero(),
+            estudiante.getLu(),
+            estudiante.getCiudad()
+        );
+    }
+
+    /**
+     * Busca estudiantes por género
+     * @param genero género a buscar (M/F)
+     * @return lista de estudiantes ordenados por apellido y nombre
+     */
+    @Transactional
+    public List<EstudianteDTO> getEstudiantesByGenero(String genero) {
+        return repository.findByGenero(genero).stream()
+                .sorted(Comparator.comparing(Estudiante::getApellido)
+                        .thenComparing(Estudiante::getNombre))
+                .map(estudiante -> new EstudianteDTO(
+                        estudiante.getDni(),
+                        estudiante.getNombre(),
+                        estudiante.getApellido(),
+                        estudiante.getEdad(),
+                        estudiante.getGenero(),
+                        estudiante.getLu(),
+                        estudiante.getCiudad()))
+                .toList();
     }
 
 }

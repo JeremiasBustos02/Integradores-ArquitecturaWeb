@@ -14,13 +14,19 @@ import java.util.List;
 @Repository("carreraRepository")
 public interface CarreraRepository extends JpaRepository<Carrera, Integer> {
 
+    /**
+     * Obtiene todas las carreras con sus estudiantes inscriptos, ordenadas por cantidad de inscriptos (descendente)
+     * @return Lista de CarreraDTO con información completa de cada carrera y su cantidad de inscriptos
+     */
     @Query("""
-    SELECT new edu.empresa.dto.CarreraDTO(c.nombre, COUNT(e))
+    SELECT new edu.empresa.dto.CarreraDTO(c.id_carrera, c.nombre, c.duracion, COUNT(e))
     FROM EstudianteCarrera ec
-    join ec.carrera c join ec.estudiante e
-    GROUP BY c.nombre
+    JOIN ec.carrera c 
+    JOIN ec.estudiante e
+    GROUP BY c.id_carrera, c.nombre, c.duracion
     ORDER BY COUNT(e) DESC
-""") List<CarreraDTO> getCarrerasConInscriptos();
+    """)
+    List<CarreraDTO> getCarrerasConInscriptos();
 
    /* @Query()
     List<Estudiante> getEstudiantesByCarrera(Carrera c, String ciudad);

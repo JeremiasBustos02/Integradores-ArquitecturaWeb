@@ -19,8 +19,9 @@ public class CarreraDTO {
         this.nombre = nombre;
         this.duracion = duracion;
     }
-    CarreraDTO(String nombre, long cantidadInscriptos){
-        this.nombre =nombre;
-        this.cantidadInscriptos= cantidadInscriptos;
+    
+    public CarreraDTO(String nombre, long cantidadInscriptos){
+        this.nombre = nombre;
+        this.cantidadInscriptos = cantidadInscriptos;
     }
 }
