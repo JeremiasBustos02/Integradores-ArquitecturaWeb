@@ -1,4 +1,4 @@
-package edu.empresa.utils;
+/*package edu.empresa.utils;
 
 import edu.empresa.dto.EstudianteCarreraDTO;
 import edu.empresa.model.Carrera;
@@ -66,3 +66,4 @@ public class LoadDatabase {
         };
     }
 }
+*/
