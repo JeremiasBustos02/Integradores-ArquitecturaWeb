@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Service("estudianteService")
@@ -20,13 +21,17 @@ public class EstudianteService {
 
     @Transactional
     public List<EstudianteDTO> getEstudiantes() {
-        return repository.findAll().stream().map(estudiante -> new EstudianteDTO(estudiante.getDni(),
-                estudiante.getNombre(),
-                estudiante.getApellido(),
-                estudiante.getEdad(),
-                estudiante.getGenero(),
-                estudiante.getLu(),
-                estudiante.getCiudad())).toList();
+        return repository.findAll().stream()
+                .sorted(Comparator.comparing(Estudiante::getApellido)
+                        .thenComparing(Estudiante::getNombre))
+                .map(estudiante -> new EstudianteDTO(estudiante.getDni(),
+                        estudiante.getNombre(),
+                        estudiante.getApellido(),
+                        estudiante.getEdad(),
+                        estudiante.getGenero(),
+                        estudiante.getLu(),
+                        estudiante.getCiudad()))
+                .toList();
     }
 
     /**
