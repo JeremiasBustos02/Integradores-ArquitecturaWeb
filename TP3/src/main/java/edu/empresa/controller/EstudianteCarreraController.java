@@ -1,6 +1,7 @@
 package edu.empresa.controller;
 
 import edu.empresa.dto.EstudianteCarreraDTO;
+import edu.empresa.dto.EstudianteDTO;
 import edu.empresa.dto.InscripcionRequestDTO;
 import edu.empresa.service.EstudianteCarreraService;
 import io.swagger.annotations.Api;
@@ -13,6 +14,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+import java.util.List;
 
 @RestController
 @RequestMapping("estudiantesYCarreras")
@@ -71,6 +75,32 @@ public class EstudianteCarreraController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Error inesperado: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Endpoint para obtener estudiantes de una carrera filtrados por ciudad
+     * @param idCarrera ID de la carrera
+     * @param ciudad ciudad de residencia
+     * @return ResponseEntity con la lista de estudiantes
+     */
+    @GetMapping("/carrera/{idCarrera}/ciudad/{ciudad}")
+    @ApiOperation(value = "Obtener estudiantes de una carrera por ciudad",
+                  notes = "Recupera todos los estudiantes inscritos en una carrera específica " +
+                          "que residen en una ciudad determinada, ordenados por apellido y nombre")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Estudiantes encontrados correctamente"),
+        @ApiResponse(code = 500, message = "Error interno del servidor")
+    })
+    public ResponseEntity<List<EstudianteDTO>> getEstudiantesByCarreraAndCiudad(
+            @PathVariable int idCarrera,
+            @PathVariable String ciudad) {
+        try {
+            List<EstudianteDTO> estudiantes = service.getEstudiantesByCarreraAndCiudad(idCarrera, ciudad);
+            return ResponseEntity.status(HttpStatus.OK).body(estudiantes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
         }
     }
 }

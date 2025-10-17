@@ -1,6 +1,7 @@
 package edu.empresa.service;
 
 import edu.empresa.dto.EstudianteCarreraDTO;
+import edu.empresa.dto.EstudianteDTO;
 import edu.empresa.model.Carrera;
 import edu.empresa.model.Estudiante;
 import edu.empresa.model.EstudianteCarrera;
@@ -10,6 +11,7 @@ import edu.empresa.repository.EstudianteRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service("estudianteCarreraService")
@@ -81,5 +83,24 @@ public class EstudianteCarreraService {
             saved.getGraduacion(),
             saved.getAntiguedad()
         );
+    }
+
+    /**
+     * Obtiene los estudiantes de una carrera específica, filtrados por ciudad
+     * @param idCarrera ID de la carrera
+     * @param ciudad ciudad de residencia
+     * @return lista de EstudianteDTO ordenados por apellido y nombre
+     */
+    public List<EstudianteDTO> getEstudiantesByCarreraAndCiudad(int idCarrera, String ciudad) {
+        return repository.findEstudiantesByCarreraAndCiudad(idCarrera, ciudad).stream()
+                .map(estudiante -> new EstudianteDTO(
+                        estudiante.getDni(),
+                        estudiante.getNombre(),
+                        estudiante.getApellido(),
+                        estudiante.getEdad(),
+                        estudiante.getGenero(),
+                        estudiante.getLu(),
+                        estudiante.getCiudad()))
+                .toList();
     }
 }

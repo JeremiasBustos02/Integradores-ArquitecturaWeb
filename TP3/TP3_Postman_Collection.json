@@ -1,0 +1,830 @@
+{
+	"info": {
+		"_postman_id": "tp3-api-tests",
+		"name": "TP3 - Sistema de Gestión Universitaria",
+		"description": "Colección de tests para la API REST del TP3. Incluye tests automáticos para validar respuestas.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Estudiantes",
+			"item": [
+				{
+					"name": "1. Obtener todos los estudiantes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test: Verificar que la respuesta sea 200 OK",
+									"pm.test(\"Status code es 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Test: Verificar que la respuesta sea un array",
+									"pm.test(\"La respuesta es un array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"// Test: Verificar que hay estudiantes",
+									"pm.test(\"Hay al menos 100 estudiantes\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.be.above(99);",
+									"});",
+									"",
+									"// Test: Verificar estructura de un estudiante",
+									"pm.test(\"Los estudiantes tienen la estructura correcta\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var estudiante = jsonData[0];",
+									"    pm.expect(estudiante).to.have.property('dni');",
+									"    pm.expect(estudiante).to.have.property('nombre');",
+									"    pm.expect(estudiante).to.have.property('apellido');",
+									"    pm.expect(estudiante).to.have.property('edad');",
+									"    pm.expect(estudiante).to.have.property('genero');",
+									"    pm.expect(estudiante).to.have.property('lu');",
+									"    pm.expect(estudiante).to.have.property('ciudad');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/estudiantes/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"estudiantes",
+								""
+							]
+						},
+						"description": "Obtiene todos los estudiantes ordenados por apellido y nombre."
+					},
+					"response": []
+				},
+				{
+					"name": "2. Dar de alta un nuevo estudiante",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test: Verificar que la respuesta sea 201 Created",
+									"pm.test(\"Status code es 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"// Test: Verificar que se devuelve el estudiante creado",
+									"pm.test(\"Se devuelve el estudiante creado\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('dni', 99999999);",
+									"    pm.expect(jsonData).to.have.property('nombre', 'Juan');",
+									"    pm.expect(jsonData).to.have.property('apellido', 'Pérez');",
+									"    pm.expect(jsonData).to.have.property('edad', 22);",
+									"    pm.expect(jsonData).to.have.property('genero', 'Male');",
+									"    pm.expect(jsonData).to.have.property('lu', 99999);",
+									"    pm.expect(jsonData).to.have.property('ciudad', 'Tandil');",
+									"});",
+									"",
+									"// Test: Tiempo de respuesta razonable",
+									"pm.test(\"El tiempo de respuesta es menor a 500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"dni\": 99999999,\n  \"nombre\": \"Juan\",\n  \"apellido\": \"Pérez\",\n  \"edad\": 22,\n  \"genero\": \"Male\",\n  \"lu\": 99999,\n  \"ciudad\": \"Tandil\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/estudiantes/alta",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"estudiantes",
+								"alta"
+							]
+						},
+						"description": "Crea un nuevo estudiante en el sistema. **Nota:** Este test fallará en ejecuciones posteriores si no se reinicia la aplicación (ya que el DNI ya existirá)."
+					},
+					"response": []
+				},
+				{
+					"name": "3. Buscar estudiante por LU (35056)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test: Verificar que la respuesta sea 200 OK",
+									"pm.test(\"Status code es 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Test: Verificar datos del estudiante Wenda Jertz",
+									"pm.test(\"Se encuentra el estudiante correcto (Wenda Jertz)\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('dni', 24549124);",
+									"    pm.expect(jsonData).to.have.property('nombre', 'Wenda');",
+									"    pm.expect(jsonData).to.have.property('apellido', 'Jertz');",
+									"    pm.expect(jsonData).to.have.property('lu', 35056);",
+									"    pm.expect(jsonData).to.have.property('genero', 'Female');",
+									"    pm.expect(jsonData).to.have.property('ciudad', 'Qiligang');",
+									"});",
+									"",
+									"// Test: Content-Type correcto",
+									"pm.test(\"Content-Type es application/json\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/estudiantes/lu/35056",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"estudiantes",
+								"lu",
+								"35056"
+							]
+						},
+						"description": "Busca a la estudiante Wenda Jertz por su número de libreta universitaria (LU: 35056)."
+					},
+					"response": []
+				},
+				{
+					"name": "4. Buscar estudiante por LU inexistente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test: Verificar que la respuesta sea 404 Not Found",
+									"pm.test(\"Status code es 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"// Test: Verificar mensaje de error",
+									"pm.test(\"Se devuelve un mensaje de error apropiado\", function () {",
+									"    var responseText = pm.response.text();",
+									"    pm.expect(responseText).to.include(\"No se encontró\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/estudiantes/lu/99999999",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"estudiantes",
+								"lu",
+								"99999999"
+							]
+						},
+						"description": "Prueba el comportamiento cuando se busca un LU que no existe."
+					},
+					"response": []
+				},
+				{
+					"name": "5. Buscar estudiantes por género (Female)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test: Verificar que la respuesta sea 200 OK",
+									"pm.test(\"Status code es 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Test: Verificar que la respuesta sea un array",
+									"pm.test(\"La respuesta es un array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"// Test: Verificar que todos son del género correcto",
+									"pm.test(\"Todos los estudiantes son del género Female\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    jsonData.forEach(function(estudiante) {",
+									"        pm.expect(estudiante.genero).to.equal('Female');",
+									"    });",
+									"});",
+									"",
+									"// Test: Verificar que hay estudiantes femeninas",
+									"pm.test(\"Hay al menos 30 estudiantes femeninas\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.be.above(29);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/estudiantes/genero/Female",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"estudiantes",
+								"genero",
+								"Female"
+							]
+						},
+						"description": "Obtiene todos los estudiantes del género femenino."
+					},
+					"response": []
+				},
+				{
+					"name": "6. Buscar estudiantes por género (Male)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test: Verificar que la respuesta sea 200 OK",
+									"pm.test(\"Status code es 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Test: Verificar que todos son del género correcto",
+									"pm.test(\"Todos los estudiantes son del género Male\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    jsonData.forEach(function(estudiante) {",
+									"        pm.expect(estudiante.genero).to.equal('Male');",
+									"    });",
+									"});",
+									"",
+									"// Test: Verificar que hay estudiantes masculinos",
+									"pm.test(\"Hay al menos 40 estudiantes masculinos\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.be.above(39);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/estudiantes/genero/Male",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"estudiantes",
+								"genero",
+								"Male"
+							]
+						},
+						"description": "Obtiene todos los estudiantes del género masculino."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints relacionados con la gestión de estudiantes."
+		},
+		{
+			"name": "Carreras",
+			"item": [
+				{
+					"name": "1. Obtener todas las carreras",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test: Verificar que la respuesta sea 200 OK",
+									"pm.test(\"Status code es 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Test: Verificar que la respuesta sea un array",
+									"pm.test(\"La respuesta es un array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"// Test: Verificar cantidad de carreras",
+									"pm.test(\"Hay exactamente 15 carreras\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.equal(15);",
+									"});",
+									"",
+									"// Test: Verificar estructura de una carrera",
+									"pm.test(\"Las carreras tienen la estructura correcta\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var carrera = jsonData[0];",
+									"    pm.expect(carrera).to.have.property('idCarrera');",
+									"    pm.expect(carrera).to.have.property('nombre');",
+									"    pm.expect(carrera).to.have.property('duracion');",
+									"});",
+									"",
+									"// Test: Verificar que existe TUDAI",
+									"pm.test(\"Existe la carrera TUDAI\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var tudai = jsonData.find(c => c.nombre === 'TUDAI');",
+									"    pm.expect(tudai).to.not.be.undefined;",
+									"    pm.expect(tudai.duracion).to.equal(2);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/carreras/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"carreras",
+								""
+							]
+						},
+						"description": "Obtiene la lista completa de todas las carreras disponibles."
+					},
+					"response": []
+				},
+				{
+					"name": "2. Obtener carreras con inscriptos",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test: Verificar que la respuesta sea 200 OK",
+									"pm.test(\"Status code es 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Test: Verificar que la respuesta sea un array",
+									"pm.test(\"La respuesta es un array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"// Test: Verificar que hay carreras con inscriptos",
+									"pm.test(\"Hay al menos 10 carreras con inscriptos\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.be.above(9);",
+									"});",
+									"",
+									"// Test: Verificar estructura con cantidadInscriptos",
+									"pm.test(\"Las carreras tienen cantidadInscriptos\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var carrera = jsonData[0];",
+									"    pm.expect(carrera).to.have.property('cantidadInscriptos');",
+									"    pm.expect(carrera.cantidadInscriptos).to.be.a('number');",
+									"    pm.expect(carrera.cantidadInscriptos).to.be.above(0);",
+									"});",
+									"",
+									"// Test: Verificar que están ordenadas de mayor a menor",
+									"pm.test(\"Las carreras están ordenadas por cantidad de inscriptos (descendente)\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    for (let i = 0; i < jsonData.length - 1; i++) {",
+									"        pm.expect(jsonData[i].cantidadInscriptos).to.be.at.least(jsonData[i + 1].cantidadInscriptos);",
+									"    }",
+									"});",
+									"",
+									"// Test: La primera carrera tiene más inscriptos",
+									"pm.test(\"La carrera con más inscriptos tiene al menos 5 estudiantes\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData[0].cantidadInscriptos).to.be.above(4);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/carreras/carreraInscriptos",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"carreras",
+								"carreraInscriptos"
+							]
+						},
+						"description": "Obtiene las carreras con estudiantes inscriptos, ordenadas por cantidad de inscriptos de mayor a menor."
+					},
+					"response": []
+				},
+				{
+					"name": "3. Generar reporte de carreras",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test: Verificar que la respuesta sea 200 OK",
+									"pm.test(\"Status code es 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Test: Verificar que la respuesta sea un array",
+									"pm.test(\"La respuesta es un array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"// Test: Verificar que hay reportes",
+									"pm.test(\"Hay al menos 50 registros en el reporte\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.be.above(49);",
+									"});",
+									"",
+									"// Test: Verificar estructura del reporte",
+									"pm.test(\"Los registros tienen la estructura correcta\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var registro = jsonData[0];",
+									"    pm.expect(registro).to.have.property('nombreCarrera');",
+									"    pm.expect(registro).to.have.property('idCarrera');",
+									"    pm.expect(registro).to.have.property('anio');",
+									"    pm.expect(registro).to.have.property('inscriptos');",
+									"    pm.expect(registro).to.have.property('egresados');",
+									"});",
+									"",
+									"// Test: Verificar ordenamiento alfabético de carreras",
+									"pm.test(\"Las carreras están ordenadas alfabéticamente\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var carreras = [...new Set(jsonData.map(r => r.nombreCarrera))];",
+									"    for (let i = 0; i < carreras.length - 1; i++) {",
+									"        pm.expect(carreras[i].toLowerCase() <= carreras[i + 1].toLowerCase()).to.be.true;",
+									"    }",
+									"});",
+									"",
+									"// Test: Verificar ordenamiento cronológico de años por carrera",
+									"pm.test(\"Los años están ordenados cronológicamente dentro de cada carrera\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var porCarrera = {};",
+									"    ",
+									"    // Agrupar por carrera",
+									"    jsonData.forEach(function(registro) {",
+									"        if (!porCarrera[registro.nombreCarrera]) {",
+									"            porCarrera[registro.nombreCarrera] = [];",
+									"        }",
+									"        porCarrera[registro.nombreCarrera].push(registro.anio);",
+									"    });",
+									"    ",
+									"    // Verificar ordenamiento en cada carrera",
+									"    Object.keys(porCarrera).forEach(function(carrera) {",
+									"        var anios = porCarrera[carrera];",
+									"        for (let i = 0; i < anios.length - 1; i++) {",
+									"            pm.expect(anios[i] <= anios[i + 1]).to.be.true;",
+									"        }",
+									"    });",
+									"});",
+									"",
+									"// Test: Los valores de inscriptos y egresados son números válidos",
+									"pm.test(\"Inscriptos y egresados son números no negativos\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    jsonData.forEach(function(registro) {",
+									"        pm.expect(registro.inscriptos).to.be.a('number');",
+									"        pm.expect(registro.egresados).to.be.a('number');",
+									"        pm.expect(registro.inscriptos).to.be.at.least(0);",
+									"        pm.expect(registro.egresados).to.be.at.least(0);",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/carreras/reporte",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"carreras",
+								"reporte"
+							]
+						},
+						"description": "Genera un reporte completo de inscriptos y egresados por carrera y año, ordenado alfabéticamente por carrera y cronológicamente por año."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints relacionados con las carreras."
+		},
+		{
+			"name": "Inscripciones",
+			"item": [
+				{
+					"name": "1. Inscribir estudiante en carrera",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test: Verificar que la respuesta sea 201 Created",
+									"pm.test(\"Status code es 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"// Test: Verificar que se devuelve la inscripción creada",
+									"pm.test(\"Se devuelve la inscripción creada\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('idEstudiante', 71779527);",
+									"    pm.expect(jsonData).to.have.property('idCarrera', 13);",
+									"});",
+									"",
+									"// Test: Verificar estructura completa",
+									"pm.test(\"La inscripción tiene todos los campos\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('inscripcion');",
+									"    pm.expect(jsonData).to.have.property('graduacion');",
+									"    pm.expect(jsonData).to.have.property('antiguedad');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idEstudiante\": 71779527,\n  \"idCarrera\": 13\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/estudiantesYCarreras/inscribir",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"estudiantesYCarreras",
+								"inscribir"
+							]
+						},
+						"description": "Inscribe al estudiante Isidro Blackmuir (DNI: 71779527) en la carrera Periodismo (ID: 13). **Nota:** Este test fallará en ejecuciones posteriores si no se reinicia la aplicación (ya que la inscripción ya existirá)."
+					},
+					"response": []
+				},
+				{
+					"name": "2. Inscribir estudiante inexistente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test: Verificar que la respuesta sea 404 Not Found",
+									"pm.test(\"Status code es 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"// Test: Verificar mensaje de error",
+									"pm.test(\"Se devuelve un mensaje de error apropiado\", function () {",
+									"    var responseText = pm.response.text();",
+									"    pm.expect(responseText).to.include(\"no encontrado\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idEstudiante\": 123,\n  \"idCarrera\": 1\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/estudiantesYCarreras/inscribir",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"estudiantesYCarreras",
+								"inscribir"
+							]
+						},
+						"description": "Prueba el comportamiento cuando se intenta inscribir un estudiante que no existe."
+					},
+					"response": []
+				},
+				{
+					"name": "3. Obtener estudiantes de carrera por ciudad",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test: Verificar que la respuesta sea 200 OK",
+									"pm.test(\"Status code es 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Test: Verificar que la respuesta sea un array",
+									"pm.test(\"La respuesta es un array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"// Test: Si hay resultados, verificar estructura",
+									"pm.test(\"Los estudiantes tienen la estructura correcta\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.length > 0) {",
+									"        var estudiante = jsonData[0];",
+									"        pm.expect(estudiante).to.have.property('dni');",
+									"        pm.expect(estudiante).to.have.property('nombre');",
+									"        pm.expect(estudiante).to.have.property('apellido');",
+									"        pm.expect(estudiante).to.have.property('ciudad');",
+									"    }",
+									"});",
+									"",
+									"// Test: Verificar que todos son de la ciudad correcta",
+									"pm.test(\"Todos los estudiantes son de la ciudad especificada\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    jsonData.forEach(function(estudiante) {",
+									"        pm.expect(estudiante.ciudad).to.equal('Qiligang');",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/estudiantesYCarreras/carrera/6/ciudad/Qiligang",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"estudiantesYCarreras",
+								"carrera",
+								"6",
+								"ciudad",
+								"Qiligang"
+							]
+						},
+						"description": "Obtiene estudiantes de Veterinaria (ID: 6) que viven en Qiligang. Debería incluir a Wenda Jertz."
+					},
+					"response": []
+				},
+				{
+					"name": "4. Obtener estudiantes de carrera TUDAI (ID:1)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test: Verificar que la respuesta sea 200 OK",
+									"pm.test(\"Status code es 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Test: Verificar que hay estudiantes en TUDAI",
+									"pm.test(\"Hay estudiantes inscritos en TUDAI\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.be.above(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/estudiantesYCarreras/carrera/1/ciudad/Arroio do Meio",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"estudiantesYCarreras",
+								"carrera",
+								"1",
+								"ciudad",
+								"Arroio do Meio"
+							]
+						},
+						"description": "Obtiene estudiantes de TUDAI que viven en Arroio do Meio. Debería incluir a Sebastien Bayle."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints relacionados con las inscripciones de estudiantes en carreras."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}
+
