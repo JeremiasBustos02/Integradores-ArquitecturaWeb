@@ -18,11 +18,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("estudiantesYCarreras")
 @Api(value = "estudianteCarreraController", description = "REST API para operaciones con estudiantes y carreras")
 public class EstudianteCarreraController {
-    @Qualifier("estudianteCarreraService")
-    @Autowired
+
     private final EstudianteCarreraService service;
 
-    public EstudianteCarreraController(@Qualifier("estudianteCarreraService") EstudianteCarreraService service) {
+    public EstudianteCarreraController(EstudianteCarreraService service) {
         this.service = service;
     }
 

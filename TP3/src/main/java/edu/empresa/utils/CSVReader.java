@@ -1,8 +1,6 @@
 package edu.empresa.utils;
 
 
-
-
 import edu.empresa.dto.EstudianteCarreraDTO;
 import edu.empresa.model.Carrera;
 import edu.empresa.model.Estudiante;
@@ -10,18 +8,18 @@ import edu.empresa.model.EstudianteCarrera;
 import edu.empresa.repository.CarreraRepository;
 import edu.empresa.repository.EstudianteCarreraRepository;
 import edu.empresa.repository.EstudianteRepository;
+import edu.empresa.service.EstudianteCarreraService;
 import jakarta.transaction.Transactional;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -36,14 +34,14 @@ public class CSVReader {
     private EstudianteRepository estudianteRepository;
 
     @Autowired
-    private EstudianteCarreraRepository estudianteCarreraRepository;
+    private EstudianteCarreraService estudianteCarreraService;
 
     @Transactional
     public void cargarDatos() throws IOException {
         System.out.printf("---CARGANDO DATOS---");
         cargarCarrera();
-        cargarEstudiantes();/* hay un error con cargar estudiantes
-        cargarEstudianteCarrera();*/
+        cargarEstudiantes();
+        //cargarEstudianteCarrera();
         System.out.printf("---CARGA COMPLETADA---");
 
     }
@@ -90,6 +88,7 @@ public class CSVReader {
             }
         }
     }
+
     public void cargarEstudiantes() throws IOException {
         //Cambiar path por absoluth si no funciona
         File archivoCSV = ResourceUtils.getFile("src/main/resources/csv/estudiantes.csv");
@@ -116,35 +115,42 @@ public class CSVReader {
             }
         }
     }
-    public void cargarEstudianteCarrera() throws IOException {
-        //Cambiar path por absoluth si no funciona
-        File archivoCSV = ResourceUtils.getFile("src/main/resources/csv/estudianteCarrera.csv");
 
-        try (FileReader reader = new FileReader(archivoCSV);
+    public void cargarEstudianteCarrera() throws IOException {
+        ClassPathResource resource = new ClassPathResource("csv/estudianteCarrera.csv");
+
+        try (Reader reader = new InputStreamReader(resource.getInputStream());
              CSVParser csvParser = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(reader)) {
 
+            int contador = 0;
+            int errores = 0;
+
             for (CSVRecord csvRecord : csvParser) {
-                int id = Integer.parseInt(csvRecord.get("id"));
-                int idEstudiante = Integer.parseInt(csvRecord.get("id_estudiante"));
-                 Optional<Estudiante> es= estudianteRepository.findById(idEstudiante);
-                Estudiante e;
-                if (es.isPresent()) {e = es.get();}
-                else throw  new RuntimeException("No existe estudiante");
-                int idCarrera = Integer.parseInt(csvRecord.get("id_carrera"));
-                java.util.Optional<Carrera> c= carreraRepository.findById(idCarrera);
-                Carrera carrera;
-                if (c.isPresent()) {carrera = c.get();}
-                else throw  new RuntimeException("No existe estudiante");
+                try {
+                    EstudianteCarreraDTO dto = new EstudianteCarreraDTO();
+                    dto.setId(Integer.parseInt(csvRecord.get("id")));
+                    dto.setIdEstudiante(Integer.parseInt(csvRecord.get("id_estudiante")));
+                    dto.setIdCarrera(Integer.parseInt(csvRecord.get("id_carrera")));
+                    dto.setInscripcion(Integer.parseInt(csvRecord.get("inscripcion")));
+                    dto.setGraduacion(Integer.parseInt(csvRecord.get("graduacion")));
+                    dto.setAntiguedad(Integer.parseInt(csvRecord.get("antiguedad")));
 
-                int inscripcion = Integer.parseInt(csvRecord.get("inscripcion"));
-                int graduacion = Integer.parseInt(csvRecord.get("graduacion"));
-                int antiguedad = Integer.parseInt(csvRecord.get("antiguedad"));
+                    // ✅ Usar el service inyectado
+                    estudianteCarreraService.inscribirEstudianteEnCarrera(dto);
+                    contador++;
 
-                EstudianteCarrera ec = new EstudianteCarrera(id, e, carrera, inscripcion, graduacion, antiguedad);
-                estudianteCarreraRepository.save(ec);
+                } catch (RuntimeException e) {
+                    errores++;
+                    System.err.println("Error en línea " + csvParser.getCurrentLineNumber() +
+                            ": " + e.getMessage());
+                    // Continuar con el siguiente registro
+                }
             }
+
+            System.out.println("Inscripciones cargadas: " + contador + ", errores: " + errores);
         }
     }
+}
 /*
 
  public List<Carrera> leerArchivoCarreras(String rutaArchivo) {
@@ -188,4 +194,3 @@ public class CSVReader {
 
         return estudiantesCarreras;
     }*/
-}

@@ -24,6 +24,6 @@ public class CarreraService {
     }
     @Transactional
     public List<CarreraDTO> getCarreras(){
-        return repository.findAll().stream().map(carrera -> new CarreraDTO(carrera.getId_carrera(),carrera.getNombre(),carrera.getDuracion())).collect(Collectors.toList());
+        return repository.findAll().stream().map(carrera -> new CarreraDTO(carrera.getId_carrera(),carrera.getNombre(),carrera.getDuracion())).toList();
     }
 }
