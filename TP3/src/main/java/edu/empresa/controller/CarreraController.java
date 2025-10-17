@@ -1,6 +1,7 @@
 package edu.empresa.controller;
 
 import edu.empresa.dto.CarreraDTO;
+import edu.empresa.dto.GenerarReporteDTO;
 import edu.empresa.model.Carrera;
 import edu.empresa.service.CarreraService;
 import io.swagger.annotations.Api;
@@ -55,6 +56,24 @@ public class CarreraController {
     public ResponseEntity<List<CarreraDTO>> getCarreraConInscriptos() {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(service.getCarrerasConInscriptos());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
+        }
+    }
+
+    @GetMapping("/reporte")
+    @ApiOperation(value = "Generar reporte de carreras con inscriptos y egresados por año",
+                  notes = "Genera un reporte completo que muestra para cada carrera la cantidad de " +
+                          "inscriptos y egresados por año. Las carreras están ordenadas alfabéticamente " +
+                          "y los años de manera cronológica.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Reporte generado correctamente"),
+            @ApiResponse(code = 500, message = "Error interno en el servidor")
+    })
+    public ResponseEntity<List<GenerarReporteDTO>> generarReporte() {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(service.generarReporteCarreras());
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());

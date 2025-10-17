@@ -28,19 +28,39 @@ public interface CarreraRepository extends JpaRepository<Carrera, Integer> {
     """)
     List<CarreraDTO> getCarrerasConInscriptos();
 
-   /* @Query()
-    List<Estudiante> getEstudiantesByCarrera(Carrera c, String ciudad);
-
-    void altaCarrera(int id, String nombre, int duracion);
-
-    Carrera buscarCarreraPorId(int id); // Para matriculación (retorna entidad)
-
-    List<CarreraDTO> obtenerTodasCarreras();
-
-    public List<GenerarReporteDTO> generarReporteCarreras();
-
-    // Método que retornEa DTO (para capa de presentación)
-    CarreraDTO buscarPorId(int id);
-
-    List<CarreraDTO> recuperarCarrerasConInscriptos();*/
+    /**
+     * Genera un reporte completo de carreras con inscriptos y egresados por año
+     * Para cada año muestra:
+     * - Cuántos estudiantes se inscribieron ese año
+     * - Cuántos estudiantes egresaron ese año
+     * Ordenado alfabéticamente por carrera y cronológicamente por año
+     * @return Lista de objetos con los datos del reporte
+     */
+    @Query(value = """
+    SELECT c.nombre as nombreCarrera,
+           c.id_carrera as idCarrera,
+           anios.anio as anio,
+           COALESCE(i.inscriptos, 0) as inscriptos,
+           COALESCE(e.egresados, 0) as egresados
+    FROM carrera c
+    CROSS JOIN (
+        SELECT DISTINCT inscripcion as anio FROM estudiante_carrera
+        UNION
+        SELECT DISTINCT graduacion FROM estudiante_carrera WHERE graduacion > 0
+    ) anios
+    LEFT JOIN (
+        SELECT id_carrera, inscripcion as anio, COUNT(*) as inscriptos
+        FROM estudiante_carrera
+        GROUP BY id_carrera, inscripcion
+    ) i ON c.id_carrera = i.id_carrera AND anios.anio = i.anio
+    LEFT JOIN (
+        SELECT id_carrera, graduacion as anio, COUNT(*) as egresados
+        FROM estudiante_carrera
+        WHERE graduacion > 0
+        GROUP BY id_carrera, graduacion
+    ) e ON c.id_carrera = e.id_carrera AND anios.anio = e.anio
+    WHERE COALESCE(i.inscriptos, 0) > 0 OR COALESCE(e.egresados, 0) > 0
+    ORDER BY c.nombre ASC, anios.anio ASC
+    """, nativeQuery = true)
+    List<Object[]> generarReporteCarreras();
 }
