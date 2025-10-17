@@ -26,6 +26,26 @@ public class LoadDatabase {
             @Qualifier("estudianteCarreraRepository") EstudianteCarreraRepository estudianteCarreraRepository
     ) {
         return args -> {
+            log.info("🗑️ Eliminando datos existentes de la base de datos...");
+            
+            // Eliminar en orden correcto (respetando foreign keys)
+            // 1. Primero las relaciones EstudianteCarrera
+            long relacionesEliminadas = estudianteCarreraRepository.count();
+            estudianteCarreraRepository.deleteAll();
+            log.info("🗑️ Relaciones EstudianteCarrera eliminadas: {}", relacionesEliminadas);
+            
+            // 2. Luego los estudiantes
+            long estudiantesEliminados = estudianteRepository.count();
+            estudianteRepository.deleteAll();
+            log.info("🗑️ Estudiantes eliminados: {}", estudiantesEliminados);
+            
+            // 3. Finalmente las carreras
+            long carrerasEliminadas = carreraRepository.count();
+            carreraRepository.deleteAll();
+            log.info("🗑️ Carreras eliminadas: {}", carrerasEliminadas);
+            
+            log.info("✨ Base de datos limpiada correctamente.");
+            log.info("");
             log.info("📦 Cargando datos desde archivos CSV...");
 
             CSVReader lector = new CSVReader();
