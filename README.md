@@ -4,7 +4,7 @@ Este repositorio contiene los trabajos prácticos de la materia **Arquitectura W
 
 - **TP1/** → Ejercicio integrador del primer trabajo práctico.  
 - **TP2/** → Ejercicio integrador del segundo trabajo práctico.
-  
+- **TP3/** → Ejercicio integrador del tercer trabajo práctico, incluye readme para invocacacion de servicios REST
 ---
 
 ## 👥 Integrantes
@@ -39,6 +39,9 @@ Este repositorio contiene los trabajos prácticos de la materia **Arquitectura W
 
 - TP2/  
   Archivos y código del TP2  
+
+- TP3/  
+  Archivos y código del TP3
 
 - README.md  
   Documentación del repositorio  
