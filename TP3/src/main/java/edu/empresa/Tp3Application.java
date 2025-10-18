@@ -10,13 +10,7 @@ import java.io.IOException;
 
 @SpringBootApplication
 public class Tp3Application {
-    @Autowired
-    private CSVReader csv;
-    @PostConstruct
-    public void init() throws IOException {
-        csv.cargarDatos();
 
-    }
     public static void main(String[] args) {
         SpringApplication.run(Tp3Application.class, args);
     }

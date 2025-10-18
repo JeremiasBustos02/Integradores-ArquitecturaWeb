@@ -25,6 +25,11 @@ public class EstudianteController {
         this.service = service;
     }
 
+
+    /**
+     * Endpoint para traer todos los estudiantes por orden alfabetico de apellido
+     * @return ResponseEntity con el resultado de la operación
+     */
     @GetMapping("/")
     @ApiOperation(value = "Encontrar todos los estudiantes")
     @ApiResponses(value = {

@@ -3,7 +3,7 @@
 ### 🎓 Estudiantes
 
 #### 1. Obtener todos los estudiantes
-**Descripción:** Recupera todos los estudiantes ordenados por apellido y nombre.
+**Descripción:** Recupera todos los estudiantes ordenados por apellido
 
 ```bash
 curl -X GET http://localhost:8080/estudiantes/ | jq
