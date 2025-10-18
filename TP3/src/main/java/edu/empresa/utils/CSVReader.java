@@ -150,10 +150,8 @@ public class CSVReader {
             System.out.println("Inscripciones cargadas: " + contador + ", errores: " + errores);
         }
     }
-}
-/*
 
- public List<Carrera> leerArchivoCarreras(String rutaArchivo) {
+    public List<Carrera> leerArchivoCarreras(String rutaArchivo) {
         List<Carrera> carreras = new ArrayList<>();
 
         try (CSVParser parser = CSVFormat.DEFAULT.withHeader().parse(new FileReader(rutaArchivo))) {
@@ -171,6 +169,27 @@ public class CSVReader {
         return carreras;
     }
 
+    public List<Estudiante> leerArchivoEstudiantes(String rutaArchivo) {
+        List<Estudiante> estudiantes = new ArrayList<>();
+
+        try (CSVParser parser = CSVFormat.DEFAULT.withHeader().parse(new FileReader(rutaArchivo))) {
+            for (CSVRecord record : parser) {
+                int dni = Integer.parseInt(record.get("DNI"));
+                String nombre = record.get("nombre");
+                String apellido = record.get("apellido");
+                int edad = Integer.parseInt(record.get("edad"));
+                String genero = record.get("genero");
+                String ciudad = record.get("ciudad");
+                int lu = Integer.parseInt(record.get("LU"));
+                Estudiante e = new Estudiante(dni, nombre, apellido, edad, genero, lu, ciudad);
+                estudiantes.add(e);
+            }
+            System.out.println("Archivo estudiantes.csv leído correctamente.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return estudiantes;
+    }
 
     public List<EstudianteCarreraDTO> leerArchivoEstudiantesCarreras(String rutaArchivo) {
         List<EstudianteCarreraDTO> estudiantesCarreras = new ArrayList<>();
@@ -193,4 +212,5 @@ public class CSVReader {
         }
 
         return estudiantesCarreras;
-    }*/
+    }
+}
