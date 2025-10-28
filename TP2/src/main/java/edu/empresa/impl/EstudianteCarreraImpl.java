@@ -4,6 +4,7 @@ import edu.empresa.dto.CarreraDTO;
 import edu.empresa.entities.Carrera;
 import edu.empresa.entities.Estudiante;
 import edu.empresa.entities.EstudianteCarrera;
+import edu.empresa.entities.EstudianteCarreraId;
 import edu.empresa.repositories.EstudianteCarreraRepository;
 import jakarta.persistence.EntityManager;
 
@@ -25,9 +26,19 @@ public class EstudianteCarreraImpl implements EstudianteCarreraRepository {
             if (nuevo != null) {
                 Carrera car = em.find(Carrera.class, c.getIdCarrera());
                 if (car != null) {
-                    EstudianteCarrera ec = new EstudianteCarrera(nuevo, car, inscripcion, graduacion, antiguedad);
-                    em.persist(ec);
-                    em.getTransaction().commit();
+                    // Verificar si ya existe la relación
+                    EstudianteCarreraId id = new EstudianteCarreraId(nuevo.getDni(), car.getIdCarrera());
+                    EstudianteCarrera existente = em.find(EstudianteCarrera.class, id);
+                    
+                    if (existente == null) {
+                        EstudianteCarrera ec = new EstudianteCarrera(nuevo, car, inscripcion, graduacion, antiguedad);
+                        em.persist(ec);
+                        em.getTransaction().commit();
+                    } else {
+                        em.getTransaction().rollback();
+                        System.out.println("La relación entre el estudiante " + nuevo.getDni() + 
+                                         " y la carrera " + car.getIdCarrera() + " ya existe. Se omite la inserción.");
+                    }
                 } else {//rollback de carrera
                     if (em.getTransaction().isActive()) {
                         em.getTransaction().rollback();

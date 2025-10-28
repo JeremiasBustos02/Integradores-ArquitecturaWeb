@@ -8,6 +8,7 @@
         <class>edu.empresa.entities.Estudiante</class>
         <class>edu.empresa.entities.Carrera</class>
         <class>edu.empresa.entities.EstudianteCarrera</class>
+        <class>edu.empresa.entities.EstudianteCarreraId</class>
 
         <properties>
             <!--  Propiedades de configuracion de JDBC para MySQL /  -->

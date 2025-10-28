@@ -5,15 +5,16 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "Estudiante_Carrera")
 public class EstudianteCarrera {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @EmbeddedId
+    private EstudianteCarreraId id;
 
     @ManyToOne
+    @MapsId("estudianteDni")
     @JoinColumn(name = "id_estudiante", referencedColumnName = "dni")
     private Estudiante estudiante;
 
     @ManyToOne
+    @MapsId("carreraId")
     @JoinColumn(name = "id_carrera", referencedColumnName = "id_carrera")
     private Carrera carrera;
 
@@ -30,8 +31,8 @@ public class EstudianteCarrera {
         super();
     }
 
-    // Constructor sin ID para auto increment
     public EstudianteCarrera(Estudiante estudiante, Carrera carrera, int inscripcion, int graduacion, int antiguedad) {
+        this.id = new EstudianteCarreraId(estudiante.getDni(), carrera.getIdCarrera());
         this.estudiante = estudiante;
         this.carrera = carrera;
         this.inscripcion = inscripcion;
@@ -40,11 +41,11 @@ public class EstudianteCarrera {
     }
 
 
-    public int getId() {
+    public EstudianteCarreraId getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(EstudianteCarreraId id) {
         this.id = id;
     }
 
