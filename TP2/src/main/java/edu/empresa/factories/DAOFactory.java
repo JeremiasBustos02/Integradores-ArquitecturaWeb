@@ -7,19 +7,15 @@ import edu.empresa.repositories.CarreraRepository;
 import edu.empresa.repositories.EstudianteCarreraRepository;
 import edu.empresa.repositories.EstudianteRepository;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 
 public class DAOFactory {
     private static volatile DAOFactory instance = null;
-    private final EntityManager em;
+    private final EntityManagerFactory emf;
 
     private DAOFactory() {
-        this.em = JPAUtil.getEntityManager();
+        this.emf = JPAUtil.getEntityManagerFactory();
     }
-
-    // Instancias singleton de los repositorios
-    private CarreraRepositoryImpl carreraRepository;
-    private EstudianteRepositoryImpl estudianteRepository;
-    private EstudianteCarreraImpl estudianteCarreraRepository;
 
     public static DAOFactory getInstance() {
         if (instance == null) {
@@ -31,33 +27,20 @@ public class DAOFactory {
         }
         return instance;
     }
-//dao
+
+    public EntityManager getEntityManager() {
+        return emf.createEntityManager();
+    }
+
     public CarreraRepository getCarreraRepository() {
-        if (carreraRepository == null) {
-            carreraRepository = CarreraRepositoryImpl.getInstance(em);
-        }
-        return carreraRepository;
+        return CarreraRepositoryImpl.getInstance();
     }
-//dao
+
     public EstudianteRepository getEstudianteRepository() {
-        if (estudianteRepository == null) {
-            estudianteRepository = EstudianteRepositoryImpl.getInstance(em);
-        }
-        return estudianteRepository;
+        return EstudianteRepositoryImpl.getInstance();
     }
-//dao
+
     public EstudianteCarreraRepository getEstudianteCarreraRepository() {
-        if (estudianteCarreraRepository == null) {
-            estudianteCarreraRepository = EstudianteCarreraImpl.getInstance(em);
-        }
-        return estudianteCarreraRepository;
-    }
-
-
-
-    public void close() {
-        if (em != null && em.isOpen()) {
-            em.close();
-        }
+        return EstudianteCarreraImpl.getInstance();
     }
 }

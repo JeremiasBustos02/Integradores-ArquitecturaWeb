@@ -2,6 +2,7 @@ package edu.empresa.impl;
 
 import edu.empresa.dto.EstudianteDTO;
 import edu.empresa.entities.Estudiante;
+import edu.empresa.factories.DAOFactory;
 import edu.empresa.repositories.EstudianteRepository;
 import jakarta.persistence.EntityManager;
 
@@ -9,18 +10,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EstudianteRepositoryImpl implements EstudianteRepository {
-    EntityManager em;
+    private final EntityManager em;
     private static volatile EstudianteRepositoryImpl instance;
 
-    private EstudianteRepositoryImpl(EntityManager em) {
-        this.em = em;
+    private EstudianteRepositoryImpl() {
+        this.em = DAOFactory.getInstance().getEntityManager();
     }
 
-    public static EstudianteRepositoryImpl getInstance(EntityManager e) {
+    public static EstudianteRepositoryImpl getInstance() {
         if (instance == null) {
             synchronized (EstudianteRepositoryImpl.class) {
                 if (instance == null) {
-                    instance = new EstudianteRepositoryImpl(e);
+                    instance = new EstudianteRepositoryImpl();
                 }
             }
         }

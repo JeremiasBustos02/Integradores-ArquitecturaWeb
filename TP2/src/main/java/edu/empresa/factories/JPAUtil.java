@@ -13,7 +13,7 @@ public class JPAUtil {
 
     public static EntityManagerFactory getEntityManagerFactory() {
         if (emf == null) {
-            synchronized (JPAUtil.class) {  // ✅ Agregar sincronización
+            synchronized (JPAUtil.class) {
                 if (emf == null) {
                     emf = Persistence.createEntityManagerFactory("Integrador_TP2");
                 }
@@ -26,7 +26,7 @@ public class JPAUtil {
         return getEntityManagerFactory().createEntityManager();
     }
 
-    public static void closeEntityManager() {
+    public static void closeEntityManagerFactory() {
         if (emf != null && emf.isOpen()) {
             emf.close();
         }

@@ -12,17 +12,17 @@ import jakarta.persistence.EntityManager;
 import java.util.*;
 
 public class CarreraRepositoryImpl implements CarreraRepository {
-    EntityManager em;
+    private final  EntityManager em;
     public static volatile CarreraRepositoryImpl instance;
 
-    private CarreraRepositoryImpl(EntityManager em) {
-        this.em = em;
+    private CarreraRepositoryImpl() {
+        this.em = DAOFactory.getInstance().getEntityManager();;
     }
-    public static CarreraRepositoryImpl getInstance(EntityManager e){
+    public static CarreraRepositoryImpl getInstance(){
         if(instance == null){
             synchronized (CarreraRepositoryImpl.class){
                 if (instance == null){
-                    instance=new CarreraRepositoryImpl(e);
+                    instance=new CarreraRepositoryImpl();
                 }
             }
         }

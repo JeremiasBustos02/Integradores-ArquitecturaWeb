@@ -5,6 +5,7 @@ import edu.empresa.entities.Carrera;
 import edu.empresa.entities.Estudiante;
 import edu.empresa.entities.EstudianteCarrera;
 import edu.empresa.entities.EstudianteCarreraId;
+import edu.empresa.factories.DAOFactory;
 import edu.empresa.repositories.EstudianteCarreraRepository;
 import jakarta.persistence.EntityManager;
 
@@ -12,18 +13,18 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class EstudianteCarreraImpl implements EstudianteCarreraRepository {
-    EntityManager em;
+    private final EntityManager em;
     public static volatile EstudianteCarreraImpl instance;
 
-    private EstudianteCarreraImpl(EntityManager em) {
-        this.em = em;
+    private EstudianteCarreraImpl() {
+        this.em = DAOFactory.getInstance().getEntityManager();
     }
 
-    public static EstudianteCarreraImpl getInstance(EntityManager e) {
+    public static EstudianteCarreraImpl getInstance() {
         if (instance == null) {
             synchronized (EstudianteRepositoryImpl.class) {
                 if (instance == null) {
-                    instance = new EstudianteCarreraImpl(e);
+                    instance = new EstudianteCarreraImpl();
                 }
             }
         }

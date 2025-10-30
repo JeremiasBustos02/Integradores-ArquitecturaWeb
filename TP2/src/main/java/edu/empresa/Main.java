@@ -72,8 +72,7 @@ public class Main {
         obtenerReporte();
         System.out.println("------------------------------------");
 
-        factory.close();
-        JPAUtil.closeEntityManager();
+        JPAUtil.closeEntityManagerFactory();
     }
 
     private static void darAltaNuevoEstudiante(Estudiante nuevoEstudiante) {
