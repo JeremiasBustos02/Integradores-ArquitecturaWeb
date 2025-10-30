@@ -10,19 +10,30 @@ import java.util.List;
 
 public class EstudianteRepositoryImpl implements EstudianteRepository {
     EntityManager em;
+    private static volatile EstudianteRepositoryImpl instance;
 
-    public EstudianteRepositoryImpl(EntityManager em) {
+    private EstudianteRepositoryImpl(EntityManager em) {
         this.em = em;
     }
 
+    public static EstudianteRepositoryImpl getInstance(EntityManager e) {
+        if (instance == null) {
+            synchronized (EstudianteRepositoryImpl.class) {
+                if (instance == null) {
+                    instance = new EstudianteRepositoryImpl(e);
+                }
+            }
+        }
+        return instance;
+    }
 
     @Override
-    public Estudiante altaEstudiante(int dni,String nombre, String apellido, int edad, String genero, int lu, String ciudad) {
+    public Estudiante altaEstudiante(int dni, String nombre, String apellido, int edad, String genero, int lu, String ciudad) {
         Estudiante nuevoEstudiante = null;
         try {
             em.getTransaction().begin();
             if (dni > 0 && nombre != null && apellido != null && edad > 0 && genero != null && lu > 0 && ciudad != null) {
-                nuevoEstudiante = new Estudiante(dni,nombre, apellido, edad, genero, lu, ciudad);
+                nuevoEstudiante = new Estudiante(dni, nombre, apellido, edad, genero, lu, ciudad);
                 em.persist(nuevoEstudiante);
                 em.getTransaction().commit();
                 return nuevoEstudiante;
@@ -84,13 +95,13 @@ public class EstudianteRepositoryImpl implements EstudianteRepository {
     private EstudianteDTO convertirADTO(Estudiante estudiante) {
         if (estudiante == null) return null;
         return new EstudianteDTO(
-            estudiante.getDni(),
-            estudiante.getNombre(),
-            estudiante.getApellido(),
-            estudiante.getEdad(),
-            estudiante.getGenero(),
-            estudiante.getLu(),
-            estudiante.getCiudad()
+                estudiante.getDni(),
+                estudiante.getNombre(),
+                estudiante.getApellido(),
+                estudiante.getEdad(),
+                estudiante.getGenero(),
+                estudiante.getLu(),
+                estudiante.getCiudad()
         );
     }
 
@@ -105,11 +116,11 @@ public class EstudianteRepositoryImpl implements EstudianteRepository {
     @Override
     public List<EstudianteDTO> buscarTodosPorCarreraYCiudad(int idCarrera, String ciudad) {
         List<Estudiante> estudiantes = em.createQuery(
-                "SELECT e from EstudianteCarrera ec " +
-                "join ec.estudiante e " +
-                "join ec.carrera c " +
-                "where c.id_carrera= ?1 " +
-                "   and e.ciudad LIKE ?2", Estudiante.class)
+                        "SELECT e from EstudianteCarrera ec " +
+                                "join ec.estudiante e " +
+                                "join ec.carrera c " +
+                                "where c.id_carrera= ?1 " +
+                                "   and e.ciudad LIKE ?2", Estudiante.class)
                 .setParameter(1, idCarrera)
                 .setParameter(2, ciudad)
                 .getResultList();

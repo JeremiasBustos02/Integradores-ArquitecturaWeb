@@ -23,9 +23,9 @@ public class DataLoader {
     public DataLoader() {
         DAOFactory daoFactory = DAOFactory.getInstance();
         EntityManager em = JPAUtil.getEntityManager();
-        this.estudianteRepository = daoFactory.getEstudianteDAO(em);
-        this.carreraRepository = daoFactory.getCarreraDAO(em);
-        this.estudianteCarreraRepository = daoFactory.getEstudianteCarreraDAO(em);
+        this.estudianteRepository = daoFactory.getEstudianteRepository();
+        this.carreraRepository = daoFactory.getCarreraRepository();
+        this.estudianteCarreraRepository = daoFactory.getEstudianteCarreraRepository();
         this.csvReader = new CSVReader();
     }
 

@@ -4,6 +4,7 @@ import edu.empresa.dto.CarreraDTO;
 import edu.empresa.dto.GenerarReporteDTO;
 import edu.empresa.entities.Carrera;
 import edu.empresa.entities.Estudiante;
+import edu.empresa.factories.DAOFactory;
 import edu.empresa.factories.JPAUtil;
 import edu.empresa.repositories.CarreraRepository;
 import jakarta.persistence.EntityManager;
@@ -12,9 +13,20 @@ import java.util.*;
 
 public class CarreraRepositoryImpl implements CarreraRepository {
     EntityManager em;
+    public static volatile CarreraRepositoryImpl instance;
 
-    public CarreraRepositoryImpl(EntityManager em) {
+    private CarreraRepositoryImpl(EntityManager em) {
         this.em = em;
+    }
+    public static CarreraRepositoryImpl getInstance(EntityManager e){
+        if(instance == null){
+            synchronized (CarreraRepositoryImpl.class){
+                if (instance == null){
+                    instance=new CarreraRepositoryImpl(e);
+                }
+            }
+        }
+        return instance;
     }
 
     @Override

@@ -5,7 +5,7 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
 public class JPAUtil {
-    private static EntityManagerFactory emf = null;
+    private static volatile EntityManagerFactory emf = null;
 
     private JPAUtil() {
         // Constructor privado para evitar instanciación
@@ -13,7 +13,11 @@ public class JPAUtil {
 
     public static EntityManagerFactory getEntityManagerFactory() {
         if (emf == null) {
-            emf = Persistence.createEntityManagerFactory("Integrador_TP2");
+            synchronized (JPAUtil.class) {  // ✅ Agregar sincronización
+                if (emf == null) {
+                    emf = Persistence.createEntityManagerFactory("Integrador_TP2");
+                }
+            }
         }
         return emf;
     }

@@ -21,7 +21,7 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
-
+        DAOFactory factory = DAOFactory.getInstance();
         new DataDelete().deleteAll();
         System.out.println("------------------------------------");
 
@@ -36,7 +36,7 @@ public class Main {
         darAltaNuevoEstudiante(nuevoEstudiante);
         System.out.println("------------------------------------");
 
-        int idCarrera = 1; // ID de la carrera TUDAI
+        int idCarrera = 1;
 
         System.out.println("Ejercicio b) - Matricular un estudiante en una carrera");
         matricularEstudianteEnCarrera(nuevoEstudiante, idCarrera);
@@ -68,14 +68,13 @@ public class Main {
         recuperarEstudiantesPorCarreraYCiudad(idCarrera, ciudadResidencia);
         System.out.println("------------------------------------");
 
-        System.out.println("Punto 3) - Generar un reporte de las carreras, que para cada carrera incluya información de los\n" +
-                "inscriptos y egresados por año. Se deben ordenar las carreras alfabéticamente, y presentar\n" +
-                "los años de manera cronológica.");
+        System.out.println("Punto 3) - Generar un reporte de las carreras...");
         obtenerReporte();
         System.out.println("------------------------------------");
 
+        factory.close();
+        JPAUtil.closeEntityManager();
     }
-
 
     private static void darAltaNuevoEstudiante(Estudiante nuevoEstudiante) {
         EntityManager em = JPAUtil.getEntityManager();
@@ -107,7 +106,7 @@ public class Main {
             em.getTransaction().begin();
 
             DAOFactory factory = DAOFactory.getInstance();
-            CarreraRepository carreraRepo = factory.getCarreraDAO(em);
+            CarreraRepository carreraRepo = factory.getCarreraRepository();
 
             Carrera carreraTUDAI = carreraRepo.buscarCarreraPorId(idCarrera);
 
@@ -138,7 +137,7 @@ public class Main {
         EntityManager em = JPAUtil.getEntityManager();
         try {
             DAOFactory factory = DAOFactory.getInstance();
-            EstudianteRepository estudianteRepo = factory.getEstudianteDAO(em);
+            EstudianteRepository estudianteRepo = factory.getEstudianteRepository();
 
             List<EstudianteDTO> estudiantes = estudianteRepo.buscarTodosOrderByNombre();
 
@@ -170,7 +169,7 @@ public class Main {
         EntityManager em = JPAUtil.getEntityManager();
         try {
             DAOFactory factory = DAOFactory.getInstance();
-            EstudianteRepository estudianteRepo = factory.getEstudianteDAO(em);
+            EstudianteRepository estudianteRepo = factory.getEstudianteRepository();
 
             System.out.println("BÚSQUEDA DE ESTUDIANTE POR LU: " + lu);
             EstudianteDTO estudiante = estudianteRepo.buscarPorLU(lu);
@@ -199,7 +198,7 @@ public class Main {
         EntityManager em = JPAUtil.getEntityManager();
         try {
             DAOFactory factory = DAOFactory.getInstance();
-            EstudianteRepository estudianteRepo = factory.getEstudianteDAO(em);
+            EstudianteRepository estudianteRepo = factory.getEstudianteRepository();
 
             List<EstudianteDTO> estudiantes = estudianteRepo.buscarPorGenero(genero);
 
@@ -236,7 +235,7 @@ public class Main {
         EntityManager em = JPAUtil.getEntityManager();
         try {
             DAOFactory factory = DAOFactory.getInstance();
-            CarreraRepository carreraRepo = factory.getCarreraDAO(em);
+            CarreraRepository carreraRepo = factory.getCarreraRepository();
 
             List<CarreraDTO> carreras = carreraRepo.recuperarCarrerasConInscriptos();
 
@@ -265,8 +264,8 @@ public class Main {
         EntityManager em = JPAUtil.getEntityManager();
         try {
             DAOFactory factory = DAOFactory.getInstance();
-            CarreraRepository carreraRepo = factory.getCarreraDAO(em);
-            EstudianteRepository estudianteRepo = factory.getEstudianteDAO(em);
+            CarreraRepository carreraRepo = factory.getCarreraRepository();
+            EstudianteRepository estudianteRepo = factory.getEstudianteRepository();
 
             Carrera carrera = carreraRepo.buscarCarreraPorId(idCarrera);
             if (carrera == null) {
@@ -306,7 +305,6 @@ public class Main {
         } finally {
             em.close();
         }
-
     }
 
     public static void obtenerReporte() {
@@ -314,7 +312,7 @@ public class Main {
 
         try {
             DAOFactory factory = DAOFactory.getInstance();
-            CarreraRepository carreraRepo = factory.getCarreraDAO(em);
+            CarreraRepository carreraRepo = factory.getCarreraRepository();
 
             List<GenerarReporteDTO> reportes = carreraRepo.generarReporteCarreras();
 
@@ -324,7 +322,6 @@ public class Main {
             }
 
             System.out.println("-------------------");
-            // NombreCarrera | Año | Inscriptos | Egresados
             System.out.printf("%-40s %6s %12s %12s%n", "CARRERA", "ANIO", "INSCRIPTOS", "EGRESADOS");
             System.out.println("--------------------------------------------------------------------------------");
 
@@ -341,8 +338,7 @@ public class Main {
             System.err.println("Error al obtener reporte:");
             e.printStackTrace(System.err);
         } finally {
-                em.close();
-            }
+            em.close();
         }
     }
-
+}

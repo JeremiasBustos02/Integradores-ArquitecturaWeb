@@ -13,9 +13,21 @@ import java.util.List;
 
 public class EstudianteCarreraImpl implements EstudianteCarreraRepository {
     EntityManager em;
+    public static volatile EstudianteCarreraImpl instance;
 
-    public EstudianteCarreraImpl(EntityManager em) {
+    private EstudianteCarreraImpl(EntityManager em) {
         this.em = em;
+    }
+
+    public static EstudianteCarreraImpl getInstance(EntityManager e) {
+        if (instance == null) {
+            synchronized (EstudianteRepositoryImpl.class) {
+                if (instance == null) {
+                    instance = new EstudianteCarreraImpl(e);
+                }
+            }
+        }
+        return instance;
     }
 
     @Override
@@ -29,15 +41,15 @@ public class EstudianteCarreraImpl implements EstudianteCarreraRepository {
                     // Verificar si ya existe la relación
                     EstudianteCarreraId id = new EstudianteCarreraId(nuevo.getDni(), car.getIdCarrera());
                     EstudianteCarrera existente = em.find(EstudianteCarrera.class, id);
-                    
+
                     if (existente == null) {
                         EstudianteCarrera ec = new EstudianteCarrera(nuevo, car, inscripcion, graduacion, antiguedad);
                         em.persist(ec);
                         em.getTransaction().commit();
                     } else {
                         em.getTransaction().rollback();
-                        System.out.println("La relación entre el estudiante " + nuevo.getDni() + 
-                                         " y la carrera " + car.getIdCarrera() + " ya existe. Se omite la inserción.");
+                        System.out.println("La relación entre el estudiante " + nuevo.getDni() +
+                                " y la carrera " + car.getIdCarrera() + " ya existe. Se omite la inserción.");
                     }
                 } else {//rollback de carrera
                     if (em.getTransaction().isActive()) {
