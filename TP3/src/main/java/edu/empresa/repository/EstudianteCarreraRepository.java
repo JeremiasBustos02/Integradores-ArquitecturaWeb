@@ -3,13 +3,14 @@ package edu.empresa.repository;
 import edu.empresa.dto.EstudianteDTO;
 import edu.empresa.model.Estudiante;
 import edu.empresa.model.EstudianteCarrera;
+import edu.empresa.model.EstudianteCarreraId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface EstudianteCarreraRepository extends JpaRepository<EstudianteCarrera, Integer> {
+public interface EstudianteCarreraRepository extends JpaRepository<EstudianteCarrera, EstudianteCarreraId> {
     
     /**
      * Verifica si existe una inscripción para un estudiante en una carrera específica

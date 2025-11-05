@@ -54,29 +54,23 @@ public class EstudianteCarreraService {
             throw new RuntimeException("El estudiante ya está inscrito en esta carrera");
         }
 
-        // Crear la nueva inscripción
-        EstudianteCarrera estudianteCarrera = new EstudianteCarrera();
-        estudianteCarrera.setId(dto.getId());
-        estudianteCarrera.setEstudiante(estudianteOpt.get());
-        estudianteCarrera.setCarrera(carreraOpt.get());
-        
         // Si no se proporciona año de inscripción, usar el año actual
         int anioInscripcion = dto.getInscripcion() != 0 ? dto.getInscripcion() : LocalDate.now().getYear();
-        estudianteCarrera.setInscripcion(anioInscripcion);
-        
-        // Graduación es opcional (puede ser 0 o null)
-        estudianteCarrera.setGraduacion(dto.getGraduacion());
         
         // Calcular antigüedad (años desde la inscripción)
         int antiguedad = LocalDate.now().getYear() - anioInscripcion;
-        estudianteCarrera.setAntiguedad(antiguedad);
+        
+        // Crear la nueva inscripción usando el constructor personalizado
+        Estudiante estudiante = estudianteOpt.get();
+        Carrera carrera = carreraOpt.get();
+        EstudianteCarrera estudianteCarrera = new EstudianteCarrera(
+            estudiante, carrera, anioInscripcion, dto.getGraduacion(), antiguedad);
 
         // Guardar en la base de datos
         EstudianteCarrera saved = repository.save(estudianteCarrera);
 
         // Convertir a DTO para retornar
         return new EstudianteCarreraDTO(
-            saved.getId(),
             saved.getEstudiante().getDni(),
             saved.getCarrera().getId_carrera(),
             saved.getInscripcion(),

@@ -67,16 +67,25 @@ public class LoadDatabase {
                 Optional<Carrera> carreraOpt = carreraRepository.findById(dto.getIdCarrera());
 
                 if (estudianteOpt.isPresent() && carreraOpt.isPresent()) {
-                    EstudianteCarrera ec = new EstudianteCarrera();
-                    ec.setEstudiante(estudianteOpt.get());
-                    ec.setCarrera(carreraOpt.get());
-                    ec.setInscripcion(dto.getInscripcion());
-                    ec.setGraduacion(dto.getGraduacion());
-                    ec.setAntiguedad(dto.getAntiguedad());
-                    estudianteCarreraRepository.save(ec);
+                    // Usar el constructor personalizado que inicializa la clave compuesta
+                    EstudianteCarrera ec = new EstudianteCarrera(
+                        estudianteOpt.get(),
+                        carreraOpt.get(),
+                        dto.getInscripcion(),
+                        dto.getGraduacion(),
+                        dto.getAntiguedad()
+                    );
+                    
+                    // Verificar si ya existe esta relación para evitar duplicados
+                    if (!estudianteCarreraRepository.existsById(ec.getId())) {
+                        estudianteCarreraRepository.save(ec);
+                    } else {
+                        log.warn("⚠️ La relación ya existe para estudiante {} y carrera {}", 
+                                dto.getIdEstudiante(), dto.getIdCarrera());
+                    }
                 } else {
-                    log.warn("⚠️ No se encontró estudiante o carrera para la relación ID={} (estudiante={}, carrera={})",
-                            dto.getId(), dto.getIdEstudiante(), dto.getIdCarrera());
+                    log.warn("⚠️ No se encontró estudiante o carrera para la relación (estudiante={}, carrera={})",
+                            dto.getIdEstudiante(), dto.getIdCarrera());
                 }
             }
 

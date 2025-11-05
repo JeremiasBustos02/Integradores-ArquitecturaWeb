@@ -12,15 +12,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EstudianteCarrera {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @EmbeddedId
+    private EstudianteCarreraId id;
 
     @ManyToOne
+    @MapsId("estudianteDni")
     @JoinColumn(name = "id_estudiante", referencedColumnName = "dni")
     private Estudiante estudiante;
 
     @ManyToOne
+    @MapsId("carreraId")
     @JoinColumn(name = "id_carrera", referencedColumnName = "id_carrera")
     private Carrera carrera;
 
@@ -30,4 +31,14 @@ public class EstudianteCarrera {
     private int graduacion;
     @Column
     private int antiguedad;
+
+    // Constructor personalizado para inicializar la clave compuesta
+    public EstudianteCarrera(Estudiante estudiante, Carrera carrera, int inscripcion, int graduacion, int antiguedad) {
+        this.id = new EstudianteCarreraId(estudiante.getDni(), carrera.getId_carrera());
+        this.estudiante = estudiante;
+        this.carrera = carrera;
+        this.inscripcion = inscripcion;
+        this.graduacion = graduacion;
+        this.antiguedad = antiguedad;
+    }
 }

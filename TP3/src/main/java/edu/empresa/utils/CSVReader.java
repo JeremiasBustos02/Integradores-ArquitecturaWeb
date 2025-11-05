@@ -103,13 +103,13 @@ public class CSVReader {
 
             for (CSVRecord csvRecord : csvParser) {
                 try {
-                    EstudianteCarreraDTO dto = new EstudianteCarreraDTO();
-                    dto.setId(Integer.parseInt(csvRecord.get("id")));
-                    dto.setIdEstudiante(Integer.parseInt(csvRecord.get("id_estudiante")));
-                    dto.setIdCarrera(Integer.parseInt(csvRecord.get("id_carrera")));
-                    dto.setInscripcion(Integer.parseInt(csvRecord.get("inscripcion")));
-                    dto.setGraduacion(Integer.parseInt(csvRecord.get("graduacion")));
-                    dto.setAntiguedad(Integer.parseInt(csvRecord.get("antiguedad")));
+                    int idEstudiante = Integer.parseInt(csvRecord.get("id_estudiante"));
+                    int idCarrera = Integer.parseInt(csvRecord.get("id_carrera"));
+                    int inscripcion = Integer.parseInt(csvRecord.get("inscripcion"));
+                    int graduacion = Integer.parseInt(csvRecord.get("graduacion"));
+                    int antiguedad = Integer.parseInt(csvRecord.get("antiguedad"));
+                    
+                    EstudianteCarreraDTO dto = new EstudianteCarreraDTO(idEstudiante, idCarrera, inscripcion, graduacion, antiguedad);
 
                     // ✅ Usar el service inyectado
                     estudianteCarreraService.inscribirEstudianteEnCarrera(dto);
@@ -172,14 +172,13 @@ public class CSVReader {
 
         try (CSVParser parser = CSVFormat.DEFAULT.withHeader().parse(new FileReader(rutaArchivo))) {
             for (CSVRecord record : parser) {
-                int id = Integer.parseInt(record.get("id"));
                 int idEstudiante = Integer.parseInt(record.get("id_estudiante"));
                 int idCarrera = Integer.parseInt(record.get("id_carrera"));
                 int inscripcion = Integer.parseInt(record.get("inscripcion"));
                 int graduacion = Integer.parseInt(record.get("graduacion"));
                 int antiguedad = Integer.parseInt(record.get("antiguedad"));
 
-                EstudianteCarreraDTO ecDTO = new EstudianteCarreraDTO(id, idEstudiante, idCarrera, inscripcion, graduacion, antiguedad);
+                EstudianteCarreraDTO ecDTO = new EstudianteCarreraDTO(idEstudiante, idCarrera, inscripcion, graduacion, antiguedad);
                 estudiantesCarreras.add(ecDTO);
             }
             System.out.println("Archivo estudiante_carrera.csv leído correctamente.");
