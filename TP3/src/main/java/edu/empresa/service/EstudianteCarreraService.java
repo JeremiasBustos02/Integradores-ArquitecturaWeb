@@ -8,6 +8,7 @@ import edu.empresa.model.EstudianteCarrera;
 import edu.empresa.repository.CarreraRepository;
 import edu.empresa.repository.EstudianteCarreraRepository;
 import edu.empresa.repository.EstudianteRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -19,7 +20,7 @@ public class EstudianteCarreraService {
     private final EstudianteCarreraRepository repository;
     private final EstudianteRepository estudianteRepository;
     private final CarreraRepository carreraRepository;
-
+    @Autowired
     public EstudianteCarreraService(EstudianteCarreraRepository repository, 
                                   EstudianteRepository estudianteRepository,
                                   CarreraRepository carreraRepository) {

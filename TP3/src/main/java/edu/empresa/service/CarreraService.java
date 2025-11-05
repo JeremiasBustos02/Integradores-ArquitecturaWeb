@@ -12,39 +12,40 @@ import java.util.stream.Collectors;
 
 @Service("carreraService")
 public class CarreraService {
-    @Autowired
     private final CarreraRepository repository;
 
+    @Autowired
     public CarreraService(CarreraRepository repository) {
         this.repository = repository;
     }
 
     @Transactional
-    public List<CarreraDTO> getCarrerasConInscriptos(){
+    public List<CarreraDTO> getCarrerasConInscriptos() {
         return repository.getCarrerasConInscriptos();
     }
-    
+
     @Transactional
-    public List<CarreraDTO> getCarreras(){
-        return repository.findAll().stream().map(carrera -> new CarreraDTO(carrera.getId_carrera(),carrera.getNombre(),carrera.getDuracion())).toList();
+    public List<CarreraDTO> getCarreras() {
+        return repository.findAll().stream().map(carrera -> new CarreraDTO(carrera.getId_carrera(), carrera.getNombre(), carrera.getDuracion())).toList();
     }
 
     /**
      * Genera un reporte completo de carreras con inscriptos y egresados por año
+     *
      * @return Lista de GenerarReporteDTO ordenada alfabéticamente por carrera y cronológicamente por año
      */
     @Transactional
     public List<GenerarReporteDTO> generarReporteCarreras() {
         List<Object[]> resultados = repository.generarReporteCarreras();
-        
+
         return resultados.stream()
-            .map(row -> new GenerarReporteDTO(
-                (String) row[0],      // nombreCarrera
-                (Integer) row[1],     // idCarrera
-                (Integer) row[2],     // anio
-                ((Number) row[3]).longValue(),  // inscriptos
-                ((Number) row[4]).longValue()   // egresados
-            ))
-            .toList();
+                .map(row -> new GenerarReporteDTO(
+                        (String) row[0],      // nombreCarrera
+                        (Integer) row[1],     // idCarrera
+                        (Integer) row[2],     // anio
+                        ((Number) row[3]).longValue(),  // inscriptos
+                        ((Number) row[4]).longValue()   // egresados
+                ))
+                .toList();
     }
 }

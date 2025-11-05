@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import java.util.List;
 public class EstudianteController {
     private final EstudianteService service;
 
+    @Autowired
     public EstudianteController(EstudianteService service) {
         this.service = service;
     }
@@ -28,6 +30,7 @@ public class EstudianteController {
 
     /**
      * Endpoint para traer todos los estudiantes por orden alfabetico de apellido
+     *
      * @return ResponseEntity con el resultado de la operación
      */
     @GetMapping("/")
@@ -47,17 +50,18 @@ public class EstudianteController {
 
     /**
      * Endpoint para dar de alta un nuevo estudiante
+     *
      * @param estudianteDTO DTO con los datos del estudiante a crear
      * @return ResponseEntity con el resultado de la operación
      */
     @PostMapping("/alta")
     @ApiOperation(value = "Dar de alta un nuevo estudiante",
-                  notes = "Crea un nuevo estudiante en el sistema con todos sus datos")
+            notes = "Crea un nuevo estudiante en el sistema con todos sus datos")
     @ApiResponses(value = {
-        @ApiResponse(code = 201, message = "Estudiante creado exitosamente"),
-        @ApiResponse(code = 400, message = "Datos inválidos en la solicitud"),
-        @ApiResponse(code = 409, message = "El estudiante ya existe (DNI o LU duplicado)"),
-        @ApiResponse(code = 500, message = "Error interno del servidor")
+            @ApiResponse(code = 201, message = "Estudiante creado exitosamente"),
+            @ApiResponse(code = 400, message = "Datos inválidos en la solicitud"),
+            @ApiResponse(code = 409, message = "El estudiante ya existe (DNI o LU duplicado)"),
+            @ApiResponse(code = 500, message = "Error interno del servidor")
     })
     public ResponseEntity<?> altaEstudiante(@Valid @RequestBody EstudianteDTO estudianteDTO) {
         try {
@@ -67,30 +71,31 @@ public class EstudianteController {
             // Manejar errores específicos del negocio
             if (e.getMessage().contains("Ya existe")) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body("Error: " + e.getMessage());
+                        .body("Error: " + e.getMessage());
             } else {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error interno: " + e.getMessage());
+                        .body("Error interno: " + e.getMessage());
             }
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error inesperado: " + e.getMessage());
+                    .body("Error inesperado: " + e.getMessage());
         }
     }
 
     /**
      * Endpoint para buscar un estudiante por su número de libreta universitaria (LU)
+     *
      * @param lu número de libreta universitaria
      * @return ResponseEntity con el estudiante encontrado o error
      */
     @GetMapping("/lu/{lu}")
     @ApiOperation(value = "Buscar estudiante por número de libreta universitaria (LU)",
-                  notes = "Recupera un estudiante específico usando su número de libreta")
+            notes = "Recupera un estudiante específico usando su número de libreta")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Estudiante encontrado correctamente"),
-        @ApiResponse(code = 404, message = "No se encontró estudiante con ese número de libreta"),
-        @ApiResponse(code = 500, message = "Error interno del servidor")
+            @ApiResponse(code = 200, message = "Estudiante encontrado correctamente"),
+            @ApiResponse(code = 404, message = "No se encontró estudiante con ese número de libreta"),
+            @ApiResponse(code = 500, message = "Error interno del servidor")
     })
     public ResponseEntity<?> getEstudianteByLU(@PathVariable int lu) {
         try {
@@ -99,29 +104,30 @@ public class EstudianteController {
         } catch (RuntimeException e) {
             if (e.getMessage().contains("No se encontró")) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Error: " + e.getMessage());
+                        .body("Error: " + e.getMessage());
             } else {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error interno: " + e.getMessage());
+                        .body("Error interno: " + e.getMessage());
             }
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error inesperado: " + e.getMessage());
+                    .body("Error inesperado: " + e.getMessage());
         }
     }
 
     /**
      * Endpoint para buscar estudiantes por género
+     *
      * @param genero género a buscar (Male/Female)
      * @return ResponseEntity con la lista de estudiantes del género especificado
      */
     @GetMapping("/genero/{genero}")
     @ApiOperation(value = "Buscar estudiantes por género",
-                  notes = "Recupera todos los estudiantes de un género específico, ordenados por apellido y nombre")
+            notes = "Recupera todos los estudiantes de un género específico, ordenados por apellido y nombre")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Estudiantes encontrados correctamente"),
-        @ApiResponse(code = 500, message = "Error interno del servidor")
+            @ApiResponse(code = 200, message = "Estudiantes encontrados correctamente"),
+            @ApiResponse(code = 500, message = "Error interno del servidor")
     })
     public ResponseEntity<?> getEstudiantesByGenero(@PathVariable String genero) {
         try {
@@ -130,7 +136,7 @@ public class EstudianteController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error inesperado: " + e.getMessage());
+                    .body("Error inesperado: " + e.getMessage());
         }
     }
 }

@@ -24,7 +24,7 @@ import java.util.List;
 @Api(value = "Carrera Controller")
 public class CarreraController {
     private final CarreraService service;
-
+    @Autowired
     public CarreraController(CarreraService service) {
         this.service = service;
     }
