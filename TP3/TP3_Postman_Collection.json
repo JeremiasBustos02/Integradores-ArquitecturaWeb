@@ -54,15 +54,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/estudiantes/",
+							"raw": "http://localhost:8080/estudiantes",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"estudiantes",
-								""
+								"estudiantes"
 							]
 						},
 						"description": "Obtiene todos los estudiantes ordenados por apellido y nombre."
@@ -115,15 +114,14 @@
 							"raw": "{\n  \"dni\": 99999999,\n  \"nombre\": \"Juan\",\n  \"apellido\": \"Pérez\",\n  \"edad\": 22,\n  \"genero\": \"Male\",\n  \"lu\": 99999,\n  \"ciudad\": \"Tandil\"\n}"
 						},
 						"url": {
-							"raw": "http://localhost:8080/estudiantes/alta",
+							"raw": "http://localhost:8080/estudiantes",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"estudiantes",
-								"alta"
+								"estudiantes"
 							]
 						},
 						"description": "Crea un nuevo estudiante en el sistema. **Nota:** Este test fallará en ejecuciones posteriores si no se reinicia la aplicación (ya que el DNI ya existirá)."
@@ -386,15 +384,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/carreras/",
+							"raw": "http://localhost:8080/carreras",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"carreras",
-								""
+								"carreras"
 							]
 						},
 						"description": "Obtiene la lista completa de todas las carreras disponibles."
@@ -456,15 +453,20 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/carreras/carreraInscriptos",
+							"raw": "http://localhost:8080/carreras?inscriptos=true",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"carreras",
-								"carreraInscriptos"
+								"carreras"
+							],
+							"query": [
+								{
+									"key": "inscriptos",
+									"value": "true"
+								}
 							]
 						},
 						"description": "Obtiene las carreras con estudiantes inscriptos, ordenadas por cantidad de inscriptos de mayor a menor."
@@ -622,15 +624,14 @@
 							"raw": "{\n  \"idEstudiante\": 71779527,\n  \"idCarrera\": 13\n}"
 						},
 						"url": {
-							"raw": "http://localhost:8080/estudiantesYCarreras/inscribir",
+							"raw": "http://localhost:8080/inscripciones",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"estudiantesYCarreras",
-								"inscribir"
+								"inscripciones"
 							]
 						},
 						"description": "Inscribe al estudiante Isidro Blackmuir (DNI: 71779527) en la carrera Periodismo (ID: 13). **Nota:** Este test fallará en ejecuciones posteriores si no se reinicia la aplicación (ya que la inscripción ya existirá)."
@@ -672,15 +673,14 @@
 							"raw": "{\n  \"idEstudiante\": 123,\n  \"idCarrera\": 1\n}"
 						},
 						"url": {
-							"raw": "http://localhost:8080/estudiantesYCarreras/inscribir",
+							"raw": "http://localhost:8080/inscripciones",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"estudiantesYCarreras",
-								"inscribir"
+								"inscripciones"
 							]
 						},
 						"description": "Prueba el comportamiento cuando se intenta inscribir un estudiante que no existe."
@@ -733,18 +733,24 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/estudiantesYCarreras/carrera/6/ciudad/Qiligang",
+							"raw": "http://localhost:8080/inscripciones?carrera=6&ciudad=Qiligang",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"estudiantesYCarreras",
-								"carrera",
-								"6",
-								"ciudad",
-								"Qiligang"
+								"inscripciones"
+							],
+							"query": [
+								{
+									"key": "carrera",
+									"value": "6"
+								},
+								{
+									"key": "ciudad",
+									"value": "Qiligang"
+								}
 							]
 						},
 						"description": "Obtiene estudiantes de Veterinaria (ID: 6) que viven en Qiligang. Debería incluir a Wenda Jertz."
@@ -777,18 +783,24 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/estudiantesYCarreras/carrera/1/ciudad/Arroio do Meio",
+							"raw": "http://localhost:8080/inscripciones?carrera=1&ciudad=Arroio%20do%20Meio",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"estudiantesYCarreras",
-								"carrera",
-								"1",
-								"ciudad",
-								"Arroio do Meio"
+								"inscripciones"
+							],
+							"query": [
+								{
+									"key": "carrera",
+									"value": "1"
+								},
+								{
+									"key": "ciudad",
+									"value": "Arroio do Meio"
+								}
 							]
 						},
 						"description": "Obtiene estudiantes de TUDAI que viven en Arroio do Meio. Debería incluir a Sebastien Bayle."
