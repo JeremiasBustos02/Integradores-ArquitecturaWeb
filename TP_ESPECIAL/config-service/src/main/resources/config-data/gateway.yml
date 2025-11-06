@@ -1,0 +1,35 @@
+server:
+  port: 8080
+
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      default-zone: http://localhost:8761/eureka
+  instance:
+    hostname: localhost
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/auth_db?createDatabaseIfNotExist=true
+    username: root
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database: mysql
+  cloud:
+    gateway:
+      mvc:
+        routes:
+          - id: usuarios-microservice
+            uri: lb://usuarios-microservice
+            predicates:
+              - Path=/api/usuarios/**, /api/cuentas/**
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG

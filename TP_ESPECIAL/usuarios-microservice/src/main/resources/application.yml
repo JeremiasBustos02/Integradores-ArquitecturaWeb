@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: usuarios-microservice
+  config:
+    import: "configserver:http://localhost:8081"
+  profiles:
+    active: default
