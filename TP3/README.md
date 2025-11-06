@@ -1,6 +1,6 @@
 ## 📚 Endpoints disponibles
 
-### 🎓 Estudiantes
+### 🎓 Estudiantes (`/estudiantes`)
 
 #### 1. Obtener todos los estudiantes
 **Descripción:** Recupera todos los estudiantes ordenados por apellido
@@ -15,7 +15,7 @@ curl -X GET http://localhost:8080/estudiantes/ | jq
 **Descripción:** Crea un nuevo estudiante en el sistema.
 
 ```bash
-curl -X POST http://localhost:8080/estudiantes/alta \
+curl -X POST http://localhost:8080/estudiantes \
   -H "Content-Type: application/json" \
   -d '{
     "dni": 99999999,
@@ -72,7 +72,7 @@ curl -X GET http://localhost:8080/estudiantes/genero/Female | jq
 
 ---
 
-### 📖 Carreras
+### 📖 Carreras (`/carreras`)
 
 #### 5. Obtener todas las carreras
 **Descripción:** Recupera la lista completa de carreras disponibles.
@@ -87,7 +87,7 @@ curl -X GET http://localhost:8080/carreras/ | jq
 **Descripción:** Retorna todas las carreras que tienen estudiantes inscriptos, ordenadas de mayor a menor según la cantidad de inscriptos.
 
 ```bash
-curl -X GET http://localhost:8080/carreras/carreraInscriptos | jq
+curl -X GET "http://localhost:8080/carreras?inscriptos=true" | jq
 ```
 
 **Ejemplo de respuesta:**
@@ -145,7 +145,7 @@ curl -X GET http://localhost:8080/carreras/reporte | jq
 **Descripción:** Da de alta un estudiante en una carrera usando solo DNI del estudiante e ID de la carrera.
 
 ```bash
-curl -X POST http://localhost:8080/estudiantesYCarreras/inscribir \
+curl -X POST http://localhost:8080/inscripciones \
   -H "Content-Type: application/json" \
   -d '{
     "idEstudiante": 24549124,
@@ -163,12 +163,13 @@ curl -X POST http://localhost:8080/estudiantesYCarreras/inscribir \
 #### 9. Obtener estudiantes de una carrera por ciudad
 **Descripción:** Recupera todos los estudiantes inscritos en una carrera específica que residen en una ciudad determinada, ordenados por apellido y nombre.
 
-**Parámetros:**
-- `idCarrera`: ID de la carrera
-- `ciudad`: Ciudad de residencia
+**Parámetros de consulta:**
+- `carrera`: ID de la carrera (opcional)
+- `ciudad`: Ciudad de residencia (opcional)
 
 ```bash
-curl -X GET http://localhost:8080/estudiantesYCarreras/carrera/1/ciudad/Paltamo | jq
+# Filtrar por carrera y ciudad
+curl -X GET "http://localhost:8080/inscripciones?carrera=1&ciudad=Paltamo" | jq
 ```
 
 ### Base de datos

@@ -8,6 +8,7 @@ import edu.empresa.model.EstudianteCarrera;
 import edu.empresa.repository.CarreraRepository;
 import edu.empresa.repository.EstudianteCarreraRepository;
 import edu.empresa.repository.EstudianteRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +36,7 @@ public class EstudianteCarreraService {
      * @return EstudianteCarreraDTO con los datos de la inscripción creada
      * @throws RuntimeException si el estudiante o carrera no existen
      */
+    @Transactional
     public EstudianteCarreraDTO inscribirEstudianteEnCarrera(EstudianteCarreraDTO dto) {
         // Verificar que el estudiante existe
         Optional<Estudiante> estudianteOpt = estudianteRepository.findById(dto.getIdEstudiante());
@@ -86,6 +88,7 @@ public class EstudianteCarreraService {
      * @param ciudad ciudad de residencia
      * @return lista de EstudianteDTO ordenados por apellido y nombre
      */
+    @Transactional
     public List<EstudianteDTO> getEstudiantesByCarreraAndCiudad(int idCarrera, String ciudad) {
         return repository.findEstudiantesByCarreraAndCiudad(idCarrera, ciudad).stream()
                 .map(estudiante -> new EstudianteDTO(

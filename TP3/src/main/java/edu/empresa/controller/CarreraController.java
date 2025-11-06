@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
@@ -29,33 +30,19 @@ public class CarreraController {
         this.service = service;
     }
 
-    @GetMapping("/")
+    @GetMapping
     @ApiOperation(value = "Obtener todas las carreras")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Carreras encontradas correctamente"),
             @ApiResponse(code = 500, message = "Error interno en el servidor")
     })
-    public ResponseEntity<List<CarreraDTO>> getCarreras() {
+    public ResponseEntity<List<CarreraDTO>> getCarreras(@RequestParam(required = false) Boolean inscriptos) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(service.getCarreras());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
-        }
-    }
-
-    @GetMapping("/carreraInscriptos")
-    @ApiOperation(value = "Obtener carreras con estudiantes inscriptos ordenadas por cantidad",
-                  notes = "Retorna todas las carreras que tienen estudiantes inscriptos, " +
-                          "ordenadas de mayor a menor según la cantidad de inscriptos. " +
-                          "Incluye el ID, nombre, duración y cantidad de inscriptos de cada carrera.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Carreras con inscriptos encontradas correctamente"),
-            @ApiResponse(code = 500, message = "Error interno en el servidor")
-    })
-    public ResponseEntity<List<CarreraDTO>> getCarreraConInscriptos() {
-        try {
-            return ResponseEntity.status(HttpStatus.OK).body(service.getCarrerasConInscriptos());
+            if (inscriptos != null && inscriptos) {
+                return ResponseEntity.status(HttpStatus.OK).body(service.getCarrerasConInscriptos());
+            } else {
+                return ResponseEntity.status(HttpStatus.OK).body(service.getCarreras());
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());

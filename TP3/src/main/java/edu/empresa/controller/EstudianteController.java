@@ -33,7 +33,7 @@ public class EstudianteController {
      *
      * @return ResponseEntity con el resultado de la operación
      */
-    @GetMapping("/")
+    @GetMapping
     @ApiOperation(value = "Encontrar todos los estudiantes")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Todos los estudiantes encontrados correctamente"),
@@ -54,8 +54,8 @@ public class EstudianteController {
      * @param estudianteDTO DTO con los datos del estudiante a crear
      * @return ResponseEntity con el resultado de la operación
      */
-    @PostMapping("/alta")
-    @ApiOperation(value = "Dar de alta un nuevo estudiante",
+    @PostMapping
+    @ApiOperation(value = "Crear un nuevo estudiante",
             notes = "Crea un nuevo estudiante en el sistema con todos sus datos")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Estudiante creado exitosamente"),
@@ -63,7 +63,7 @@ public class EstudianteController {
             @ApiResponse(code = 409, message = "El estudiante ya existe (DNI o LU duplicado)"),
             @ApiResponse(code = 500, message = "Error interno del servidor")
     })
-    public ResponseEntity<?> altaEstudiante(@Valid @RequestBody EstudianteDTO estudianteDTO) {
+    public ResponseEntity<?> crearEstudiante(@Valid @RequestBody EstudianteDTO estudianteDTO) {
         try {
             EstudianteDTO resultado = service.altaEstudiante(estudianteDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(resultado);

@@ -19,8 +19,8 @@ import java.util.Collections;
 import java.util.List;
 
 @RestController
-@RequestMapping("estudiantesYCarreras")
-@Api(value = "estudianteCarreraController", description = "REST API para operaciones con estudiantes y carreras")
+@RequestMapping("inscripciones")
+@Api(value = "InscripcionController", description = "REST API para gestionar inscripciones de estudiantes en carreras")
 public class EstudianteCarreraController {
 
     private final EstudianteCarreraService service;
@@ -36,9 +36,9 @@ public class EstudianteCarreraController {
      * @param request DTO simplificado con datos básicos de inscripción
      * @return ResponseEntity con el resultado de la operación
      */
-    @PostMapping("/inscribir")
-    @ApiOperation(value = "Inscribir estudiante en carrera (versión simplificada)",
-            notes = "Da de alta un estudiante en una carrera usando solo DNI y ID de carrera")
+    @PostMapping
+    @ApiOperation(value = "Inscribir estudiante en carrera",
+            notes = "Crea una nueva inscripción de un estudiante en una carrera específica")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Estudiante inscrito exitosamente"),
             @ApiResponse(code = 400, message = "Datos inválidos en la solicitud"),
@@ -46,7 +46,7 @@ public class EstudianteCarreraController {
             @ApiResponse(code = 409, message = "El estudiante ya está inscrito en esta carrera"),
             @ApiResponse(code = 500, message = "Error interno del servidor")
     })
-    public ResponseEntity<?> inscribirEstudianteSimple(@Valid @RequestBody InscripcionRequestDTO request) {
+    public ResponseEntity<?> inscribirEstudiante(@Valid @RequestBody InscripcionRequestDTO request) {
         try {
             // Convertir a EstudianteCarreraDTO completo
             EstudianteCarreraDTO dto = new EstudianteCarreraDTO();
@@ -83,24 +83,30 @@ public class EstudianteCarreraController {
     /**
      * Endpoint para obtener estudiantes de una carrera filtrados por ciudad
      *
-     * @param idCarrera ID de la carrera
-     * @param ciudad    ciudad de residencia
+     * @param idCarrera ID de la carrera (opcional)
+     * @param ciudad    ciudad de residencia (opcional)
      * @return ResponseEntity con la lista de estudiantes
      */
-    @GetMapping("/carrera/{idCarrera}/ciudad/{ciudad}")
-    @ApiOperation(value = "Obtener estudiantes de una carrera por ciudad",
-            notes = "Recupera todos los estudiantes inscritos en una carrera específica " +
-                    "que residen en una ciudad determinada, ordenados por apellido y nombre")
+    @GetMapping
+    @ApiOperation(value = "Obtener estudiantes inscriptos con filtros",
+            notes = "Recupera estudiantes inscritos con filtros opcionales por carrera y ciudad, " +
+                    "ordenados por apellido y nombre")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Estudiantes encontrados correctamente"),
             @ApiResponse(code = 500, message = "Error interno del servidor")
     })
-    public ResponseEntity<List<EstudianteDTO>> getEstudiantesByCarreraAndCiudad(
-            @PathVariable int idCarrera,
-            @PathVariable String ciudad) {
+    public ResponseEntity<List<EstudianteDTO>> getEstudiantesInscritos(
+            @RequestParam(required = false) Integer carrera,
+            @RequestParam(required = false) String ciudad) {
         try {
-            List<EstudianteDTO> estudiantes = service.getEstudiantesByCarreraAndCiudad(idCarrera, ciudad);
-            return ResponseEntity.status(HttpStatus.OK).body(estudiantes);
+            // Si ambos parámetros están presentes, usar el filtro completo
+            if (carrera != null && ciudad != null) {
+                List<EstudianteDTO> estudiantes = service.getEstudiantesByCarreraAndCiudad(carrera, ciudad);
+                return ResponseEntity.status(HttpStatus.OK).body(estudiantes);
+            } else {
+                // Para otros casos, retornar lista vacía o implementar otros filtros
+                return ResponseEntity.status(HttpStatus.OK).body(Collections.emptyList());
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
