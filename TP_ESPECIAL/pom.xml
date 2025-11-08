@@ -20,7 +20,7 @@
         <module>config-service</module>
         <module>eureka-service</module>
         <module>gateway</module>
-        <module>usuarios-microservice</module>
+        <module>microservice-user</module>
     </modules>
 
     <properties>
