@@ -10,7 +10,7 @@
 
     <artifactId>microservice-user</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>usuarios-microservice</name>
+    <name>microservice-user</name>
     <description>Microservicio de Usuarios y Cuentas para Sistema de Monopatines</description>
 
     <properties>
