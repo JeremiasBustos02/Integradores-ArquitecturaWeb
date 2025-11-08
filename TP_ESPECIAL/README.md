@@ -15,15 +15,28 @@
 
 ## 🏗️ Arquitectura
 
-El template incluye los siguientes servicios:
+El sistema incluye los siguientes servicios:
 
-| Servicio | Puerto | Descripción |
-|----------|--------|-------------|
-| **Config Service** | 8081 | Gestión de configuración centralizada |
-| **Eureka Service** | 8761 | Registro y descubrimiento de servicios |
-| **Gateway** | 8080 | API Gateway con autenticación JWT |
-| **Usuarios Microservice** | 8083 | Microservicio de usuarios y cuentas |
-| **MySQL** | 3306 | Base de datos |
+| Servicio | Puerto | Base de Datos | Descripción |
+|----------|--------|---------------|-------------|
+| **Config Service** | 8081 | - | Gestión de configuración centralizada |
+| **Eureka Service** | 8761 | - | Registro y descubrimiento de servicios |
+| **Gateway** | 8080 | `auth_db` | API Gateway con autenticación JWT |
+| **Usuarios Microservice** | 8083 | `usuarios_db` | Gestión de usuarios y cuentas |
+| **Tarifas Microservice** | 8084 | `tarifas_db` | Gestión de tarifas y precios |
+| **Facturación Microservice** | 8085 | `facturacion_db` | Gestión de facturación y reportes |
+| **MySQL** | 3306 | - | Servidor de base de datos |
+
+### 📊 Bases de Datos
+
+El sistema utiliza múltiples bases de datos MySQL (una por microservicio):
+
+- **auth_db**: Datos de autenticación (Gateway)
+- **usuarios_db**: Usuarios, cuentas y relaciones
+- **tarifas_db**: Tarifas, precios y vigencias
+- **facturacion_db**: Facturas, estados y reportes
+
+> Todas las bases de datos se crean automáticamente con `createDatabaseIfNotExist=true`
 
 ## ✨ Características
 
@@ -109,6 +122,22 @@ cd usuarios-microservice
 mvn spring-boot:run
 ```
 Espera hasta ver: `Started UsuariosMicroserviceApplication`
+
+#### 4.5 Tarifas Microservice (Puerto 8084)
+```bash
+# En una nueva terminal
+cd tarifas-microservice
+mvn spring-boot:run
+```
+Espera hasta ver: `Started TarifasMicroserviceApplication`
+
+#### 4.6 Facturación Microservice (Puerto 8085)
+```bash
+# En una nueva terminal
+cd facturacion-microservice
+mvn spring-boot:run
+```
+Espera hasta ver: `Started FacturacionMicroserviceApplication`
 
 ### Paso 5: Verificar que Todo Esté Funcionando
 
@@ -208,18 +237,25 @@ curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
 
 ## 🌐 URLs de Servicios
 
-- **Eureka Dashboard**: http://localhost:8761
-- **API Gateway**: http://localhost:8080
-- **Config Service**: http://localhost:8081
-- **Usuarios Microservice**: http://localhost:8083 (acceso directo)
+| Servicio | URL | Acceso |
+|----------|-----|--------|
+| **Eureka Dashboard** | http://localhost:8761 | Dashboard de servicios |
+| **API Gateway** | http://localhost:8080 | Punto de entrada principal |
+| **Config Service** | http://localhost:8081 | Configuración centralizada |
+| **Usuarios Microservice** | http://localhost:8083 | Acceso directo (dev) |
+| **Tarifas Microservice** | http://localhost:8084 | Acceso directo (dev) |
+| **Facturación Microservice** | http://localhost:8085 | Acceso directo (dev) |
+
+> **Nota**: En producción, todos los microservicios deben accederse **solo a través del Gateway** (puerto 8080)
 
 ## 📡 Endpoints Disponibles
 
-### Autenticación (Gateway)
+### 🔐 Autenticación (Gateway)
 - `POST /api/authenticate` - Login y obtener JWT token
 - `POST /api/usuarios` - Registrar nuevo usuario
 
-### Usuarios Microservice (vía Gateway)
+### 👥 Usuarios Microservice (vía Gateway)
+
 #### Usuarios
 - `GET /api/usuarios` - Obtener todos los usuarios (paginado)
 - `POST /api/usuarios` - Crear nuevo usuario
@@ -228,39 +264,92 @@ curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
 - `GET /api/usuarios/celular/{celular}` - Obtener usuario por celular
 - `PUT /api/usuarios/{id}` - Actualizar usuario
 - `DELETE /api/usuarios/{id}` - Eliminar usuario
-- `GET /api/usuarios/search?nombre={nombre}&apellido={apellido}` - Buscar usuarios por nombre
+- `GET /api/usuarios/search?nombre={nombre}&apellido={apellido}` - Buscar usuarios
 - `POST /api/usuarios/{usuarioId}/cuentas/{cuentaId}` - Asociar usuario a cuenta
-- `DELETE /api/usuarios/{usuarioId}/cuentas/{cuentaId}` - Desasociar usuario de cuenta
+- `DELETE /api/usuarios/{usuarioId}/cuentas/{cuentaId}` - Desasociar usuario
 
 #### Cuentas
 - `GET /api/cuentas` - Obtener todas las cuentas (paginado)
 - `POST /api/cuentas` - Crear nueva cuenta
 - `GET /api/cuentas/{id}` - Obtener cuenta por ID
-- `GET /api/cuentas/mercado-pago/{idMercadoPago}` - Obtener cuenta por ID Mercado Pago
-- `GET /api/cuentas/estado/{estado}` - Obtener cuentas por estado
-- `GET /api/cuentas/tipo/{tipo}` - Obtener cuentas por tipo (BASICA/PREMIUM)
+- `GET /api/cuentas/mercado-pago/{idMercadoPago}` - Cuenta por ID Mercado Pago
+- `GET /api/cuentas/estado/{estado}` - Cuentas por estado
+- `GET /api/cuentas/tipo/{tipo}` - Cuentas por tipo (BASICA/PREMIUM)
 - `PATCH /api/cuentas/{id}/habilitar` - Habilitar cuenta
 - `PATCH /api/cuentas/{id}/deshabilitar` - Deshabilitar cuenta
 - `PATCH /api/cuentas/{id}/cargar-saldo?monto={monto}` - Cargar saldo
 - `PATCH /api/cuentas/{id}/descontar-saldo?monto={monto}` - Descontar saldo
 - `DELETE /api/cuentas/{id}` - Eliminar cuenta
 
+### 💰 Tarifas Microservice
+
+#### CRUD de Tarifas
+- `POST /api/tarifas` - Crear nueva tarifa (incluye ajuste de precios)
+- `GET /api/tarifas` - Listar todas las tarifas
+- `GET /api/tarifas/{id}` - Obtener tarifa por ID
+- `PUT /api/tarifas/{id}` - Actualizar tarifa
+- `DELETE /api/tarifas/{id}` - Eliminar tarifa
+
+#### Consultas Especiales
+- `GET /api/tarifas/activa` - Obtener tarifa actualmente activa
+- `GET /api/tarifas/vigente?fecha={fecha}` - Tarifa vigente en fecha específica
+- `GET /api/tarifas/buscar?fechaInicio={fecha}&fechaFin={fecha}` - Buscar por rango
+
+> **💡 Ajuste de Precios**: Para ajustar precios, crear nueva tarifa con `activa: true`
+
+### 📄 Facturación Microservice
+
+#### CRUD de Facturas
+- `POST /api/facturas` - Crear nueva factura
+- `GET /api/facturas` - Listar todas las facturas
+- `GET /api/facturas/{id}` - Obtener factura por ID
+- `PUT /api/facturas/{id}` - Actualizar factura
+- `DELETE /api/facturas/{id}` - Eliminar factura
+- `PATCH /api/facturas/{id}/estado?estado={estado}` - Cambiar estado
+
+#### Consultas y Filtros
+- `GET /api/facturas/cuenta/{cuentaId}` - Facturas por cuenta
+- `GET /api/facturas/estado/{estado}` - Facturas por estado
+- `GET /api/facturas/rango-fechas?fechaInicio={fecha}&fechaFin={fecha}` - Por rango
+- `GET /api/facturas/cuenta/{cuentaId}/rango-fechas?...` - Cuenta + rango
+
+#### Reportes
+- `GET /api/facturas/reporte/total-facturado?mesInicio={mes}&mesFin={mes}&anio={año}` - Reporte financiero
+
+**Estados válidos**: `PENDIENTE`, `PAGADA`, `VENCIDA`, `CANCELADA`
+
+> 📚 Para más detalles ver [MICROSERVICES_README.md](./MICROSERVICES_README.md)
+
 ## ⚙️ Configuración
 
 ### Configuración de Base de Datos
 
-Las configuraciones de base de datos se encuentran en:
-- `config-service/src/main/resources/config-data/gateway.yml`
-- `config-service/src/main/resources/config-data/sample-microservice.yml`
+Cada microservicio tiene su propia base de datos configurada en:
+- `config-service/src/main/resources/config-data/`
 
+| Microservicio | Archivo de Config | Base de Datos |
+|---------------|-------------------|---------------|
+| Gateway | `gateway.yml` | `auth_db` |
+| Usuarios | `usuarios-microservice.yml` | `usuarios_db` |
+| Tarifas | `tarifas-microservice.yml` | `tarifas_db` |
+| Facturación | `facturacion-microservice.yml` | `facturacion_db` |
+
+**Configuración típica**:
 ```yaml
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/auth_db?createDatabaseIfNotExist=true
+    url: jdbc:mysql://localhost:3306/{db_name}?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
     username: root
     password: password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database: mysql
 ```
+
+> **Nota**: Las bases de datos se crean automáticamente al iniciar cada microservicio
 
 ### Configuración JWT
 
@@ -298,7 +387,9 @@ Agregar el nuevo módulo al `pom.xml` principal:
     <module>config-service</module>
     <module>eureka-service</module>
     <module>gateway</module>
-    <module>sample-microservice</module>
+    <module>usuarios-microservice</module>
+    <module>tarifas-microservice</module>
+    <module>facturacion-microservice</module>
     <module>nuevo-microservice</module>
 </modules>
 ```
@@ -386,19 +477,42 @@ docker run -d --name microservices-mysql \
 # Luego ejecutar servicios con Maven como se explicó arriba
 ```
 
-### Opción 2: Todo con Docker Compose (Futuro)
+### Opción 2: Todo con Docker Compose
 
 ```bash
-# Nota: Requiere crear Dockerfiles para cada servicio
+# Ejecutar todos los servicios con Docker Compose
+docker-compose up --build
+
+# Ejecutar en segundo plano
 docker-compose up -d
+
+# Ver logs
+docker-compose logs -f
+
+# Detener servicios
+docker-compose down
 ```
+
+**Servicios incluidos en Docker Compose**:
+- ✅ MySQL (con scripts de inicialización)
+- ✅ Config Service
+- ✅ Eureka Service
+- ✅ Gateway
+- ✅ Usuarios Microservice
+- ✅ Tarifas Microservice
+- ✅ Facturación Microservice
+
+> **Tiempo de inicio**: ~2-3 minutos para todos los servicios
 
 ## 🔍 Solución de Problemas
 
 ### Problema: Puerto ya en uso
 ```bash
-# Verificar qué está usando el puerto
+# Verificar qué está usando el puerto (ejemplo con 8080)
 lsof -i :8080
+
+# Verificar todos los puertos del sistema
+lsof -i :8080 && lsof -i :8081 && lsof -i :8083 && lsof -i :8084 && lsof -i :8085 && lsof -i :8761
 
 # Detener proceso
 kill -9 <PID>
@@ -417,6 +531,20 @@ docker logs microservices-mysql
 1. Verificar que Eureka esté corriendo en puerto 8761
 2. Verificar que Config Service esté corriendo en puerto 8081
 3. Revisar logs de los servicios
+4. Esperar ~30 segundos para el registro automático
+5. Verificar en http://localhost:8761 que los servicios aparezcan
+
+### Problema: Error de conexión entre microservicios
+1. Verificar que todos los servicios estén registrados en Eureka
+2. Verificar que los nombres de servicios coincidan (case-sensitive)
+3. Revisar configuración de Feign Clients
+4. Verificar timeouts en configuración
+
+### Problema: Base de datos no se crea
+1. Verificar que MySQL esté corriendo
+2. Verificar permisos del usuario root
+3. Revisar propiedad `createDatabaseIfNotExist=true` en URL
+4. Verificar logs de JPA/Hibernate
 
 ### Problema: JWT Token inválido
 1. Verificar que el usuario existe en la base de datos
@@ -431,6 +559,97 @@ El sistema incluye usuarios predefinidos (ver `init-scripts/init.sql`):
 |---------|------------|-----|
 | admin | admin123 | ROLE_ADMIN |
 | user | user123 | ROLE_USER |
+
+## 🧪 Ejemplos de Prueba de Microservicios
+
+### Tarifas Microservice
+
+```bash
+# 1. Crear una tarifa inicial
+curl -X POST http://localhost:8084/api/tarifas \
+  -H "Content-Type: application/json" \
+  -d '{
+    "montoBase": 100.0,
+    "montoExtra": 50.0,
+    "fechaVigencia": "2025-01-01",
+    "activa": true,
+    "descripcion": "Tarifa inicial 2025"
+  }'
+
+# 2. Obtener tarifa activa
+curl http://localhost:8084/api/tarifas/activa
+
+# 3. Crear nueva tarifa (ajuste de precios)
+curl -X POST http://localhost:8084/api/tarifas \
+  -H "Content-Type: application/json" \
+  -d '{
+    "montoBase": 120.0,
+    "montoExtra": 60.0,
+    "fechaVigencia": "2025-06-01",
+    "activa": true,
+    "descripcion": "Ajuste de precios - Verano"
+  }'
+
+# 4. Listar todas las tarifas
+curl http://localhost:8084/api/tarifas
+```
+
+### Facturación Microservice
+
+```bash
+# 1. Crear una factura
+curl -X POST http://localhost:8085/api/facturas \
+  -H "Content-Type: application/json" \
+  -d '{
+    "cuentaId": 1,
+    "montoTotal": 250.0,
+    "fechaEmision": "2025-01-15T10:30:00",
+    "fechaVencimiento": "2025-02-15",
+    "estado": "PENDIENTE",
+    "descripcion": "Viaje del 15/01",
+    "periodoMes": 1,
+    "periodoAnio": 2025,
+    "tipoCuenta": "BASICA"
+  }'
+
+# 2. Consultar facturas por cuenta
+curl http://localhost:8085/api/facturas/cuenta/1
+
+# 3. Cambiar estado de factura
+curl -X PATCH "http://localhost:8085/api/facturas/1/estado?estado=PAGADA"
+
+# 4. Reporte de facturación
+curl "http://localhost:8085/api/facturas/reporte/total-facturado?mesInicio=1&mesFin=3&anio=2025"
+
+# 5. Facturas por estado
+curl http://localhost:8085/api/facturas/estado/PENDIENTE
+```
+
+### Flujo Completo de Prueba
+
+```bash
+# 1. Crear tarifa
+curl -X POST http://localhost:8084/api/tarifas \
+  -H "Content-Type: application/json" \
+  -d '{"montoBase": 100.0, "montoExtra": 50.0, "fechaVigencia": "2025-01-01", "activa": true}'
+
+# 2. Verificar tarifa activa
+curl http://localhost:8084/api/tarifas/activa
+
+# 3. Crear cuenta (debe existir previamente en usuarios-microservice)
+# curl -X POST http://localhost:8083/api/cuentas ...
+
+# 4. Crear factura asociada a cuenta
+curl -X POST http://localhost:8085/api/facturas \
+  -H "Content-Type: application/json" \
+  -d '{"cuentaId": 1, "montoTotal": 250.0, "fechaEmision": "2025-01-15T10:30:00", "estado": "PENDIENTE", "periodoMes": 1, "periodoAnio": 2025}'
+
+# 5. Consultar facturas de la cuenta
+curl http://localhost:8085/api/facturas/cuenta/1
+
+# 6. Generar reporte de facturación
+curl "http://localhost:8085/api/facturas/reporte/total-facturado?mesInicio=1&mesFin=12&anio=2025"
+```
 
 ## 🤝 Contribución
 

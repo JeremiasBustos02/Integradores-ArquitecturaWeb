@@ -85,6 +85,46 @@ services:
     networks:
       - microservices-network
 
+  tarifas-microservice:
+    build: ./tarifas-microservice
+    container_name: tarifas-microservice
+    ports:
+      - "8084:8084"
+    depends_on:
+      eureka-service:
+        condition: service_healthy
+      mysql:
+        condition: service_started
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVER_URL=http://config-service:8081
+      - EUREKA_SERVER_URL=http://eureka-service:8761/eureka
+      - DB_HOST=mysql
+      - DB_PORT=3306
+    networks:
+      - microservices-network
+
+  facturacion-microservice:
+    build: ./facturacion-microservice
+    container_name: facturacion-microservice
+    ports:
+      - "8085:8085"
+    depends_on:
+      eureka-service:
+        condition: service_healthy
+      mysql:
+        condition: service_started
+      tarifas-microservice:
+        condition: service_started
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVER_URL=http://config-service:8081
+      - EUREKA_SERVER_URL=http://eureka-service:8761/eureka
+      - DB_HOST=mysql
+      - DB_PORT=3306
+    networks:
+      - microservices-network
+
 volumes:
   mysql_data:
 
