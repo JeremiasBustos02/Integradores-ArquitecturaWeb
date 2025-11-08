@@ -24,6 +24,7 @@
         <module>eureka-service</module>
         <module>gateway</module>
         <module>microservice-user</module>
+        <module>microservice-monopatin</module>
     </modules>
 
     <properties>

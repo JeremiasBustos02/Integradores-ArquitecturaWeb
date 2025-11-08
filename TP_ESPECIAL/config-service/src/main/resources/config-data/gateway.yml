@@ -30,6 +30,14 @@ spring:
             predicates:
               - Path=/api/usuarios/**, /api/cuentas/**
 
+        # Ruta para Monopatines
+          - id: microservice-monopatin
+            uri: lb://microservice-monopatin
+            predicates:
+              - Path=/api/monopatines/**
+            filters:
+              - StripPrefix=1  # Quita /api del path
+
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG

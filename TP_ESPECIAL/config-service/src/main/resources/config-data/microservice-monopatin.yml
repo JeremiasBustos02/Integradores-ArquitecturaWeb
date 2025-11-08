@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: microservice-monopatin
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/monopatin_db?createDatabaseIfNotExist=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+
+server:
+  port: 8084
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
+
+# Logging
+logging:
+  level:
+    com.microservices.monopatin: DEBUG
+    org.hibernate.SQL: DEBUG
