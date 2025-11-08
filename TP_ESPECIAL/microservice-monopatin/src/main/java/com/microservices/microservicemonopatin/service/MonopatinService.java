@@ -30,5 +30,5 @@ public interface MonopatinService {
     void actualizarUbicacion(Long id, Double latitud, Double longitud);
 
     void registrarUsoDeViaje(Long id, Double kmRecorridos, Long tiempoUso, Long tiempoPausas);
-    
+
 }

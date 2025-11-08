@@ -24,4 +24,10 @@ public interface MonopatinRepository extends JpaRepository<Monopatin, Long> {
     // Para el reporte de km
     @Query("SELECT m FROM Monopatin m ORDER BY m.kmTotales DESC")
     List<Monopatin> findAllOrderByKmTotales();
+
+    // Comprueba si existe uno ya con ese id
+    @Query("SELECT m" +
+            "FROM Monopatin m " +
+            "WHERE m.id = :monopatinId")
+    boolean existsById(Long monopatinId);
 }
