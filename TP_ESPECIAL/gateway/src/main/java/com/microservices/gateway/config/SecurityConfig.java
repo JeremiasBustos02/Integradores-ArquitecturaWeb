@@ -1,25 +1,21 @@
 package com.microservices.gateway.config;
 
-import com.microservices.gateway.security.AuthorityConstant;
 import com.microservices.gateway.security.jwt.JwtFilter;
 import com.microservices.gateway.security.jwt.TokenProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.server.SecurityWebFilterChain;
 
 @Configuration
-@EnableWebSecurity
-@EnableMethodSecurity
+@EnableWebFluxSecurity
+@EnableReactiveMethodSecurity
 public class SecurityConfig {
 
     private final TokenProvider tokenProvider;
@@ -34,22 +30,18 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         http
-            .csrf(AbstractHttpConfigurer::disable);
-        http
-            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        http
-            .securityMatcher("/api/**")
-            .authorizeHttpRequests(authz -> authz
-                    .requestMatchers(HttpMethod.POST, "/api/authenticate").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
-                    .requestMatchers("/api/usuarios/**").hasAuthority(AuthorityConstant.USER)
-                    .requestMatchers("/api/cuentas/**").hasAuthority(AuthorityConstant.USER)
-                    .anyRequest().authenticated()
+            .csrf(ServerHttpSecurity.CsrfSpec::disable)
+            .authorizeExchange(exchanges -> exchanges
+                .pathMatchers(HttpMethod.POST, "/api/authenticate").permitAll()
+                .pathMatchers(HttpMethod.POST, "/api/register").permitAll()
+                .pathMatchers("/actuator/**").permitAll()
+                .pathMatchers("/api/**").authenticated()
+                .anyExchange().permitAll()
             )
-            .httpBasic(Customizer.withDefaults())
-            .addFilterBefore(new JwtFilter(this.tokenProvider), UsernamePasswordAuthenticationFilter.class);
+            .addFilterAt(new JwtFilter(tokenProvider), SecurityWebFiltersOrder.AUTHENTICATION);
+        
         return http.build();
     }
 }
