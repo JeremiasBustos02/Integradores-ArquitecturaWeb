@@ -91,8 +91,8 @@
 3. Gateway → Microservicio
    ├─ Enrutamiento por path
    │  • /api/usuarios/* → usuarios-microservice
-   │  • /api/tarifas/*  → tarifas-microservice
-   │  • /api/facturas/* → facturacion-microservice
+   │  • /api/tarifas/*  → microservice-tarifas
+   │  • /api/facturas/* → microservice-facturacion
    └─ Forward del request
 
 4. Microservicio → Config Server (8081)
@@ -159,7 +159,7 @@
 **Ejemplo: Facturación → Tarifas**
 
 ```java
-@FeignClient(name = "tarifas-microservice")
+@FeignClient(name = "microservice-tarifas")
 public interface TarifaFeignClient {
     
     @GetMapping("/api/tarifas/activa")
@@ -190,10 +190,10 @@ usuarios-microservice     →  usuarios_db
   ├─ Cuenta
   └─ UsuarioCuenta (join table)
 
-tarifas-microservice      →  tarifas_db
+microservice-tarifas      →  tarifas_db
   └─ Tarifa
 
-facturacion-microservice  →  facturacion_db
+microservice-facturacion  →  facturacion_db
   └─ Factura
 
 gateway                   →  auth_db

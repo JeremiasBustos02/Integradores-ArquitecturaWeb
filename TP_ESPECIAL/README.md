@@ -126,7 +126,7 @@ Espera hasta ver: `Started UsuariosMicroserviceApplication`
 #### 4.5 Tarifas Microservice (Puerto 8084)
 ```bash
 # En una nueva terminal
-cd tarifas-microservice
+cd microservice-tarifas
 mvn spring-boot:run
 ```
 Espera hasta ver: `Started TarifasMicroserviceApplication`
@@ -134,7 +134,7 @@ Espera hasta ver: `Started TarifasMicroserviceApplication`
 #### 4.6 Facturación Microservice (Puerto 8085)
 ```bash
 # En una nueva terminal
-cd facturacion-microservice
+cd microservice-facturacion
 mvn spring-boot:run
 ```
 Espera hasta ver: `Started FacturacionMicroserviceApplication`
@@ -331,8 +331,8 @@ Cada microservicio tiene su propia base de datos configurada en:
 |---------------|-------------------|---------------|
 | Gateway | `gateway.yml` | `auth_db` |
 | Usuarios | `usuarios-microservice.yml` | `usuarios_db` |
-| Tarifas | `tarifas-microservice.yml` | `tarifas_db` |
-| Facturación | `facturacion-microservice.yml` | `facturacion_db` |
+| Tarifas | `microservice-tarifas.yml` | `tarifas_db` |
+| Facturación | `microservice-facturacion.yml` | `facturacion_db` |
 
 **Configuración típica**:
 ```yaml
@@ -388,8 +388,8 @@ Agregar el nuevo módulo al `pom.xml` principal:
     <module>eureka-service</module>
     <module>gateway</module>
     <module>usuarios-microservice</module>
-    <module>tarifas-microservice</module>
-    <module>facturacion-microservice</module>
+    <module>microservice-tarifas</module>
+    <module>microservice-facturacion</module>
     <module>nuevo-microservice</module>
 </modules>
 ```

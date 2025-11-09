@@ -1,6 +1,6 @@
 spring:
   application:
-    name: tarifas-microservice
+    name: microservice-tarifas
   config:
     import: "configserver:http://localhost:8081"
   profiles:

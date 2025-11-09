@@ -8,10 +8,10 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>tarifas-microservice</artifactId>
+    <artifactId>microservice-facturacion</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>tarifas-microservice</name>
-    <description>Microservicio de Tarifas para Sistema de Monopatines</description>
+    <name>microservice-facturacion</name>
+    <description>Microservicio de Facturación para Sistema de Monopatines</description>
 
     <properties>
         <java.version>17</java.version>

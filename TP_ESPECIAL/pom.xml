@@ -25,9 +25,8 @@
         <module>gateway</module>
         <module>microservice-user</module>
         <module>microservice-monopatin</module>
-        <module>usuarios-microservice</module>
-        <module>tarifas-microservice</module>
-        <module>facturacion-microservice</module>
+        <module>microservice-tarifas</module>
+        <module>microservice-facturacion</module>
     </modules>
 
     <properties>

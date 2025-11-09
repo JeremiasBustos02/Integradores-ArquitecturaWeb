@@ -85,9 +85,9 @@ services:
     networks:
       - microservices-network
 
-  tarifas-microservice:
-    build: ./tarifas-microservice
-    container_name: tarifas-microservice
+  microservice-tarifas:
+    build: ./microservice-tarifas
+    container_name: microservice-tarifas
     ports:
       - "8084:8084"
     depends_on:
@@ -104,9 +104,9 @@ services:
     networks:
       - microservices-network
 
-  facturacion-microservice:
-    build: ./facturacion-microservice
-    container_name: facturacion-microservice
+  microservice-facturacion:
+    build: ./microservice-facturacion
+    container_name: microservice-facturacion
     ports:
       - "8085:8085"
     depends_on:
@@ -114,7 +114,7 @@ services:
         condition: service_healthy
       mysql:
         condition: service_started
-      tarifas-microservice:
+      microservice-tarifas:
         condition: service_started
     environment:
       - SPRING_PROFILES_ACTIVE=docker

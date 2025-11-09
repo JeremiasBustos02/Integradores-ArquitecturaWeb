@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
 
-@FeignClient(name = "tarifas-microservice")
+@FeignClient(name = "microservice-tarifas")
 public interface TarifaFeignClient {
     
     @GetMapping("/api/tarifas/activa")
