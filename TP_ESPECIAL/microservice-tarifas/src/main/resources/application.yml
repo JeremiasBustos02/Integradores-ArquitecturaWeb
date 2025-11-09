@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: microservice-tarifas
+  config:
+    import: "configserver:http://localhost:8081"
+  profiles:
+    active: default
+

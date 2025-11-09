@@ -8,10 +8,10 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>microservice-user</artifactId>
+    <artifactId>microservice-facturacion</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>microservice-user</name>
-    <description>Microservicio de Usuarios y Cuentas para Sistema de Monopatines</description>
+    <name>microservice-facturacion</name>
+    <description>Microservicio de Facturación para Sistema de Monopatines</description>
 
     <properties>
         <java.version>21</java.version>
@@ -143,3 +143,4 @@
         </plugins>
     </build>
 </project>
+

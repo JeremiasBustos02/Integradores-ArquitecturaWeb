@@ -1,0 +1,76 @@
+package com.microservices.tarifas.controller;
+
+import com.microservices.tarifas.dto.request.TarifaRequestDTO;
+import com.microservices.tarifas.dto.response.TarifaResponseDTO;
+import com.microservices.tarifas.service.ITarifaService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/tarifas")
+@RequiredArgsConstructor
+public class TarifaController {
+    
+    private final ITarifaService tarifaService;
+    
+    @PostMapping
+    public ResponseEntity<TarifaResponseDTO> crearTarifa(@Valid @RequestBody TarifaRequestDTO requestDTO) {
+        TarifaResponseDTO tarifa = tarifaService.crearTarifa(requestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(tarifa);
+    }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity<TarifaResponseDTO> actualizarTarifa(
+            @PathVariable Long id,
+            @Valid @RequestBody TarifaRequestDTO requestDTO) {
+        TarifaResponseDTO tarifa = tarifaService.actualizarTarifa(id, requestDTO);
+        return ResponseEntity.ok(tarifa);
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<TarifaResponseDTO> obtenerTarifaPorId(@PathVariable Long id) {
+        TarifaResponseDTO tarifa = tarifaService.obtenerTarifaPorId(id);
+        return ResponseEntity.ok(tarifa);
+    }
+    
+    @GetMapping
+    public ResponseEntity<List<TarifaResponseDTO>> obtenerTodasLasTarifas() {
+        List<TarifaResponseDTO> tarifas = tarifaService.obtenerTodasLasTarifas();
+        return ResponseEntity.ok(tarifas);
+    }
+    
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarTarifa(@PathVariable Long id) {
+        tarifaService.eliminarTarifa(id);
+        return ResponseEntity.noContent().build();
+    }
+    
+    @GetMapping("/activa")
+    public ResponseEntity<TarifaResponseDTO> obtenerTarifaActiva() {
+        TarifaResponseDTO tarifa = tarifaService.obtenerTarifaActiva();
+        return ResponseEntity.ok(tarifa);
+    }
+    
+    @GetMapping("/vigente")
+    public ResponseEntity<TarifaResponseDTO> obtenerTarifaVigenteEnFecha(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+        TarifaResponseDTO tarifa = tarifaService.obtenerTarifaVigenteEnFecha(fecha);
+        return ResponseEntity.ok(tarifa);
+    }
+    
+    @GetMapping("/buscar")
+    public ResponseEntity<List<TarifaResponseDTO>> obtenerTarifasPorRangoFechas(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
+        List<TarifaResponseDTO> tarifas = tarifaService.obtenerTarifasPorRangoFechas(fechaInicio, fechaFin);
+        return ResponseEntity.ok(tarifas);
+    }
+}
+
