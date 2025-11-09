@@ -10,12 +10,12 @@ import org.mapstruct.MappingConstants;
 
 import java.util.List;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {CuentaMapper.class})
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface UsuarioMapper {
     
     Usuario toEntity(UsuarioRequestDTO requestDTO);
     
-    @Mapping(target = "cuentas", source = "cuentas")
+    @Mapping(target = "cuentas", ignore = true)
     UsuarioResponseDTO toResponseDTO(Usuario usuario);
     
     UsuarioBasicResponseDTO toBasicResponseDTO(Usuario usuario);

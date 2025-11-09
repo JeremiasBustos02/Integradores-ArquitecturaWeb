@@ -10,7 +10,7 @@ import org.mapstruct.MappingConstants;
 
 import java.util.List;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {UsuarioMapper.class})
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface CuentaMapper {
     
     @Mapping(target = "saldo", source = "saldoInicial")
@@ -22,7 +22,7 @@ public interface CuentaMapper {
     @Mapping(target = "usuarios", ignore = true)
     Cuenta toEntity(CuentaRequestDTO requestDTO);
     
-    @Mapping(target = "usuarios", source = "usuarios")
+    @Mapping(target = "usuarios", ignore = true)
     CuentaResponseDTO toResponseDTO(Cuenta cuenta);
     
     CuentaBasicResponseDTO toBasicResponseDTO(Cuenta cuenta);
