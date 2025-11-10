@@ -114,14 +114,14 @@ public class ViajeService implements ViajeServiceI {
 
 
         } catch (Exception e) {
-            // Si la tarifa no existe o el cálculo falla, lanzamos error
+            // no existio tarifa
             throw new RuntimeException("Error al calcular la tarifa del viaje: " + e.getMessage());
         }
         try {
-            // A. Buscamos la CUENTA a facturar usando el USUARIO del viaje
+            // esperar que me expongan el endpoint para obtener la cuenta a facturar
             Long cuentaIdParaFacturar = usuarioClient.getCuentaParaFacturar(viaje.getUsuarioId());
 
-            // B. Creamos el DTO para la factura
+
             FacturaRequestDTO facturaRequest = new FacturaRequestDTO(
                     cuentaIdParaFacturar,
                     viaje.getId(),
@@ -130,13 +130,12 @@ public class ViajeService implements ViajeServiceI {
                     EstadosFactura.PENDIENTE
             );
 
-            // C. Enviamos la factura
+            // creamos la factura
             facturaClient.crearFactura(facturaRequest);
             log.info("Notificación de factura enviada para el viaje: {}", id);
 
         } catch (Exception e) {
-            // Si falla la facturación (o encontrar la cuenta), lanzamos error
-            // @Transactional debería revertir el .save(viaje)
+
             throw new RuntimeException("Error al generar la factura: " + e.getMessage());
         }
         try {
@@ -188,7 +187,6 @@ public class ViajeService implements ViajeServiceI {
 
         ViajeResponseDTO viajeDTO = mapper.toResponseDTO(viaje);
 
-        // Manejo seguro de llamadas a otros MS
         try {
             ParadaDTO paradaInicio = paradaClient.getParadaById(viaje.getParadaOrigenId());
             viajeDTO.setParadaInicio(paradaInicio);
