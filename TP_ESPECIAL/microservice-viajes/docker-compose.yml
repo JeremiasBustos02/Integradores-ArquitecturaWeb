@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  mongo-db:
+    image: mongo:latest
+    container_name: mongo_local_db
+    restart: unless-stopped
+    ports:
+      # Expone el puerto por defecto de Mongo (27017) en tu localhost
+      - "27017:27017"
+    volumes:
+      # Crea un volumen para que tus datos persistan
+      # aunque apagues y prendas el contenedor
+      - mongodata:/data/db
+
+volumes:
+  mongodata:
+    driver: local
