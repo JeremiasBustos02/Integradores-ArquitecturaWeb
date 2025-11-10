@@ -1,17 +1,14 @@
 spring:
-  application:
-    name: microservice-monopatin
-
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/monopatin_db?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://mysql:3306/monopatin_db?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
     username: root
-    password: root
+    password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
-
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+    database: mysql
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
@@ -23,15 +20,21 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_SERVER_URL:http://eureka-service:8761/eureka}
+      defaultZone: http://eureka-service:8761/eureka
     register-with-eureka: true
     fetch-registry: true
+    registry-fetch-interval-seconds: 5
+    initial-instance-info-replication-interval-seconds: 10
   instance:
     prefer-ip-address: true
     instance-id: ${spring.application.name}:${server.port}
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
 
 # Logging
 logging:
   level:
     com.microservices.monopatin: DEBUG
+    org.springframework.web: DEBUG
     org.hibernate.SQL: DEBUG
+
