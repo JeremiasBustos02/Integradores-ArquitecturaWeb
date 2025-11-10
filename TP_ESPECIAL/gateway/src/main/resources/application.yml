@@ -4,6 +4,13 @@ spring:
   config:
     import: optional:configserver:${CONFIG_SERVER_URL:http://config-service:8081}
   cloud:
+    config:
+      fail-fast: false
+      retry:
+        max-attempts: 20
+        initial-interval: 1500
+        multiplier: 1.2
+        max-interval: 3000
     gateway:
       routes:
         # Ruta para microservice-user usando Eureka

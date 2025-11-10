@@ -6,9 +6,13 @@ eureka:
     fetch-registry: true
     register-with-eureka: true
     service-url:
-      default-zone: http://eureka-service:8761/eureka
+      defaultZone: http://eureka-service:8761/eureka
+    registry-fetch-interval-seconds: 5
+    initial-instance-info-replication-interval-seconds: 10
   instance:
     prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
 
 spring:
   datasource:
