@@ -11,9 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MonopatinRequestDTO {
 
-    @NotNull(message = "El ID del monopatín es obligatorio")
-    private Long id;
-
     @NotNull(message = "La latitud es obligatoria")
     private Double latitud;
 
