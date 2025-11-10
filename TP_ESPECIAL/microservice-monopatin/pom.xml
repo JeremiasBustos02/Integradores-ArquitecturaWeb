@@ -68,6 +68,18 @@
             <artifactId>spring-cloud-starter-bootstrap</artifactId>
         </dependency>
 
+        <!-- Spring Retry - Para reintentos de Config Server -->
+        <dependency>
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
+        </dependency>
+        
+        <!-- Spring Boot AOP - Necesario para Spring Retry -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
         <!-- MySQL Driver -->
         <dependency>
             <groupId>com.mysql</groupId>

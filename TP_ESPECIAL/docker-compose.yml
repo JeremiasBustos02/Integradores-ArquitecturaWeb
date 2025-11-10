@@ -14,15 +14,6 @@ services:
       - ./init-scripts:/docker-entrypoint-initdb.d
     networks:
       - microservices-network
-  mongo:
-    image: mongo6.0
-    container_name: microservices-mongo
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    networks:
-      - microservices-network
 
   config-service:
     build: ./config-service
@@ -133,27 +124,9 @@ services:
       - DB_PORT=3306
     networks:
       - microservices-network
-  viajes-microservice:
-    build: ./viajes-microservice
-    container_name:
-      viajes-microservice
-    ports:
-      - "8084:8084"
-    depends_on:
-      eureka-service:
-        condition: service_healthy
-      mongo:
-        condition: service_started
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - CONFIG_SERVER_URL=http://config-service:8081
-      - EUREKA_SERVER_URL=http://eureka-service:8761/eureka
-      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/viajes
-    networks:
-      - microservices-network
+
 volumes:
   mysql_data:
-  mongo:
 
 networks:
   microservices-network:

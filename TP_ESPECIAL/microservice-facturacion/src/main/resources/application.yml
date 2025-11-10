@@ -2,7 +2,15 @@ spring:
   application:
     name: microservice-facturacion
   config:
-    import: "configserver:http://localhost:8081"
+    import: "optional:configserver:${CONFIG_SERVER_URL:http://config-service:8081}"
   profiles:
     active: default
+  cloud:
+    config:
+      fail-fast: false
+      retry:
+        max-attempts: 20
+        initial-interval: 1500
+        multiplier: 1.2
+        max-interval: 3000
 

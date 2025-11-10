@@ -55,6 +55,18 @@
             <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
         
+        <!-- Spring Retry - Para reintentos de Config Server -->
+        <dependency>
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
+        </dependency>
+        
+        <!-- Spring Boot AOP - Necesario para Spring Retry -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+        
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
