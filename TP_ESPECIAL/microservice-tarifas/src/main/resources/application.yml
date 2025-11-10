@@ -2,7 +2,7 @@ spring:
   application:
     name: microservice-tarifas
   config:
-    import: "configserver:http://localhost:8081"
+    import: "configserver:${CONFIG_SERVER_URL:http://config-service:8081}"
   profiles:
     active: default
 

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mysql:
     image: mysql:8.0
@@ -16,20 +14,25 @@ services:
       - microservices-network
 
   config-service:
-    build: ./config-service
+    build:
+      context: .
+      dockerfile: config-service/Dockerfile
     container_name: config-service
     ports:
       - "8081:8081"
     networks:
       - microservices-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/application/default"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
 
   eureka-service:
-    build: ./eureka-service
+    build:
+      context: .
+      dockerfile: eureka-service/Dockerfile
     container_name: eureka-service
     ports:
       - "8761:8761"
@@ -42,13 +45,16 @@ services:
     networks:
       - microservices-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8761/"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
 
   gateway:
-    build: ./gateway
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
     container_name: gateway
     ports:
       - "8080:8080"
@@ -66,9 +72,11 @@ services:
     networks:
       - microservices-network
 
-  usuarios-microservice:
-    build: ./usuarios-microservice
-    container_name: usuarios-microservice
+  microservice-user:
+    build:
+      context: .
+      dockerfile: microservice-user/Dockerfile
+    container_name: microservice-user
     ports:
       - "8083:8083"
     depends_on:
@@ -85,8 +93,31 @@ services:
     networks:
       - microservices-network
 
+  microservice-monopatin:
+    build:
+      context: .
+      dockerfile: microservice-monopatin/Dockerfile
+    container_name: microservice-monopatin
+    ports:
+      - "8082:8082"
+    depends_on:
+      eureka-service:
+        condition: service_healthy
+      mysql:
+        condition: service_started
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVER_URL=http://config-service:8081
+      - EUREKA_SERVER_URL=http://eureka-service:8761/eureka
+      - DB_HOST=mysql
+      - DB_PORT=3306
+    networks:
+      - microservices-network
+
   microservice-tarifas:
-    build: ./microservice-tarifas
+    build:
+      context: .
+      dockerfile: microservice-tarifas/Dockerfile
     container_name: microservice-tarifas
     ports:
       - "8084:8084"
@@ -105,7 +136,9 @@ services:
       - microservices-network
 
   microservice-facturacion:
-    build: ./microservice-facturacion
+    build:
+      context: .
+      dockerfile: microservice-facturacion/Dockerfile
     container_name: microservice-facturacion
     ports:
       - "8085:8085"
