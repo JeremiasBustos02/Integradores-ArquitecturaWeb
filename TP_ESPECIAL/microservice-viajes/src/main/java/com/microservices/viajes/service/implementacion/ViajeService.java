@@ -48,8 +48,9 @@ public class ViajeService implements ViajeServiceI {
             throw new InvalidViajeException("La parada de inicio no existe");
         }
         try {
-            boolean puedeViajar = usuarioClient.saldoSuficiente(usuarioId);
-            if (!puedeViajar) throw new InvalidViajeException("El usuario no tiene fondo suficiente");
+            CuentaResponseDTO cuentas = usuarioClient.getCuentasParaFacturar(usuarioId);
+            Long cuentaId = saldoSuficiente(cuentas);
+            if (cuentaId != null) throw new InvalidViajeException("El usuario no tiene fondo suficiente");
 
         } catch (Exception e) {
             throw new InvalidViajeException("Usuario no valido o sin saldo: " + e.getMessage());
@@ -326,6 +327,7 @@ public class ViajeService implements ViajeServiceI {
         long minutos = Duration.between(pausa.getTiempoInicio(), pausa.getTiempoFin()).toMinutes();
         return minutos > 15;
     }
+
     private List<ViajeResponseDTO> enriquecerListaDeViajes(List<Viaje> viajes) {
         if (viajes == null || viajes.isEmpty()) {
             return new ArrayList<>();
@@ -356,5 +358,13 @@ public class ViajeService implements ViajeServiceI {
             return dto;
         }).collect(Collectors.toList());
     }
-}
+
+    private Long saldoSuficiente(List<CuentaResponseDTO> cuentas) {
+        if (cuentas == null || cuentas.isEmpty()) return null;
+        List<CuentaBasicResponseDTO> cuentasUser = cuentas.stream().collect
+        return cuentas.stream().anyMatch(cuenta ->
+                cuenta.getCuentas() != null &&
+                        cuenta.getSaldo().compareTo(BigDecimal.ZERO) > 0 // Compara si saldo > 0
+        );
+    }
 
