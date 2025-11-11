@@ -1,6 +1,7 @@
 package com.microservices.usuarios.controller;
 
 import com.microservices.usuarios.dto.request.UsuarioRequestDTO;
+import com.microservices.usuarios.dto.response.CuentaResponseDTO;
 import com.microservices.usuarios.dto.response.UsuarioResponseDTO;
 import com.microservices.usuarios.service.IUsuarioService;
 import jakarta.validation.Valid;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -85,6 +87,14 @@ public class UsuarioController {
         log.info("REST request to get Usuarios by cuenta ID: {}", cuentaId);
         Page<UsuarioResponseDTO> usuarios = usuarioService.getUsuariosByCuentaId(cuentaId, pageable);
         return ResponseEntity.ok(usuarios);
+    }
+
+    @GetMapping("/{id}/cuentas")
+    public ResponseEntity<List<CuentaResponseDTO>> getCuentasByUsuarioId(
+            @PathVariable @Positive @NotNull Long id) {
+        log.info("REST request to get Cuentas for Usuario ID: {}", id);
+        List<CuentaResponseDTO> cuentas = usuarioService.getCuentasByUsuarioId(id);
+        return ResponseEntity.ok(cuentas);
     }
 
     @PutMapping("/{id}")
