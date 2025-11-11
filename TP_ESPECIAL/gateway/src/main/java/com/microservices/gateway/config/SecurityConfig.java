@@ -1,13 +1,9 @@
 package com.microservices.gateway.config;
 
-import com.microservices.gateway.security.jwt.JwtFilter;
-import com.microservices.gateway.security.jwt.TokenProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
-import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,12 +14,6 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 @EnableReactiveMethodSecurity
 public class SecurityConfig {
 
-    private final TokenProvider tokenProvider;
-
-    public SecurityConfig(TokenProvider tokenProvider) {
-        this.tokenProvider = tokenProvider;
-    }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -32,16 +22,14 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         http
-            .csrf(ServerHttpSecurity.CsrfSpec::disable)
-            .authorizeExchange(exchanges -> exchanges
-                .pathMatchers(HttpMethod.POST, "/api/authenticate").permitAll()
-                .pathMatchers(HttpMethod.POST, "/api/register").permitAll()
-                .pathMatchers("/actuator/**").permitAll()
-                .pathMatchers("/api/**").authenticated()
-                .anyExchange().permitAll()
-            )
-            .addFilterAt(new JwtFilter(tokenProvider), SecurityWebFiltersOrder.AUTHENTICATION);
-        
+                // JWT desactivado para 1era entrega
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
+                .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
+                .authorizeExchange(exchanges -> exchanges
+                        .anyExchange().permitAll()
+                );
+
         return http.build();
     }
 }
