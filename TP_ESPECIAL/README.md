@@ -305,6 +305,7 @@ curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
 - `GET /api/usuarios` - Obtener todos los usuarios (paginado)
 - `POST /api/usuarios` - Crear nuevo usuario
 - `GET /api/usuarios/{id}` - Obtener usuario por ID
+- `GET /api/usuarios/{id}/cuentas` - Obtener todas las cuentas del usuario
 - `GET /api/usuarios/email/{email}` - Obtener usuario por email
 - `GET /api/usuarios/celular/{celular}` - Obtener usuario por celular
 - `PUT /api/usuarios/{id}` - Actualizar usuario
@@ -628,6 +629,44 @@ El sistema incluye usuarios predefinidos (ver `init-scripts/init.sql`):
 | user | user123 | ROLE_USER |
 
 ## 🧪 Ejemplos de Prueba de Microservicios
+
+### Usuarios y Cuentas Microservice
+
+```bash
+# 1. Crear un usuario
+curl -X POST http://localhost:8083/api/usuarios \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nombre": "Juan",
+    "apellido": "Pérez",
+    "celular": "1234567890",
+    "email": "juan.perez@example.com"
+  }'
+
+# 2. Crear una cuenta
+curl -X POST http://localhost:8083/api/cuentas \
+  -H "Content-Type: application/json" \
+  -d '{
+    "idCuentaMercadoPago": 123456,
+    "tipoCuenta": "PREMIUM",
+    "saldo": 5000.00
+  }'
+
+# 3. Asociar usuario a cuenta
+curl -X POST http://localhost:8083/api/usuarios/1/cuentas/1
+
+# 4. Obtener todas las cuentas de un usuario
+curl http://localhost:8083/api/usuarios/1/cuentas
+
+# 5. Obtener usuarios de una cuenta
+curl http://localhost:8083/api/usuarios/cuenta/1
+
+# 6. Cargar saldo en una cuenta
+curl -X PATCH "http://localhost:8083/api/cuentas/1/cargar-saldo?monto=1000.00"
+
+# 7. Descontar saldo (usado al finalizar viaje)
+curl -X PATCH "http://localhost:8083/api/cuentas/1/descontar-saldo?monto=250.50"
+```
 
 ### Tarifas Microservice
 

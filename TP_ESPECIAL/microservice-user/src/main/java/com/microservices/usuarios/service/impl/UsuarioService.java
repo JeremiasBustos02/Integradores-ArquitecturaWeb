@@ -1,12 +1,14 @@
 package com.microservices.usuarios.service.impl;
 
 import com.microservices.usuarios.dto.request.UsuarioRequestDTO;
+import com.microservices.usuarios.dto.response.CuentaResponseDTO;
 import com.microservices.usuarios.dto.response.UsuarioResponseDTO;
 import com.microservices.usuarios.entity.Cuenta;
 import com.microservices.usuarios.entity.Usuario;
 import com.microservices.usuarios.exception.CuentaNotFoundException;
 import com.microservices.usuarios.exception.DuplicateResourceException;
 import com.microservices.usuarios.exception.UsuarioNotFoundException;
+import com.microservices.usuarios.mapper.CuentaMapper;
 import com.microservices.usuarios.mapper.UsuarioMapper;
 import com.microservices.usuarios.repository.CuentaRepository;
 import com.microservices.usuarios.repository.UsuarioRepository;
@@ -18,6 +20,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -27,6 +32,7 @@ public class UsuarioService implements IUsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final CuentaRepository cuentaRepository;
     private final UsuarioMapper usuarioMapper;
+    private final CuentaMapper cuentaMapper;
 
     @Override
     public UsuarioResponseDTO createUsuario(UsuarioRequestDTO requestDTO) {
@@ -98,6 +104,22 @@ public class UsuarioService implements IUsuarioService {
         log.info("Obteniendo usuarios de la cuenta ID: {}", cuentaId);
         Page<Usuario> usuarios = usuarioRepository.findByCuentaId(cuentaId, pageable);
         return usuarios.map(usuarioMapper::toResponseDTO);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CuentaResponseDTO> getCuentasByUsuarioId(Long usuarioId) {
+        log.info("Obteniendo cuentas del usuario ID: {}", usuarioId);
+        
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNotFoundException(usuarioId));
+        
+        List<CuentaResponseDTO> cuentas = usuario.getCuentas().stream()
+                .map(cuentaMapper::toResponseDTO)
+                .collect(Collectors.toList());
+        
+        log.info("Se encontraron {} cuentas para el usuario ID: {}", cuentas.size(), usuarioId);
+        return cuentas;
     }
 
     @Override
