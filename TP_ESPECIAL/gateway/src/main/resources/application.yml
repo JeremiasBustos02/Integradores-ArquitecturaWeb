@@ -11,64 +11,7 @@ spring:
         initial-interval: 1500
         multiplier: 1.2
         max-interval: 3000
-    gateway:
-      routes:
-        # Ruta para microservice-user usando Eureka
-        - id: usuarios-route
-          uri: lb://usuarios-microservice
-          predicates:
-            - Path=/api/usuarios/**, /api/cuentas/**
-          filters:
-            - StripPrefix=0
-            
-        # Ruta para microservice-tarifas usando Eureka
-        - id: tarifas-route
-          uri: lb://microservice-tarifas
-          predicates:
-            - Path=/api/tarifas/**
-          filters:
-            - StripPrefix=0
-            
-        # Ruta para microservice-facturacion usando Eureka
-        - id: facturacion-route
-          uri: lb://microservice-facturacion
-          predicates:
-            - Path=/api/facturas/**
-          filters:
-            - StripPrefix=0
-      
-      # Configuración global de CORS
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowedOrigins: "*"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - PATCH
-              - OPTIONS
-            allowedHeaders: "*"
-            exposedHeaders:
-              - Authorization
-            allowCredentials: false
-      
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
 
-eureka:
-  client:
-    enabled: true
-    service-url:
-      defaultZone: ${EUREKA_SERVER_URL:http://eureka-service:8761/eureka}
-    register-with-eureka: true
-    fetch-registry: true
-  instance:
-    prefer-ip-address: true
-    
 server:
   port: 8080
 

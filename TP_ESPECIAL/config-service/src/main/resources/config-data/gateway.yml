@@ -1,19 +1,16 @@
-server:
-  port: 8080
-
 eureka:
   client:
     fetch-registry: true
     register-with-eureka: true
     service-url:
-      default-zone: http://localhost:8761/eureka
+      defaultZone: http://localhost:8761/eureka
   instance:
-    hostname: localhost
+    prefer-ip-address: true
 
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/auth_db?createDatabaseIfNotExist=true
+    url: jdbc:mysql://localhost:3306/auth_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
     password: password
   jpa:
@@ -23,20 +20,55 @@ spring:
     database: mysql
   cloud:
     gateway:
-      mvc:
-        routes:
-          - id: usuarios-microservice
-            uri: lb://usuarios-microservice
-            predicates:
-              - Path=/api/usuarios/**, /api/cuentas/**
+      routes:
+        - id: usuarios-route
+          uri: lb://microservice-user
+          predicates:
+            - Path=/api/usuarios/**, /api/cuentas/**
+          filters:
+            - StripPrefix=0
 
-        # Ruta para Monopatines
-          - id: microservice-monopatin
-            uri: lb://microservice-monopatin
-            predicates:
-              - Path=/api/monopatines/**
-            filters:
-              - StripPrefix=1  # Quita /api del path
+        - id: monopatin-route
+          uri: lb://microservice-monopatin
+          predicates:
+            - Path=/api/monopatines/**
+          filters:
+            - StripPrefix=0
+
+        - id: tarifas-route
+          uri: lb://microservice-tarifas
+          predicates:
+            - Path=/api/tarifas/**
+          filters:
+            - StripPrefix=0
+
+        - id: facturacion-route
+          uri: lb://microservice-facturacion
+          predicates:
+            - Path=/api/facturacion/**
+          filters:
+            - StripPrefix=0
+      
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
+            allowedHeaders: "*"
+            exposedHeaders:
+              - Authorization
+            allowCredentials: false
+      
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
 
 logging:
   level:

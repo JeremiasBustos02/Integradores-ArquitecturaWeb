@@ -1,63 +1,48 @@
 spring:
+  datasource:
+    url: jdbc:mysql://mysql:3306/auth_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: password
+
   cloud:
     gateway:
       routes:
-        # Ruta para microservice-user usando Eureka
         - id: usuarios-route
-          uri: lb://usuarios-microservice
+          uri: lb://microservice-user
           predicates:
-            - Path=/api/users/**
+            - Path=/api/usuarios/**, /api/cuentas/**
           filters:
-            - StripPrefix=1
+            - StripPrefix=0
 
-        # Ruta para microservice-monopatin usando Eureka
         - id: monopatin-route
           uri: lb://microservice-monopatin
           predicates:
             - Path=/api/monopatines/**
           filters:
-            - StripPrefix=1
+            - StripPrefix=0
 
-        # Ruta para microservice-tarifas usando Eureka
         - id: tarifas-route
           uri: lb://microservice-tarifas
           predicates:
             - Path=/api/tarifas/**
           filters:
-            - StripPrefix=1
+            - StripPrefix=0
 
-        # Ruta para microservice-facturacion usando Eureka
         - id: facturacion-route
           uri: lb://microservice-facturacion
           predicates:
-            - Path=/api/facturacion/**
+            - Path=/api/facturas**
           filters:
-            - StripPrefix=1
-
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
+            - StripPrefix=0
 
 eureka:
   client:
-    enabled: true
     service-url:
       defaultZone: http://eureka-service:8761/eureka
     register-with-eureka: true
     fetch-registry: true
     registry-fetch-interval-seconds: 5
-    initial-instance-info-replication-interval-seconds: 10
   instance:
     prefer-ip-address: true
     lease-renewal-interval-in-seconds: 10
     lease-expiration-duration-in-seconds: 30
-    
-server:
-  port: 8080
-
-# JWT Token configuration
-jwt:
-  secret: mySecretKey
-  expiration: 3600000
-
