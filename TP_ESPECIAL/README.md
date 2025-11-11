@@ -22,9 +22,10 @@ El sistema incluye los siguientes servicios:
 | **Config Service** | 8081 | - | Gestión de configuración centralizada |
 | **Eureka Service** | 8761 | - | Registro y descubrimiento de servicios |
 | **Gateway** | 8080 | `auth_db` | API Gateway con autenticación JWT |
-| **Usuarios Microservice** | 8083 | `usuarios_db` | Gestión de usuarios y cuentas |
-| **Tarifas Microservice** | 8084 | `tarifas_db` | Gestión de tarifas y precios |
-| **Facturación Microservice** | 8085 | `facturacion_db` | Gestión de facturación y reportes |
+| **Microservice User** | 8083 | `usuarios_db` | Gestión de usuarios y cuentas |
+| **Microservice Monopatin** | 8082 | `monopatin_db` | Gestión de monopatines y viajes |
+| **Microservice Tarifas** | 8084 | `tarifas_db` | Gestión de tarifas y precios |
+| **Microservice Facturación** | 8085 | `facturacion_db` | Gestión de facturación y reportes |
 | **MySQL** | 3306 | - | Servidor de base de datos |
 
 ### 📊 Bases de Datos
@@ -33,6 +34,7 @@ El sistema utiliza múltiples bases de datos MySQL (una por microservicio):
 
 - **auth_db**: Datos de autenticación (Gateway)
 - **usuarios_db**: Usuarios, cuentas y relaciones
+- **monopatin_db**: Monopatines, viajes y ubicaciones
 - **tarifas_db**: Tarifas, precios y vigencias
 - **facturacion_db**: Facturas, estados y reportes
 
@@ -53,93 +55,54 @@ El sistema utiliza múltiples bases de datos MySQL (una por microservicio):
 
 Antes de ejecutar la aplicación, asegúrate de tener instalado:
 
-- **Java 17+**
-- **Maven 3.6+**
-- **Docker** (para MySQL)
+- **Docker** y **Docker Compose** (recomendado - ejecuta todo el sistema)
 - **Git**
+
+**Opcional** (solo si quieres ejecutar sin Docker):
+- **Java 21+**
+- **Maven 3.6+**
 
 ## 🚀 Instalación y Ejecución
 
-### Paso 1: Clonar el Repositorio
+### 🐳 Método Recomendado: Docker Compose (Simple y Rápido)
+
+Este es el método **más fácil y rápido** para ejecutar todo el sistema:
+
+#### Paso 1: Clonar el Repositorio
 
 ```bash
 git clone <repository-url>
 cd TP_ESPECIAL
 ```
 
-### Paso 2: Configurar MySQL con Docker
+#### Paso 2: Ejecutar con Docker Compose
 
 ```bash
-# Detener cualquier MySQL existente
-docker stop $(docker ps -q --filter "expose=3306") 2>/dev/null || true
+# Construir y ejecutar todos los servicios
+docker-compose up --build -d
 
-# Ejecutar MySQL con configuración inicial
-docker run -d --name microservices-mysql \
-  -e MYSQL_ROOT_PASSWORD=password \
-  -e MYSQL_DATABASE=auth_db \
-  -p 3306:3306 \
-  -v $(pwd)/init-scripts:/docker-entrypoint-initdb.d \
-  mysql:8.0
+# Ver el estado de los contenedores
+docker-compose ps
+
+# Ver logs en tiempo real
+docker-compose logs -f
+
+# Ver logs de un servicio específico
+docker-compose logs -f microservice-user
 ```
 
-### Paso 3: Compilar el Proyecto
+#### Paso 3: Esperar a que los Servicios Inicien
 
-```bash
-mvn clean compile
-```
+⏱️ **Tiempo aproximado**: 2-3 minutos
 
-### Paso 4: Ejecutar los Servicios
+Los servicios se inician en el orden correcto automáticamente:
+1. ✅ MySQL (con bases de datos e inicialización)
+2. ✅ Config Service (puerto 8081)
+3. ✅ Eureka Service (puerto 8761)
+4. ✅ Gateway (puerto 8080)
+5. ✅ Todos los microservicios (8082, 8083, 8084, 8085)
 
-**IMPORTANTE**: Los servicios deben iniciarse en el siguiente orden:
-
-#### 4.1 Config Service (Puerto 8081)
-```bash
-cd config-service
-mvn spring-boot:run
-```
-Espera hasta ver: `Started ConfigServiceApplication`
-
-#### 4.2 Eureka Service (Puerto 8761)
-```bash
-# En una nueva terminal
-cd eureka-service
-mvn spring-boot:run
-```
-Espera hasta ver: `Started EurekaServiceApplication`
-
-#### 4.3 Gateway (Puerto 8080)
-```bash
-# En una nueva terminal
-cd gateway
-mvn spring-boot:run
-```
-Espera hasta ver: `Started GatewayApplication`
-
-#### 4.4 Usuarios Microservice (Puerto 8083)
-```bash
-# En una nueva terminal
-cd usuarios-microservice
-mvn spring-boot:run
-```
-Espera hasta ver: `Started UsuariosMicroserviceApplication`
-
-#### 4.5 Tarifas Microservice (Puerto 8084)
-```bash
-# En una nueva terminal
-cd microservice-tarifas
-mvn spring-boot:run
-```
-Espera hasta ver: `Started TarifasMicroserviceApplication`
-
-#### 4.6 Facturación Microservice (Puerto 8085)
-```bash
-# En una nueva terminal
-cd microservice-facturacion
-mvn spring-boot:run
-```
-Espera hasta ver: `Started FacturacionMicroserviceApplication`
-
-### Paso 5: Verificar que Todo Esté Funcionando
+#### Paso 4: Verificar que Todo Esté Funcionando
 
 ```bash
 # Verificar servicios registrados en Eureka
@@ -147,7 +110,88 @@ curl http://localhost:8761/eureka/apps
 
 # Verificar Config Service
 curl http://localhost:8081/actuator/health
+
+# Verificar Gateway
+curl http://localhost:8080/actuator/health
 ```
+
+#### Comandos Útiles de Docker Compose
+
+```bash
+# Detener todos los servicios
+docker-compose down
+
+# Detener y eliminar volúmenes (limpieza completa)
+docker-compose down -v
+
+# Reconstruir un servicio específico
+docker-compose up --build -d microservice-user
+
+# Ver logs de todos los servicios
+docker-compose logs
+
+# Ver logs de los últimos 100 registros
+docker-compose logs --tail=100
+```
+
+---
+
+### 💻 Método Alternativo: Ejecución Manual (Sin Docker)
+
+**Solo si NO quieres usar Docker** (requiere Java y Maven instalados):
+
+<details>
+<summary>Haz clic para expandir las instrucciones de ejecución manual</summary>
+
+#### Paso 1: Configurar MySQL
+
+```bash
+# Opción 1: Con Docker (solo MySQL)
+docker run -d --name microservices-mysql \
+  -e MYSQL_ROOT_PASSWORD=password \
+  -e MYSQL_DATABASE=auth_db \
+  -p 3306:3306 \
+  -v $(pwd)/init-scripts:/docker-entrypoint-initdb.d \
+  mysql:8.0
+
+# Opción 2: MySQL local (debe estar corriendo en puerto 3306)
+```
+
+#### Paso 2: Ejecutar los Servicios (en orden)
+
+**IMPORTANTE**: Debes ejecutar en terminales separadas y en este orden:
+
+1. **Config Service** (Puerto 8081)
+```bash
+cd config-service && mvn spring-boot:run
+```
+
+2. **Eureka Service** (Puerto 8761)
+```bash
+cd eureka-service && mvn spring-boot:run
+```
+
+3. **Gateway** (Puerto 8080)
+```bash
+cd gateway && mvn spring-boot:run
+```
+
+4. **Microservicios** (puertos 8082-8085)
+```bash
+# Terminal 1
+cd microservice-monopatin && mvn spring-boot:run
+
+# Terminal 2
+cd microservice-user && mvn spring-boot:run
+
+# Terminal 3
+cd microservice-tarifas && mvn spring-boot:run
+
+# Terminal 4
+cd microservice-facturacion && mvn spring-boot:run
+```
+
+</details>
 
 ## 🧪 Pruebas de la API
 
@@ -242,9 +286,10 @@ curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
 | **Eureka Dashboard** | http://localhost:8761 | Dashboard de servicios |
 | **API Gateway** | http://localhost:8080 | Punto de entrada principal |
 | **Config Service** | http://localhost:8081 | Configuración centralizada |
-| **Usuarios Microservice** | http://localhost:8083 | Acceso directo (dev) |
-| **Tarifas Microservice** | http://localhost:8084 | Acceso directo (dev) |
-| **Facturación Microservice** | http://localhost:8085 | Acceso directo (dev) |
+| **Microservice User** | http://localhost:8083 | Acceso directo (dev) |
+| **Microservice Monopatin** | http://localhost:8082 | Acceso directo (dev) |
+| **Microservice Tarifas** | http://localhost:8084 | Acceso directo (dev) |
+| **Microservice Facturación** | http://localhost:8085 | Acceso directo (dev) |
 
 > **Nota**: En producción, todos los microservicios deben accederse **solo a través del Gateway** (puerto 8080)
 
@@ -254,7 +299,7 @@ curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
 - `POST /api/authenticate` - Login y obtener JWT token
 - `POST /api/usuarios` - Registrar nuevo usuario
 
-### 👥 Usuarios Microservice (vía Gateway)
+### 👥 Microservice User (vía Gateway)
 
 #### Usuarios
 - `GET /api/usuarios` - Obtener todos los usuarios (paginado)
@@ -281,7 +326,24 @@ curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
 - `PATCH /api/cuentas/{id}/descontar-saldo?monto={monto}` - Descontar saldo
 - `DELETE /api/cuentas/{id}` - Eliminar cuenta
 
-### 💰 Tarifas Microservice
+### 🛴 Microservice Monopatin (vía Gateway)
+
+#### CRUD de Monopatines
+- `GET /api/monopatines` - Listar todos los monopatines
+- `POST /api/monopatines` - Crear nuevo monopatín
+- `GET /api/monopatines/{id}` - Obtener monopatín por ID
+- `PUT /api/monopatines/{id}` - Actualizar monopatín
+- `DELETE /api/monopatines/{id}` - Eliminar monopatín
+
+#### Gestión de Viajes
+- `POST /api/viajes` - Iniciar viaje
+- `PUT /api/viajes/{id}/finalizar` - Finalizar viaje
+- `GET /api/viajes` - Listar viajes
+- `GET /api/viajes/{id}` - Obtener viaje por ID
+
+> 📚 Para más detalles ver documentación específica del microservicio
+
+### 💰 Microservice Tarifas
 
 #### CRUD de Tarifas
 - `POST /api/tarifas` - Crear nueva tarifa (incluye ajuste de precios)
@@ -297,7 +359,7 @@ curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
 
 > **💡 Ajuste de Precios**: Para ajustar precios, crear nueva tarifa con `activa: true`
 
-### 📄 Facturación Microservice
+### 📄 Microservice Facturación
 
 #### CRUD de Facturas
 - `POST /api/facturas` - Crear nueva factura
@@ -329,10 +391,13 @@ Cada microservicio tiene su propia base de datos configurada en:
 
 | Microservicio | Archivo de Config | Base de Datos |
 |---------------|-------------------|---------------|
-| Gateway | `gateway.yml` | `auth_db` |
-| Usuarios | `usuarios-microservice.yml` | `usuarios_db` |
-| Tarifas | `microservice-tarifas.yml` | `tarifas_db` |
-| Facturación | `microservice-facturacion.yml` | `facturacion_db` |
+| Gateway | `gateway.yml` / `gateway-docker.yml` | `auth_db` |
+| User | `microservice-user.yml` / `microservice-user-docker.yml` | `usuarios_db` |
+| Monopatin | `microservice-monopatin.yml` / `microservice-monopatin-docker.yml` | `monopatin_db` |
+| Tarifas | `microservice-tarifas.yml` / `microservice-tarifas-docker.yml` | `tarifas_db` |
+| Facturación | `microservice-facturacion.yml` / `microservice-facturacion-docker.yml` | `facturacion_db` |
+
+> **Nota**: Los archivos `*-docker.yml` se usan cuando se ejecuta con Docker Compose
 
 **Configuración típica**:
 ```yaml
@@ -387,7 +452,8 @@ Agregar el nuevo módulo al `pom.xml` principal:
     <module>config-service</module>
     <module>eureka-service</module>
     <module>gateway</module>
-    <module>usuarios-microservice</module>
+    <module>microservice-user</module>
+    <module>microservice-monopatin</module>
     <module>microservice-tarifas</module>
     <module>microservice-facturacion</module>
     <module>nuevo-microservice</module>
@@ -461,46 +527,47 @@ Actualizar `SecurityConfig.java`:
 - **Maven**
 - **Docker**
 
-## 🐳 Ejecución con Docker
+## 🐳 Docker Compose - Arquitectura Completa
 
-### Opción 1: Solo MySQL con Docker
+### Servicios Incluidos
+
+Docker Compose configura automáticamente todos los servicios necesarios:
+
+| Servicio | Container Name | Puerto | Healthcheck |
+|----------|----------------|--------|-------------|
+| MySQL | `microservices-mysql` | 3306 | ✅ |
+| Config Service | `config-service` | 8081 | ✅ |
+| Eureka Service | `eureka-service` | 8761 | ✅ |
+| Gateway | `gateway` | 8080 | ✅ |
+| Microservice User | `microservice-user` | 8083 | ✅ |
+| Microservice Monopatin | `microservice-monopatin` | 8082 | ✅ |
+| Microservice Tarifas | `microservice-tarifas` | 8084 | ✅ |
+| Microservice Facturación | `microservice-facturacion` | 8085 | ✅ |
+
+### Características de Docker Compose
+
+- ✅ **Orden de inicio automático**: Los servicios se inician en el orden correcto
+- ✅ **Health checks**: Verifica que cada servicio esté listo antes de iniciar dependencias
+- ✅ **Red aislada**: Todos los servicios en red `microservices-network`
+- ✅ **Persistencia de datos**: Volumen para MySQL
+- ✅ **Perfiles de Spring**: Automáticamente usa perfil `docker`
+- ✅ **Variables de entorno**: Configuración centralizada
+
+### Comandos Adicionales
 
 ```bash
-# Ejecutar solo MySQL (recomendado para desarrollo)
-docker run -d --name microservices-mysql \
-  -e MYSQL_ROOT_PASSWORD=password \
-  -e MYSQL_DATABASE=auth_db \
-  -p 3306:3306 \
-  -v $(pwd)/init-scripts:/docker-entrypoint-initdb.d \
-  mysql:8.0
+# Reconstruir un servicio específico sin caché
+docker-compose build --no-cache microservice-user
 
-# Luego ejecutar servicios con Maven como se explicó arriba
+# Escalar un servicio (crear múltiples instancias)
+docker-compose up -d --scale microservice-user=2
+
+# Ver uso de recursos
+docker stats
+
+# Ejecutar comando en un contenedor
+docker-compose exec microservice-user bash
 ```
-
-### Opción 2: Todo con Docker Compose
-
-```bash
-# Ejecutar todos los servicios con Docker Compose
-docker-compose up --build
-
-# Ejecutar en segundo plano
-docker-compose up -d
-
-# Ver logs
-docker-compose logs -f
-
-# Detener servicios
-docker-compose down
-```
-
-**Servicios incluidos en Docker Compose**:
-- ✅ MySQL (con scripts de inicialización)
-- ✅ Config Service
-- ✅ Eureka Service
-- ✅ Gateway
-- ✅ Usuarios Microservice
-- ✅ Tarifas Microservice
-- ✅ Facturación Microservice
 
 > **Tiempo de inicio**: ~2-3 minutos para todos los servicios
 
