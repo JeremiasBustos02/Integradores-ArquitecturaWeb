@@ -14,19 +14,28 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FacturaRequestDTO {
-    @NotNull
+    @NotNull(message = "El ID de cuenta es obligatorio")
     private Long cuentaId;
 
-    @NotNull
-    private String viajeId; // String porque es el ID de Mongo
+    private Long viajeId;
 
-    @NotNull
-    @Positive
+    @NotNull(message = "El monto total es obligatorio")
+    @Positive(message = "El monto total debe ser positivo")
     private Double montoTotal;
 
-    @NotNull
+    @NotNull(message = "La fecha de emisión es obligatoria")
     private LocalDateTime fechaEmision;
 
-    @NotNull
+    private LocalDate fechaVencimiento;
+
+    @NotNull(message = "El estado es obligatorio")
     private EstadosFactura estado;
+
+    private String descripcion;
+
+    private Integer periodoMes;
+
+    private Integer periodoAnio;
+
+    private String tipoCuenta;
 }
