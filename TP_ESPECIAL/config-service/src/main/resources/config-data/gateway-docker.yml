@@ -31,7 +31,7 @@ spring:
         - id: facturacion-route
           uri: lb://microservice-facturacion
           predicates:
-            - Path=/api/facturacion/**
+            - Path=/api/facturas**
           filters:
             - StripPrefix=0
 
