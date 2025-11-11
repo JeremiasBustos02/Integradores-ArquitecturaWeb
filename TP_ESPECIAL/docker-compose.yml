@@ -14,6 +14,16 @@ services:
       - ./init-scripts:/docker-entrypoint-initdb.d
     networks:
       - microservices-network
+  mongo:
+    image: mongo:6.0
+    container_name: microservices-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      microservices-network:
+
 
   config-service:
     build: ./config-service
@@ -23,7 +33,7 @@ services:
     networks:
       - microservices-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -42,7 +52,7 @@ services:
     networks:
       - microservices-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -125,8 +135,56 @@ services:
     networks:
       - microservices-network
 
+  viajes-microservice:
+    build: ./microservice-viajes
+    container_name: viajes-microservice
+    ports:
+      - "8086:8086"
+    depends_on:
+      eureka-service:
+        condition: service_healthy
+      mongo:
+        condition: service_started
+      parada-microservice:
+        condition: service_started
+      microservice-tarifas:
+        condition: service_started
+      microservice-facturacion:
+        condition: service_started
+      usuarios-microservice:
+        condition: service_started
+      microservice-monopatin:
+        condition: service_started
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVER_URL=http://config-service:8081
+      - EUREKA_SERVER_URL=http://eureka-service:8761/eureka
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/viajes-microservice
+    networks:
+      - microservices-network
+
+  parada-microservice:
+    build: ./microservice-parada
+    container_name: parada-microservice
+    ports:
+      - "8087:8087"
+    depends_on:
+      eureka-service:
+        condition: service_healthy
+      mysql:
+        condition: service_started
+
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVER_URL=http://config-service:8081
+      - EUREKA_SERVER_URL=http://eureka-service:8761/eureka
+      - DB_HOST=mysql
+      - DB_PORT=3306
+    networks:
+      - microservices-network
 volumes:
   mysql_data:
+  mongo_data:
 
 networks:
   microservices-network:

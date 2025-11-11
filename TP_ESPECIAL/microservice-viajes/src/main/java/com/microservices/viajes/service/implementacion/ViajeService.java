@@ -2,6 +2,7 @@ package com.microservices.viajes.service.implementacion;
 
 import com.microservices.viajes.clients.*;
 import com.microservices.viajes.dto.request.EstadosFactura;
+import com.microservices.viajes.dto.request.EstadosMonopatin;
 import com.microservices.viajes.dto.request.FacturaRequestDTO;
 import com.microservices.viajes.dto.response.*;
 import com.microservices.viajes.entity.Pausa;
@@ -19,9 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -65,7 +65,7 @@ public class ViajeService implements ViajeServiceI {
         }
 
         try {
-            monopatinClient.actualizarEstado(monopatin.getId(), "EN USO");
+            monopatinClient.actualizarEstado(monopatin.getId(), EstadosMonopatin.EN_USO);
         } catch (Exception e) {
             throw new RuntimeException("No se pudo actualizar el estado del monopatin (servicio externo fallo): " + e.getMessage());
         }
@@ -73,7 +73,7 @@ public class ViajeService implements ViajeServiceI {
         Viaje viaje = new Viaje(monopatinId, paradaInicioId, usuarioId, tarifaId);
         viaje.setPausas(new ArrayList<>());
         viaje.setHoraInicio(LocalDateTime.now());
-
+        viaje.setPausaExtensa(false);
         Viaje viajeSaved = viajeRepository.save(viaje);
         log.info("Viaje creado correctamente con id: {}", viajeSaved.getId());
 
@@ -88,7 +88,7 @@ public class ViajeService implements ViajeServiceI {
         }
 
         if (paradaFin == null || kmRecorridos == null || kmRecorridos < 0) {
-            throw new IllegalArgumentException("Parada y kilómetros son obligatorios");
+            throw new IllegalArgumentException("Parada y kilometros son obligatorios");
         }
         try {
             ParadaDTO paradaIni = paradaClient.getParadaById(paradaFin);
@@ -111,12 +111,18 @@ public class ViajeService implements ViajeServiceI {
             costoTotal = minutosTotales * tarifa.getMontoBase();
 
             log.info("Viaje {} finalizado. Duración: {} min. Costo: ${}", id, minutosTotales, costoTotal);
+            if (viaje.isPausaExtensa()) {
+                costoTotal += tarifa.getMontoExtra();
+                log.info("Aplicando tarifa extra por pausa extensa. Monto extra: ${}", tarifa.getMontoExtra());
 
+            }
 
         } catch (Exception e) {
             // no existio tarifa
             throw new RuntimeException("Error al calcular la tarifa del viaje: " + e.getMessage());
         }
+        Viaje viajeAct = viajeRepository.save(viaje);
+
         try {
             // esperar que me expongan el endpoint para obtener la cuenta a facturar
             Long cuentaIdParaFacturar = usuarioClient.getCuentaParaFacturar(viaje.getUsuarioId());
@@ -139,13 +145,12 @@ public class ViajeService implements ViajeServiceI {
             throw new RuntimeException("Error al generar la factura: " + e.getMessage());
         }
         try {
-            monopatinClient.actualizarEstado(viaje.getMonopatinId(), "DISPONIBLE");
+            monopatinClient.actualizarEstado(viaje.getMonopatinId(), EstadosMonopatin.DISPONIBLE);
         } catch (Exception e) {
             log.error("Fallo al notificar a MSVC-MONOPATIN. Viaje ID: {}", id, e);
             throw new MonopatinNotFound("No se encontro el monopatin ");
         }
 
-        Viaje viajeAct = viajeRepository.save(viaje);
         return this.getViajeById(viajeAct.getId());
     }
 
@@ -176,6 +181,11 @@ public class ViajeService implements ViajeServiceI {
                 .findFirst()
                 .orElseThrow(() -> new InvalidViajeException("No hay pausa activa para finalizar"));
         pausaActiva.setTiempoFin(LocalDateTime.now());
+        esPausaExtensa(pausaActiva);
+        if (esPausaExtensa(pausaActiva)) {
+            viaje.setPausaExtensa(true);
+            log.warn("Pausa extensa detectada en viaje {}", id);
+        }
         Viaje viajeAct = viajeRepository.save(viaje);
         return mapper.toResponseDTO(viajeAct);
     }
@@ -204,7 +214,7 @@ public class ViajeService implements ViajeServiceI {
     @Override
     public List<ViajeResponseDTO> getAllViajes() {
         List<Viaje> viajes = viajeRepository.findAll();
-        return mapper.toResponseDTOList(viajes);
+        return this.enriquecerListaDeViajes(viajes); //
     }
 
     @Override
@@ -223,7 +233,7 @@ public class ViajeService implements ViajeServiceI {
     public List<ViajeResponseDTO> getViajesByMonopatin(Long monopatinId) {
         if (monopatinId == null || monopatinId <= 0) throw new IllegalArgumentException("El id debe ser mayor a 0");
         List<Viaje> viajes = viajeRepository.getViajesByMonopatinId(monopatinId);
-        return mapper.toResponseDTOList(viajes);
+        return this.enriquecerListaDeViajes(viajes);
     }
 
     @Override
@@ -293,5 +303,58 @@ public class ViajeService implements ViajeServiceI {
         viajeRepository.deleteById(id);
     }
 
+    public List<ViajeResponseDTO> getViajesByUsuarioEnPeriodo(Long usuarioId, LocalDateTime inicio, LocalDateTime fin) {
+        if (usuarioId == null || usuarioId <= 0) {
+            throw new IllegalArgumentException("El ID de usuario debe ser válido");
+        }
+
+        if (inicio == null || fin == null) {
+            throw new IllegalArgumentException("Las fechas de inicio y fin son obligatorias");
+        }
+
+        if (inicio.isAfter(fin)) {
+            throw new IllegalArgumentException("La fecha de inicio debe ser anterior a la fecha de fin");
+        }
+        List<Viaje> viajes = viajeRepository.findByUsuarioIdAndHoraInicioBetween(usuarioId, inicio, fin);
+        return this.enriquecerListaDeViajes(viajes);
+    }
+
+    private boolean esPausaExtensa(Pausa pausa) {
+        if (pausa.getTiempoInicio() == null || pausa.getTiempoFin() == null) {
+            return false;
+        }
+        long minutos = Duration.between(pausa.getTiempoInicio(), pausa.getTiempoFin()).toMinutes();
+        return minutos > 15;
+    }
+    private List<ViajeResponseDTO> enriquecerListaDeViajes(List<Viaje> viajes) {
+        if (viajes == null || viajes.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+
+        Set<Long> paradaIds = new HashSet<>();
+        for (Viaje v : viajes) {
+            paradaIds.add(v.getParadaOrigenId());
+            if (v.getParadaDestinoId() != null) {
+                paradaIds.add(v.getParadaDestinoId());
+            }
+        }
+
+        List<ParadaDTO> paradas = paradaClient.getParadasByIds(new ArrayList<>(paradaIds));
+
+        Map<Long, ParadaDTO> paradasMap = paradas.stream()
+                .collect(Collectors.toMap(ParadaDTO::getId, p -> p));
+
+        return viajes.stream().map(viaje -> {
+            ViajeResponseDTO dto = mapper.toResponseDTO(viaje);
+
+            dto.setParadaInicio(paradasMap.get(viaje.getParadaOrigenId()));
+
+            if (viaje.getParadaDestinoId() != null) {
+                dto.setParadaFin(paradasMap.get(viaje.getParadaDestinoId()));
+            }
+            return dto;
+        }).collect(Collectors.toList());
+    }
 }
 

@@ -1,7 +1,6 @@
 package com.microservices.viajes.mapper;
 
 import com.microservices.viajes.dto.request.ViajeRequestDTO;
-import com.microservices.viajes.dto.response.BasicViajeResponseDTO;
 import com.microservices.viajes.dto.response.ViajeResponseDTO;
 import com.microservices.viajes.entity.Viaje;
 import org.mapstruct.Mapper;
@@ -11,7 +10,7 @@ import org.mapstruct.Mappings;
 
 import java.util.List;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING,uses = {PausaMapper.class})
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {PausaMapper.class})
 public interface ViajeMapper {
     @Mappings({
             @Mapping(source = "paradaInicioId", target = "paradaOrigenId"),
@@ -21,13 +20,12 @@ public interface ViajeMapper {
     })
     Viaje toEntity(ViajeRequestDTO requestDTO);
 
-       // Entity -> Response
-    @Mapping(source = "distanciaRecorrida", target = "kmRecorridos")
+    // Entity -> Response
+    @Mappings({@Mapping(source = "distanciaRecorrida", target = "kmRecorridos"),
+            @Mapping(target = "pausaExtensa", ignore = true)})
     ViajeResponseDTO toResponseDTO(Viaje viaje);
 
-    BasicViajeResponseDTO toBasicReponseDTO(Viaje viaje);
 
     List<ViajeResponseDTO> toResponseDTOList(List<Viaje> viajes);
 
-    List<BasicViajeResponseDTO> toBasicResponseDTOList(List<Viaje> viajes);
 }

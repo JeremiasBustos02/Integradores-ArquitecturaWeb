@@ -1,129 +1,246 @@
 package com.microservices.viajes;
 
-import com.microservices.viajes.clients.MonopatinClientRest;
-import com.microservices.viajes.clients.ParadaClientRest;
-import com.microservices.viajes.dto.response.MonopatinDTO;
-import com.microservices.viajes.dto.response.ParadaDTO;
-import com.microservices.viajes.dto.response.ViajeResponseDTO;
-import com.microservices.viajes.service.implementacion.ViajeService;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+// --- Imports de Spring y JUnit ---
 
-import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq; // Importante para "EN USO"
+import static org.mockito.Mockito.*; // Para when, verify, never, etc.
+
+import org.mockito.Mockito;
+import org.springframework.boot.test.context.SpringBootTest;
+
+// --- Imports de tus Clases ---
+import com.microservices.viajes.clients.*;
+import com.microservices.viajes.dto.request.EstadosFactura;
+import com.microservices.viajes.dto.request.EstadosMonopatin;
+import com.microservices.viajes.dto.request.FacturaRequestDTO;
+import com.microservices.viajes.dto.response.*;
+import com.microservices.viajes.entity.Viaje;
+import com.microservices.viajes.exception.InvalidViajeException;
+import com.microservices.viajes.mapper.PausaMapper;
+import com.microservices.viajes.mapper.ViajeMapper;
+import com.microservices.viajes.repository.ViajeRepository;
+import com.microservices.viajes.service.implementacion.ViajeService;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @SpringBootTest
-@AutoConfigureMockMvc
 class ViajeServiceTest {
 
-    @MockBean
-    private ParadaClientRest paradaCliente;
-
-    @MockBean
+    // --- Mocks (Los "actores" que simulan los otros servicios) ---
+    @Mock
+    private ViajeRepository viajeRepository;
+    @Mock
+    private ViajeMapper mapper;
+    @Mock
+    private PausaMapper pausaMapper; // Necesario para el enriquecimiento
+    @Mock
+    private ParadaClientRest paradaClient;
+    @Mock
     private MonopatinClientRest monopatinClient;
+    @Mock
+    private UsuarioClientRest usuarioClient;
+    @Mock
+    private TarifaClientRest tarifaClient;
+    @Mock
+    private FacturacionClientRest facturaClient;
 
-    @Autowired
+    // --- SUT (Subject Under Test - La clase que probamos) ---
+    @InjectMocks
     private ViajeService viajeService;
 
-    @Test
-    void testCreateViaje() {
-        // Mock de las respuestas
-        ParadaDTO paradaMock = new ParadaDTO(1L, "Parada 1", -37.32, -59.13);
-        MonopatinDTO monopatinMock = new MonopatinDTO(1L, -37.32, -59.13, "DISPONIBLE");
+    // --- IDs y DTOs de prueba reutilizables ---
+    private final Long MONOPATIN_ID = 1L;
+    private final Long USUARIO_ID = 1L;
+    private final Long TARIFA_ID = 1L;
+    private final Long PARADA_ORIGEN_ID = 10L;
+    private final Long PARADA_DESTINO_ID = 20L;
+    private final Long CUENTA_ID = 99L;
+    private final String VIAJE_ID = "viaje-test-123";
 
-        when(paradaCliente.getParadaById(1L)).thenReturn(paradaMock);
-        when(monopatinClient.getMonopatinById(1L)).thenReturn(monopatinMock);
+    private MonopatinDTO monopatinDisponible;
+    private MonopatinDTO monopatinEnUso;
+    private ParadaDTO paradaOrigen;
+    private ParadaDTO paradaDestino;
+    private TarifaDTO tarifaEstandar;
+    private Viaje viajeEnCurso;
 
-        // Probar tu servicio
-        ViajeResponseDTO response = viajeService.createViaje(1L, 1L, 1L, 1L);
-
-        // --- FORMA 1: Imprimirlo para verlo (Debug) ---
-        System.out.println("Respuesta del test: " + response.toString());
-
-        // --- FORMA 2: Afirmaciones (Asserts) más potentes ---
-        assertNotNull(response); // 1. Confirmamos que no es nulo
-        assertNotNull(response.getId()); // 2. Confirmamos que Mongo le dio un ID
-
-        // 3. ¡Confirmamos que se "enriqueció" con el mock de la parada!
-        assertNotNull(response.getParadaInicio());
-        assertEquals(1L, response.getParadaInicio().getId());
-        assertEquals("Parada 1", response.getParadaInicio().getNombre());
-    }
-
-    @Test
-    void testViajeLifecycle_Success() throws InterruptedException {
-        // --- 1. GIVEN (Configuración) ---
-        // IDs de prueba
-        final Long MONOPATIN_ID = 1L;
-        final Long USUARIO_ID = 1L;
-        final Long TARIFA_ID = 1L;
-        final Long PARADA_ORIGEN_ID = 10L;
-        final Long PARADA_DESTINO_ID = 20L;
-        final Double DISTANCIA_RECORRIDA = 3.5;
+    @BeforeEach
+    void setUp() {
+        // --- Configuración inicial para todos los tests ---
 
         // Mocks de DTOs
-        ParadaDTO paradaOrigenMock = new ParadaDTO(PARADA_ORIGEN_ID, "Parada Origen", -37.0, -59.0);
-        ParadaDTO paradaDestinoMock = new ParadaDTO(PARADA_DESTINO_ID, "Parada Destino", -37.1, -59.1);
-        MonopatinDTO monopatinDisponibleMock = new MonopatinDTO(MONOPATIN_ID, -37.0, -59.0, "DISPONIBLE");
+        monopatinDisponible = new MonopatinDTO(MONOPATIN_ID, -37.0, -59.0, "DISPONIBLE");
+        monopatinEnUso = new MonopatinDTO(MONOPATIN_ID, -37.0, -59.0, "EN USO");
+        paradaOrigen = new ParadaDTO(PARADA_ORIGEN_ID, "Parada Origen", -37.0, -59.0);
+        paradaDestino = new ParadaDTO(PARADA_DESTINO_ID, "Parada Destino", -37.1, -59.1);
+        tarifaEstandar = new TarifaDTO(TARIFA_ID, 10.0, 50.0, null, true, "Tarifa Base"); // $10 por minuto, $50 extra
 
-        // Mocks de las llamadas GET (para validación y enriquecimiento)
-        when(paradaCliente.getParadaById(PARADA_ORIGEN_ID)).thenReturn(paradaOrigenMock);
-        when(paradaCliente.getParadaById(PARADA_DESTINO_ID)).thenReturn(paradaDestinoMock);
-        when(monopatinClient.getMonopatinById(MONOPATIN_ID)).thenReturn(monopatinDisponibleMock);
+        // Mock de un Viaje
+        viajeEnCurso = new Viaje(MONOPATIN_ID, PARADA_ORIGEN_ID, USUARIO_ID, TARIFA_ID);
+        viajeEnCurso.setId(VIAJE_ID);
+        viajeEnCurso.setHoraInicio(LocalDateTime.now().minusMinutes(30)); // Empezó hace 30 min
+        viajeEnCurso.setPausaExtensa(false);
 
-        // Mocks de las llamadas PUT (para notificación de estado)
-        MonopatinDTO monopatinEnUsoMock = new MonopatinDTO(MONOPATIN_ID, -37.0, -59.0, "EN USO");
-        // Usamos doNothing() porque los métodos 'actualizarEstado' devuelven void
-        when(monopatinClient.actualizarEstado(MONOPATIN_ID, "EN USO")).thenReturn(monopatinEnUsoMock);
-        when(monopatinClient.actualizarEstado(MONOPATIN_ID, "DISPONIBLE")).thenReturn(monopatinDisponibleMock);
+        // Mocks de Mappers (para el enriquecimiento)
+        when(mapper.toResponseDTO(any(Viaje.class))).thenAnswer(invocation -> {
+            Viaje v = invocation.getArgument(0);
+            return new ViajeResponseDTO(
+                    v.getId(),                      // 1. id
+                    v.getHoraInicio(),              // 2. horaInicio
+                    v.getHoraFin(),                 // 3. horaFin
+                    v.getDistanciaRecorrida(),      // 4. kmRecorridos
+                    null,                           // 5. paradaInicio
+                    null,                           // 6. paradaFin
+                    v.isPausaExtensa(),             // 7. pausaExtensa (¡El que faltaba!)
+                    v.getMonopatinId(),             // 8. monopatinId
+                    v.getUsuarioId(),               // 9. usuarioId
+                    v.getTarifaId(),                // 10. tarifaId
+                    List.of()                       // 11. pausas
+            );
+        });
+    }
 
-        // --- 2. WHEN & THEN (Crear Viaje) ---
-        ViajeResponseDTO viajeCreado = viajeService.createViaje(MONOPATIN_ID, USUARIO_ID, TARIFA_ID, PARADA_ORIGEN_ID);
+    // --- TEST 1: Camino de error en Create (Falla de negocio) ---
+    @Test
+    void testCreateViaje_Fails_WhenUsuarioNoTieneSaldo() {
+        // GIVEN: Parada OK, pero Usuario SIN saldo
+        when(paradaClient.getParadaById(anyLong())).thenReturn(paradaOrigen);
+        when(usuarioClient.saldoSuficiente(USUARIO_ID)).thenReturn(false); // ¡Sin saldo!
 
-        // Verificamos
-        assertNotNull(viajeCreado.getId());
-        assertNull(viajeCreado.getHoraFin()); // Aún no ha terminado
-        assertEquals("Parada Origen", viajeCreado.getParadaInicio().getNombre()); // Fue enriquecido
+        // WHEN: Se intenta crear el viaje
+        // THEN: Debería lanzar una excepción ANTES de tocar el monopatín o la BD
+        InvalidViajeException exception = assertThrows(InvalidViajeException.class, () -> {
+            viajeService.createViaje(MONOPATIN_ID, USUARIO_ID, TARIFA_ID, PARADA_ORIGEN_ID);
+        });
 
-        // Verificamos que se haya notificado el cambio de estado
-        Mockito.verify(monopatinClient, times(1)).actualizarEstado(MONOPATIN_ID, "EN USO");
+        // VERIFY: Verificamos que el error es el correcto
+        assertTrue(exception.getMessage().contains("El usuario no tiene fondo suficiente"));
 
-        // Obtenemos el ID para los siguientes pasos
-        String viajeId = viajeCreado.getId();
+        // VERIFY (El más importante): Verificamos que NUNCA se intentó reservar el monopatín ni guardar el viaje
+        Mockito.verify(monopatinClient, never()).actualizarEstado(anyLong(), any(EstadosMonopatin.class));
+        Mockito.verify(viajeRepository, never()).save(any(Viaje.class));
+    }
 
-        // --- 3. WHEN & THEN (Iniciar Pausa) ---
-        ViajeResponseDTO viajePausado = viajeService.iniciarPausa(viajeId);
+    // --- TEST 2: Camino Feliz en Finalizar (El más complejo) ---
+    @Test
+    void testFinalizarViaje_HappyPath_FullLogic() {
+        // GIVEN: Un viaje en curso y todos los servicios responden OK
+        when(viajeRepository.findById(VIAJE_ID)).thenReturn(Optional.of(viajeEnCurso));
+        when(paradaClient.getParadaById(PARADA_DESTINO_ID)).thenReturn(paradaDestino);
+        when(viajeRepository.save(any(Viaje.class))).thenReturn(viajeEnCurso); // Devuelve el viaje guardado
+        when(tarifaClient.getTarifaById(TARIFA_ID)).thenReturn(tarifaEstandar);
+        when(usuarioClient.getCuentaParaFacturar(USUARIO_ID)).thenReturn(CUENTA_ID);
+        when(facturaClient.crearFactura(any(FacturaRequestDTO.class))).thenReturn(new FacturaResponseDTO());
+        when(monopatinClient.actualizarEstado(MONOPATIN_ID, EstadosMonopatin.DISPONIBLE)).thenReturn(monopatinDisponible);
 
-        // Verificamos
-        assertEquals(1, viajePausado.getPausas().size());
-        assertNotNull(viajePausado.getPausas().get(0).getTiempoInicio());
-        assertNull(viajePausado.getPausas().get(0).getTiempoFin());
+        // Mocks para el enriquecimiento final (getViajeById)
+        when(paradaClient.getParadaById(PARADA_ORIGEN_ID)).thenReturn(paradaOrigen);
+        when(paradaClient.getParadaById(PARADA_DESTINO_ID)).thenReturn(paradaDestino);
 
-        // --- 4. WHEN & THEN (Finalizar Pausa) ---
-        ViajeResponseDTO viajeReanudado = viajeService.finalizarPausa(viajeId);
+        // WHEN: Se finaliza el viaje
+        Double kmRecorridos = 5.0;
+        ViajeResponseDTO viajeFinalizado = viajeService.finalizarViaje(VIAJE_ID, PARADA_DESTINO_ID, kmRecorridos);
 
-        // Verificamos
-        assertEquals(1, viajeReanudado.getPausas().size());
-        assertNotNull(viajeReanudado.getPausas().get(0).getTiempoFin());
+        // THEN: Verificamos el costo (30 min * $10/min = $300)
+        double costoEsperado = 300.0;
 
-        // --- 5. WHEN & THEN (Finalizar Viaje) ---
-        // (Asumimos que el DTO de finalizar ahora solo pide km y paradaId)
-        ViajeResponseDTO viajeFinalizado = viajeService.finalizarViaje(viajeId, PARADA_DESTINO_ID, DISTANCIA_RECORRIDA);
+        // VERIFY 1: Que se haya llamado a Facturación con los datos correctos
+        ArgumentCaptor<FacturaRequestDTO> facturaCaptor = ArgumentCaptor.forClass(FacturaRequestDTO.class);
+        Mockito.verify(facturaClient).crearFactura(facturaCaptor.capture());
 
-        // Verificamos
-        assertNotNull(viajeFinalizado.getHoraFin());
-        assertEquals(DISTANCIA_RECORRIDA, viajeFinalizado.getKmRecorridos());
-        assertEquals("Parada Destino", viajeFinalizado.getParadaFin().getNombre()); // Fue enriquecido
+        assertEquals(costoEsperado, facturaCaptor.getValue().getMontoTotal());
+        assertEquals(CUENTA_ID, facturaCaptor.getValue().getCuentaId());
+        assertEquals(VIAJE_ID, facturaCaptor.getValue().getViajeId());
+        assertEquals(EstadosFactura.PENDIENTE, facturaCaptor.getValue().getEstado());
 
-        // Verificamos que se notificó el cambio de estado de vuelta a DISPONIBLE
-        Mockito.verify(monopatinClient, times(1)).actualizarEstado(MONOPATIN_ID, "DISPONIBLE");
-        System.out.println("Respuesta del test: " + viajeFinalizado.toString());
+        // VERIFY 2: Que se haya liberado el monopatín
+        Mockito.verify(monopatinClient).actualizarEstado(MONOPATIN_ID, EstadosMonopatin.DISPONIBLE);
 
+        // VERIFY 3: Que el resultado final esté enriquecido
+        assertNotNull(viajeFinalizado.getParadaFin());
+        assertEquals("Parada Destino", viajeFinalizado.getParadaFin().getNombre());
+    }
+
+    // --- TEST 3: Camino de Error en Finalizar (Falla de un servicio externo) ---
+    @Test
+    void testFinalizarViaje_Fails_WhenFacturacionFalla() {
+        // GIVEN: Todo OK, excepto Facturación que falla
+        when(viajeRepository.findById(VIAJE_ID)).thenReturn(Optional.of(viajeEnCurso));
+        when(paradaClient.getParadaById(PARADA_DESTINO_ID)).thenReturn(paradaDestino);
+        when(viajeRepository.save(any(Viaje.class))).thenReturn(viajeEnCurso);
+        when(tarifaClient.getTarifaById(TARIFA_ID)).thenReturn(tarifaEstandar);
+        when(usuarioClient.getCuentaParaFacturar(USUARIO_ID)).thenReturn(CUENTA_ID);
+
+        // ¡LA FACTURACIÓN FALLA!
+        when(facturaClient.crearFactura(any(FacturaRequestDTO.class)))
+                .thenThrow(new RuntimeException("Error de red en facturacion"));
+
+        // WHEN: Se intenta finalizar el viaje
+        // THEN: Debería lanzar la excepción que nosotros relanzamos
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            viajeService.finalizarViaje(VIAJE_ID, PARADA_DESTINO_ID, 5.0);
+        });
+
+        // VERIFY: Verificamos que el error es el de facturación
+        assertTrue(exception.getMessage().contains("Error al generar la factura"));
+
+        // VERIFY (El más importante): Verificamos que el monopatín NUNCA se liberó,
+        // porque el error de facturación (que es más crítico) detuvo el flujo.
+        Mockito.verify(monopatinClient, never()).actualizarEstado(anyLong(), any(EstadosMonopatin.class));
+    }
+
+    // --- TEST 4: Prueba de Optimización N+1 (Batch Enrichment) ---
+    @Test
+    void testBatchEnrichment_GetAllViajes() {
+        // GIVEN: Una lista de 2 viajes que usan 3 paradas únicas
+        Viaje v1 = new Viaje(1L, 10L, 1L, 1L);
+        v1.setId("v1");
+        v1.setParadaDestinoId(20L);
+        Viaje v2 = new Viaje(2L, 20L, 2L, 1L);
+        v2.setId("v2");
+        v2.setParadaDestinoId(30L);
+        List<Viaje> listaViajes = List.of(v1, v2);
+
+        ParadaDTO p10 = new ParadaDTO(10L, "Parada 10", 0.0, 0.0);
+        ParadaDTO p20 = new ParadaDTO(20L, "Parada 20", 0.0, 0.0);
+        ParadaDTO p30 = new ParadaDTO(30L, "Parada 30", 0.0, 0.0);
+        List<ParadaDTO> listaParadas = List.of(p10, p20, p30);
+
+        when(viajeRepository.findAll()).thenReturn(listaViajes);
+        // Simulamos la llamada BATCH
+        when(paradaClient.getParadasByIds(anyList())).thenReturn(listaParadas);
+
+        // WHEN: Llamamos al método que devuelve una lista
+        List<ViajeResponseDTO> resultado = viajeService.getAllViajes();
+
+        // THEN: Verificamos que los datos fueron enriquecidos
+        assertEquals(2, resultado.size());
+        assertEquals("Parada 10", resultado.get(0).getParadaInicio().getNombre());
+        assertEquals("Parada 20", resultado.get(0).getParadaFin().getNombre());
+        assertEquals("Parada 20", resultado.get(1).getParadaInicio().getNombre());
+        assertEquals("Parada 30", resultado.get(1).getParadaFin().getNombre());
+
+        // VERIFY (El más importante): Verificamos que se llamó al cliente de paradas
+        // UNA SOLA VEZ (no N+1 veces) con los IDs correctos.
+        ArgumentCaptor<List<Long>> idCaptor = ArgumentCaptor.forClass(List.class);
+        Mockito.verify(paradaClient, times(1)).getParadasByIds(idCaptor.capture());
+
+        // Verificamos que la lista de IDs que se pidió contiene todos los IDs únicos
+        List<Long> idsEnviados = idCaptor.getValue();
+        assertEquals(3, idsEnviados.size()); // 3 IDs únicos
+        assertTrue(idsEnviados.containsAll(Set.of(10L, 20L, 30L)));
     }
 }

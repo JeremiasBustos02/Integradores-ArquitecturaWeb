@@ -28,6 +28,8 @@
         <module>microservice-tarifas</module>
         <module>microservice-facturacion</module>
         <module>microservice-viajes</module>
+        <module>microservice-parada</module>
+
 
     </modules>
 

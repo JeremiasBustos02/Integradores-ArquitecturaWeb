@@ -37,6 +37,8 @@ public class Viaje {
     @Field
     private Long usuarioId;
     @Field
+    boolean pausaExtensa;
+    @Field
     private List<Pausa> pausas;
 
     public Viaje(Long monopatinId, Long paradaOrigenId, Long usuarioId, Long tarifaId) {

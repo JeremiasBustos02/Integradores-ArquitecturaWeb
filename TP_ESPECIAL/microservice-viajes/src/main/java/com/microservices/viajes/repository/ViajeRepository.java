@@ -29,5 +29,7 @@ public interface ViajeRepository extends MongoRepository<Viaje, String> {
     // contar viajes de un monopatín en un año
     Long countByMonopatinId(Long monopatinId, LocalDateTime inicio, LocalDateTime fin);
 
+    List<Viaje> findByUsuarioIdAndHoraInicioBetween(Long usuarioId, LocalDateTime inicio, LocalDateTime fin);
+
     Long countByMonopatinIdAndHoraInicioBetween(Long monopatinId, LocalDateTime anio, LocalDateTime finAnio);
 }

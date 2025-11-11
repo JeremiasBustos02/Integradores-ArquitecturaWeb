@@ -5,6 +5,7 @@ import com.microservices.viajes.dto.request.ViajeRequestDTO;
 import com.microservices.viajes.dto.response.ReporteUsoMonopatinDTO;
 import com.microservices.viajes.dto.response.ViajeResponseDTO;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ViajeServiceI {
@@ -27,6 +28,8 @@ public interface ViajeServiceI {
     ReporteUsoMonopatinDTO getReporteUsoMonopatin(Long monopatinId, boolean incluirPausas);
 
     Long contarViajesPorMonopatinEnAnio(Long monopatinId, Integer anio);
+
+    List<ViajeResponseDTO> getViajesByUsuarioEnPeriodo(Long usuarioId, LocalDateTime inicio, LocalDateTime fin);
 
     void deleteViaje(String id);
 }

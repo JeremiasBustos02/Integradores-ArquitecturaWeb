@@ -1,5 +1,7 @@
 package com.microservices.viajes.clients;
 
+import com.microservices.viajes.dto.request.EstadosFactura;
+import com.microservices.viajes.dto.request.EstadosMonopatin;
 import com.microservices.viajes.dto.response.MonopatinDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,5 +16,5 @@ public interface MonopatinClientRest {
 
     //actualizar estado monopatin
     @PutMapping("api/monopatin/{id}/estado")
-    MonopatinDTO actualizarEstado(@PathVariable("id") Long id, @RequestParam String estado);
+    MonopatinDTO actualizarEstado(@PathVariable("id") Long id, @RequestParam EstadosMonopatin estado);
 }

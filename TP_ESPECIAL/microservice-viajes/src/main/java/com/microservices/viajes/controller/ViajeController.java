@@ -12,12 +12,14 @@ import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 
@@ -34,7 +36,7 @@ public class ViajeController {
         log.info("REST Request to create viaje con parada en: {}", request.getParadaInicioId());
 
         ViajeResponseDTO viaje = viajeService.createViaje(
-                request.getMonopatinId(), request.getParadaInicioId(), request.getUsuarioId(), request.getTarifaId()
+                request.getMonopatinId(), request.getUsuarioId(), request.getTarifaId(), request.getParadaInicioId()
         );
         URI location = ServletUriComponentsBuilder
                 .fromCurrentContextPath()
@@ -71,19 +73,32 @@ public class ViajeController {
         return ResponseEntity.ok(viajeService.finalizarPausa(id));
     }
 
-    @GetMapping("reportes/monopatin/{monopatinid}")
+    //PUNTO 4 A reporte de uso de monopatines por kilómetros
+    //Responsabilidad de msvc-monopatin ?
+    @GetMapping("/reportes/monopatin/{monopatinid}")
     public ResponseEntity<ReporteUsoMonopatinDTO> getReportePorMonopatin(@PathVariable @NotNull Long monopatinid,
                                                                          @RequestParam(defaultValue = "true") boolean incluirPausas) {
         return ResponseEntity.ok(viajeService.getReporteUsoMonopatin(monopatinid, incluirPausas));
     }
 
-    @GetMapping("reportes/viajes/{monopatinid}/conteo-anual")
+    //c. Como administrador quiero consultar los monopatines con más de X viajes en un cierto año.
+    @GetMapping("/reportes/viajes/{monopatinid}/conteo-anual")
     public ResponseEntity<Long> getViajesAnualesPorMonopatin(@PathVariable @NotNull Long monopatinid, @RequestParam Integer anio) {
         return ResponseEntity.ok(viajeService.contarViajesPorMonopatinEnAnio(monopatinid, anio));
     }
 
-    @GetMapping("reportes/viajes/usuario/{usuarioId}")
+    @GetMapping("/reportes/viajes/usuario/{usuarioId}")
     public ResponseEntity<List<ViajeResponseDTO>> getViajesPorUsuario(@PathVariable @NotNull Long usuarioId) {
         return ResponseEntity.ok(viajeService.getViajesByUsuario(usuarioId));
+    }
+
+    //* Como usuario quiero saber cuánto he usado los monopatines en un período...
+    @GetMapping("/reportes/viajes/usuario/{usuarioId}/periodo")
+    public ResponseEntity<List<ViajeResponseDTO>> getViajesPorUsuarioEnPeriodo(
+            @PathVariable @NotNull @Positive Long usuarioId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fin) {
+
+        return ResponseEntity.ok(viajeService.getViajesByUsuarioEnPeriodo(usuarioId, inicio, fin));
     }
 }
