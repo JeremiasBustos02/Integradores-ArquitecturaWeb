@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mysql:
     image: mysql:8.0
@@ -14,6 +12,14 @@ services:
       - ./init-scripts:/docker-entrypoint-initdb.d
     networks:
       - microservices-network
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
   mongo:
     image: mongo:6.0
     container_name: microservices-mongo
@@ -22,24 +28,29 @@ services:
     volumes:
       - mongo_data:/data/db
     networks:
-      microservices-network:
-
+      - microservices-network
 
   config-service:
-    build: ./config-service
+    build:
+      context: .
+      dockerfile: config-service/Dockerfile
     container_name: config-service
     ports:
       - "8081:8081"
     networks:
       - microservices-network
+    restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/application/default" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
 
   eureka-service:
-    build: ./eureka-service
+    build:
+      context: .
+      dockerfile: eureka-service/Dockerfile
     container_name: eureka-service
     ports:
       - "8761:8761"
@@ -51,22 +62,28 @@ services:
       - CONFIG_SERVER_URL=http://config-service:8081
     networks:
       - microservices-network
+    restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8761/" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
 
   gateway:
-    build: ./gateway
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
     container_name: gateway
     ports:
       - "8080:8080"
     depends_on:
+      config-service:
+        condition: service_healthy
       eureka-service:
         condition: service_healthy
       mysql:
-        condition: service_started
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - CONFIG_SERVER_URL=http://config-service:8081
@@ -75,17 +92,22 @@ services:
       - DB_PORT=3306
     networks:
       - microservices-network
+    restart: on-failure:5
 
-  usuarios-microservice:
-    build: ./usuarios-microservice
-    container_name: usuarios-microservice
+  microservice-user:
+    build:
+      context: .
+      dockerfile: microservice-user/Dockerfile
+    container_name: microservice-user
     ports:
       - "8083:8083"
     depends_on:
+      config-service:
+        condition: service_healthy
       eureka-service:
         condition: service_healthy
       mysql:
-        condition: service_started
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - CONFIG_SERVER_URL=http://config-service:8081
@@ -94,17 +116,46 @@ services:
       - DB_PORT=3306
     networks:
       - microservices-network
+    restart: on-failure:5
+
+  microservice-monopatin:
+    build:
+      context: .
+      dockerfile: microservice-monopatin/Dockerfile
+    container_name: microservice-monopatin
+    ports:
+      - "8082:8082"
+    depends_on:
+      config-service:
+        condition: service_healthy
+      eureka-service:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVER_URL=http://config-service:8081
+      - EUREKA_SERVER_URL=http://eureka-service:8761/eureka
+      - DB_HOST=mysql
+      - DB_PORT=3306
+    networks:
+      - microservices-network
+    restart: on-failure:5
 
   microservice-tarifas:
-    build: ./microservice-tarifas
+    build:
+      context: .
+      dockerfile: microservice-tarifas/Dockerfile
     container_name: microservice-tarifas
     ports:
       - "8084:8084"
     depends_on:
+      config-service:
+        condition: service_healthy
       eureka-service:
         condition: service_healthy
       mysql:
-        condition: service_started
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - CONFIG_SERVER_URL=http://config-service:8081
@@ -113,17 +164,22 @@ services:
       - DB_PORT=3306
     networks:
       - microservices-network
+    restart: on-failure:5
 
   microservice-facturacion:
-    build: ./microservice-facturacion
+    build:
+      context: .
+      dockerfile: microservice-facturacion/Dockerfile
     container_name: microservice-facturacion
     ports:
       - "8085:8085"
     depends_on:
+      config-service:
+        condition: service_healthy
       eureka-service:
         condition: service_healthy
       mysql:
-        condition: service_started
+        condition: service_healthy
       microservice-tarifas:
         condition: service_started
     environment:
@@ -134,24 +190,29 @@ services:
       - DB_PORT=3306
     networks:
       - microservices-network
+    restart: on-failure:5
 
-  viajes-microservice:
-    build: ./microservice-viajes
-    container_name: viajes-microservice
+  microservice-viajes:
+    build:
+      context: .
+      dockerfile: ./microservice-viajes/Dockerfile
+    container_name: microservice-viajes
     ports:
       - "8086:8086"
     depends_on:
+      config-service:
+        condition: service_healthy
       eureka-service:
         condition: service_healthy
       mongo:
         condition: service_started
-      parada-microservice:
+      microservice-parada:
         condition: service_started
       microservice-tarifas:
         condition: service_started
       microservice-facturacion:
         condition: service_started
-      usuarios-microservice:
+      microservice-user:
         condition: service_started
       microservice-monopatin:
         condition: service_started
@@ -163,17 +224,20 @@ services:
     networks:
       - microservices-network
 
-  parada-microservice:
-    build: ./microservice-parada
-    container_name: parada-microservice
+  microservice-parada:
+    build:
+      context: .
+      dockerfile: ./microservice-parada/Dockerfile
+    container_name: microservice-parada
     ports:
       - "8087:8087"
     depends_on:
+      config-service:
+        condition: service_healthy
       eureka-service:
         condition: service_healthy
       mysql:
-        condition: service_started
-
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - CONFIG_SERVER_URL=http://config-service:8081
@@ -182,6 +246,7 @@ services:
       - DB_PORT=3306
     networks:
       - microservices-network
+
 volumes:
   mysql_data:
   mongo_data:

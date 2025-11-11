@@ -15,6 +15,8 @@ public interface ViajeServiceI {
 
     ViajeResponseDTO iniciarPausa(String id);
 
+    public Integer viajesXMonopatin(Long monopatinId);
+
     ViajeResponseDTO finalizarPausa(String id);
 
     ViajeResponseDTO getViajeById(String id);
@@ -27,7 +29,7 @@ public interface ViajeServiceI {
 
     ReporteUsoMonopatinDTO getReporteUsoMonopatin(Long monopatinId, boolean incluirPausas);
 
-    Long contarViajesPorMonopatinEnAnio(Long monopatinId, Integer anio);
+    Long contarViajesPorMonopatinEnAnio(Long monopatinId, int anio);
 
     List<ViajeResponseDTO> getViajesByUsuarioEnPeriodo(Long usuarioId, LocalDateTime inicio, LocalDateTime fin);
 

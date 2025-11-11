@@ -1,7 +1,6 @@
 package com.microservices.viajes.clients;
 
 import com.microservices.viajes.dto.response.CuentaResponseDTO;
-import com.microservices.viajes.dto.response.UsuarioDTO;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -18,9 +17,10 @@ import java.util.List;
 
 @FeignClient(name = "microservice-user")
 public interface UsuarioClientRest {
-    @GetMapping("api/usuarios/{id}")
-    UsuarioDTO getUsuarioById(@PathVariable @NotNull Long id);
 
     @GetMapping("/api/usuarios/{id}/cuentas")
-    List<CuentaResponseDTO> getCuentasParaFacturar(@PathVariable("id") Long usuarioId);
+    List<CuentaResponseDTO> getCuentasUsuario(@PathVariable("id") Long usuarioId);
+
+    @GetMapping("api/usuarios/{usuarioId}/cuentas/cuenta-para-facturar")
+    Long getCuentaFacturar(@PathVariable("usuarioId") Long usuarioId);
 }

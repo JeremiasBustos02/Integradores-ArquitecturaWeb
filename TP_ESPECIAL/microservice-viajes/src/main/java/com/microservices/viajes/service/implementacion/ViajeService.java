@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -48,9 +49,8 @@ public class ViajeService implements ViajeServiceI {
             throw new InvalidViajeException("La parada de inicio no existe");
         }
         try {
-            CuentaResponseDTO cuentas = usuarioClient.getCuentasParaFacturar(usuarioId);
-            Long cuentaId = saldoSuficiente(cuentas);
-            if (cuentaId != null) throw new InvalidViajeException("El usuario no tiene fondo suficiente");
+            List<CuentaResponseDTO> cuentas = usuarioClient.getCuentasUsuario(usuarioId);
+            if (!saldoSuficiente(cuentas)) throw new InvalidViajeException("El usuario no tiene fondo suficiente");
 
         } catch (Exception e) {
             throw new InvalidViajeException("Usuario no valido o sin saldo: " + e.getMessage());
@@ -126,7 +126,7 @@ public class ViajeService implements ViajeServiceI {
 
         try {
             // esperar que me expongan el endpoint para obtener la cuenta a facturar
-            Long cuentaIdParaFacturar = usuarioClient.getCuentaParaFacturar(viaje.getUsuarioId());
+            Long cuentaIdParaFacturar = usuarioClient.getCuentaFacturar(viaje.getUsuarioId());
 
 
             FacturaRequestDTO facturaRequest = new FacturaRequestDTO(
@@ -134,6 +134,7 @@ public class ViajeService implements ViajeServiceI {
                     viaje.getId(),
                     costoTotal,
                     LocalDateTime.now(),
+                    null,
                     EstadosFactura.PENDIENTE
             );
 
@@ -225,7 +226,7 @@ public class ViajeService implements ViajeServiceI {
         }
 
         List<Viaje> viajes = viajeRepository.findByUsuarioId(usuarioId);
-        return mapper.toResponseDTOList(viajes);
+        return this.enriquecerListaDeViajes(viajes);
 
 
     }
@@ -260,7 +261,7 @@ public class ViajeService implements ViajeServiceI {
     }
 
     @Override
-    public Long contarViajesPorMonopatinEnAnio(Long monopatinId, Integer anio) {
+    public Long contarViajesPorMonopatinEnAnio(Long monopatinId, int anio) {
         LocalDateTime inicioAnio = LocalDateTime.of(anio, 1, 1, 0, 0);
         LocalDateTime finAnio = LocalDateTime.of(anio, 12, 31, 23, 59);
 
@@ -268,7 +269,11 @@ public class ViajeService implements ViajeServiceI {
                 monopatinId, inicioAnio, finAnio
         );
     }
-
+    @Override
+    public Integer viajesXMonopatin(Long monopatinId){
+        if (monopatinId == null)throw new RuntimeException("El id del monopatin debe ser valido");
+        return viajeRepository.getViajesXMonopatin(monopatinId);
+    }
     private long calcularTiempoViaje(Viaje viaje, boolean incluirPausas) {
         if (viaje.getHoraInicio() == null || viaje.getHoraFin() == null) {
             return 0;
@@ -359,12 +364,16 @@ public class ViajeService implements ViajeServiceI {
         }).collect(Collectors.toList());
     }
 
-    private Long saldoSuficiente(List<CuentaResponseDTO> cuentas) {
-        if (cuentas == null || cuentas.isEmpty()) return null;
-        List<CuentaBasicResponseDTO> cuentasUser = cuentas.stream().collect
-        return cuentas.stream().anyMatch(cuenta ->
-                cuenta.getCuentas() != null &&
-                        cuenta.getSaldo().compareTo(BigDecimal.ZERO) > 0 // Compara si saldo > 0
-        );
-    }
+    private boolean saldoSuficiente(List<CuentaResponseDTO> cuentas) {
+        if (cuentas == null || cuentas.isEmpty()) return false;
+        for (CuentaResponseDTO c : cuentas) {
+            boolean tieneSaldo = c.getSaldo() != null &&
+                    c.getSaldo().compareTo(BigDecimal.ZERO) > 0;
+            if (tieneSaldo) {
+                return true;
+            }
+        }
+        return false;
 
+    }
+}

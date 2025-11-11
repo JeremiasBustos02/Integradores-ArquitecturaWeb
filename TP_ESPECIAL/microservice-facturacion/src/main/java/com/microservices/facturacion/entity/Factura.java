@@ -26,7 +26,7 @@ public class Factura {
     private Long cuentaId;
     
     @Column(name = "viaje_id")
-    private Long viajeId;
+    private String viajeId;
     
     @Column(name = "monto_total", nullable = false)
     private Double montoTotal;

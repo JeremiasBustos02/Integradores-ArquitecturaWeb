@@ -4,6 +4,7 @@ import com.microservices.usuarios.dto.request.UsuarioRequestDTO;
 import com.microservices.usuarios.dto.response.CuentaResponseDTO;
 import com.microservices.usuarios.dto.response.UsuarioResponseDTO;
 import com.microservices.usuarios.entity.Cuenta;
+import com.microservices.usuarios.entity.TipoCuenta;
 import com.microservices.usuarios.entity.Usuario;
 import com.microservices.usuarios.exception.CuentaNotFoundException;
 import com.microservices.usuarios.exception.DuplicateResourceException;
@@ -20,7 +21,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,12 +41,12 @@ public class UsuarioService implements IUsuarioService {
     @Override
     public UsuarioResponseDTO createUsuario(UsuarioRequestDTO requestDTO) {
         log.info("Creando usuario con email: {}", requestDTO.getEmail());
-        
+
         // Validar que no exista un usuario con el mismo email
         if (usuarioRepository.existsByEmail(requestDTO.getEmail())) {
             throw new DuplicateResourceException("Ya existe un usuario con el email: " + requestDTO.getEmail());
         }
-        
+
         // Validar que no exista un usuario con el mismo celular
         if (usuarioRepository.existsByCelular(requestDTO.getCelular())) {
             throw new DuplicateResourceException("Ya existe un usuario con el celular: " + requestDTO.getCelular());
@@ -50,7 +54,7 @@ public class UsuarioService implements IUsuarioService {
 
         Usuario usuario = usuarioMapper.toEntity(requestDTO);
         Usuario savedUsuario = usuarioRepository.save(usuario);
-        
+
         log.info("Usuario creado exitosamente con ID: {}", savedUsuario.getId());
         return usuarioMapper.toResponseDTO(savedUsuario);
     }
@@ -110,34 +114,66 @@ public class UsuarioService implements IUsuarioService {
     @Transactional(readOnly = true)
     public List<CuentaResponseDTO> getCuentasByUsuarioId(Long usuarioId) {
         log.info("Obteniendo cuentas del usuario ID: {}", usuarioId);
-        
+
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new UsuarioNotFoundException(usuarioId));
-        
+
         List<CuentaResponseDTO> cuentas = usuario.getCuentas().stream()
                 .map(cuentaMapper::toResponseDTO)
                 .collect(Collectors.toList());
-        
+
         log.info("Se encontraron {} cuentas para el usuario ID: {}", cuentas.size(), usuarioId);
         return cuentas;
     }
 
     @Override
+    public Long getCuentaParaFacturar(Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNotFoundException(usuarioId));
+
+        Set<Cuenta> cuentas = usuario.getCuentas();
+
+        if (cuentas == null || cuentas.isEmpty()) {
+            throw new CuentaNotFoundException("El usuario no tiene cuentas asociadas.");
+        }
+
+
+        Optional<Cuenta> cuentaPremium = cuentas.stream()
+                .filter(c -> c.getTipoCuenta() == TipoCuenta.PREMIUM)
+                .findFirst();
+        //devolver la primera cuenta premium
+        if (cuentaPremium.isPresent()) {
+            return cuentaPremium.get().getId();
+        }
+        //buscamos otra basica
+        Optional<Cuenta> cuentaConSaldo = cuentas.stream()
+                .filter(c -> c.getSaldo() != null && c.getSaldo().compareTo(BigDecimal.ZERO) > 0)
+                .findFirst();
+
+        if (cuentaConSaldo.isPresent()) {
+            return cuentaConSaldo.get().getId();
+        }
+
+        // 3. Si no hay ninguna, falla
+        throw new CuentaNotFoundException("El usuario no tiene ninguna cuenta Premium activa ni cuentas con saldo para facturar.");
+    }
+
+    @Override
     public UsuarioResponseDTO updateUsuario(Long id, UsuarioRequestDTO requestDTO) {
         log.info("Actualizando usuario con ID: {}", id);
-        
+
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNotFoundException(id));
 
         // Validar email único si cambió
-        if (!usuario.getEmail().equals(requestDTO.getEmail()) && 
-            usuarioRepository.existsByEmail(requestDTO.getEmail())) {
+        if (!usuario.getEmail().equals(requestDTO.getEmail()) &&
+                usuarioRepository.existsByEmail(requestDTO.getEmail())) {
             throw new DuplicateResourceException("Ya existe un usuario con el email: " + requestDTO.getEmail());
         }
 
         // Validar celular único si cambió
-        if (!usuario.getCelular().equals(requestDTO.getCelular()) && 
-            usuarioRepository.existsByCelular(requestDTO.getCelular())) {
+        if (!usuario.getCelular().equals(requestDTO.getCelular()) &&
+                usuarioRepository.existsByCelular(requestDTO.getCelular())) {
             throw new DuplicateResourceException("Ya existe un usuario con el celular: " + requestDTO.getCelular());
         }
 
@@ -156,10 +192,10 @@ public class UsuarioService implements IUsuarioService {
         log.info("Eliminando usuario con ID: {}", id);
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNotFoundException(id));
-        
+
         // Desasociar de todas las cuentas antes de eliminar
         usuario.getCuentas().forEach(cuenta -> cuenta.removeUsuario(usuario));
-        
+
         usuarioRepository.delete(usuario);
         log.info("Usuario eliminado exitosamente con ID: {}", id);
     }
@@ -167,32 +203,34 @@ public class UsuarioService implements IUsuarioService {
     @Override
     public void asociarUsuarioACuenta(Long usuarioId, Long cuentaId) {
         log.info("Asociando usuario ID: {} a cuenta ID: {}", usuarioId, cuentaId);
-        
+
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new UsuarioNotFoundException(usuarioId));
-        
+
         Cuenta cuenta = cuentaRepository.findById(cuentaId)
                 .orElseThrow(() -> new CuentaNotFoundException(cuentaId));
 
         cuenta.addUsuario(usuario);
         cuentaRepository.save(cuenta);
-        
+
         log.info("Usuario asociado exitosamente a la cuenta");
     }
 
     @Override
     public void desasociarUsuarioDeCuenta(Long usuarioId, Long cuentaId) {
         log.info("Desasociando usuario ID: {} de cuenta ID: {}", usuarioId, cuentaId);
-        
+
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new UsuarioNotFoundException(usuarioId));
-        
+
         Cuenta cuenta = cuentaRepository.findById(cuentaId)
                 .orElseThrow(() -> new CuentaNotFoundException(cuentaId));
 
         cuenta.removeUsuario(usuario);
         cuentaRepository.save(cuenta);
-        
+
         log.info("Usuario desasociado exitosamente de la cuenta");
     }
+
+
 }

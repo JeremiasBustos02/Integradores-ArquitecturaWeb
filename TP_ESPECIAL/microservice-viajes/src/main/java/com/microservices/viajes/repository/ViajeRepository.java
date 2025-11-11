@@ -16,6 +16,7 @@ public interface ViajeRepository extends MongoRepository<Viaje, String> {
 
     List<Viaje> getViajesByMonopatinId(Long id);
 
+    Integer getViajesXMonopatin(Long monopatinId);
     ///
 
     //reporte de uso por usuario

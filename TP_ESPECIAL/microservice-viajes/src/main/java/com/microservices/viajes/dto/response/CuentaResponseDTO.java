@@ -5,16 +5,19 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
+
 @Getter
 
 public class CuentaResponseDTO {
     private Long id;
-    private String nombre;
-    private String apellido;
-    private String celular;
-    private String email;
+    private Long idCuentaMercadoPago;
     private LocalDateTime fechaAlta;
-    private Set<CuentaBasicResponseDTO> cuentas;
+    private Boolean estadoCuenta;
+    private TipoCuenta tipoCuenta;
+    private BigDecimal saldo;
+    private Double kilometrosRecorridosMes;
+    private LocalDateTime fechaRenovacionCupo;
 }

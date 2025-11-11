@@ -17,7 +17,7 @@ public class FacturaRequestDTO {
     @NotNull(message = "El ID de cuenta es obligatorio")
     private Long cuentaId;
 
-    private Long viajeId;
+    private String viajeId;
 
     @NotNull(message = "El monto total es obligatorio")
     @Positive(message = "El monto total debe ser positivo")
@@ -31,11 +31,6 @@ public class FacturaRequestDTO {
     @NotNull(message = "El estado es obligatorio")
     private EstadosFactura estado;
 
-    private String descripcion;
 
-    private Integer periodoMes;
 
-    private Integer periodoAnio;
-
-    private String tipoCuenta;
 }
