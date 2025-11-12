@@ -1,4 +1,5 @@
-package com.monopatines.admin.dto;
+package com.microservices.usuarios.dto.response;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,3 +17,4 @@ public class UsuarioUsoDTO {
     private Double totalKilometros;
     private Long totalMinutos;
 }
+

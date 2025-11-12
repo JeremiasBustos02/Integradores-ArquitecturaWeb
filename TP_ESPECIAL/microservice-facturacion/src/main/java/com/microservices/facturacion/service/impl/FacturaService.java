@@ -1,5 +1,6 @@
 package com.microservices.facturacion.service.impl;
 
+import com.microservices.facturacion.client.CuentaFeignClient;
 import com.microservices.facturacion.client.TarifaFeignClient;
 import com.microservices.facturacion.dto.request.FacturaRequestDTO;
 import com.microservices.facturacion.dto.response.FacturaResponseDTO;
@@ -11,9 +12,11 @@ import com.microservices.facturacion.mapper.FacturaMapper;
 import com.microservices.facturacion.repository.FacturaRepository;
 import com.microservices.facturacion.service.IFacturaService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -21,21 +24,53 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FacturaService implements IFacturaService {
 
     private final FacturaRepository facturaRepository;
     private final FacturaMapper facturaMapper;
     private final TarifaFeignClient tarifaFeignClient;
+    private final CuentaFeignClient cuentaFeignClient;
 
     @Override
     @Transactional
     public FacturaResponseDTO crearFactura(FacturaRequestDTO requestDTO) {
+        log.info("Creando factura para cuenta {} con monto {}", requestDTO.getCuentaId(), requestDTO.getMontoTotal());
+        
         Factura factura = facturaMapper.toEntity(requestDTO);
 
         // Generar número de factura único
         factura.setNumeroFactura(generarNumeroFactura());
 
         Factura facturaGuardada = facturaRepository.save(factura);
+        log.info("Factura {} creada exitosamente", facturaGuardada.getNumeroFactura());
+        
+        // DESCUENTO AUTOMÁTICO DE SALDO
+        if (requestDTO.getMontoTotal() > 0) {
+            try {
+                BigDecimal montoADescontar = BigDecimal.valueOf(requestDTO.getMontoTotal());
+                log.info("Descontando {} de la cuenta {}", montoADescontar, requestDTO.getCuentaId());
+                
+                cuentaFeignClient.descontarSaldo(requestDTO.getCuentaId(), montoADescontar);
+                
+                log.info("Saldo descontado exitosamente de la cuenta {}", requestDTO.getCuentaId());
+                
+                // Actualizar estado de factura a PAGADA
+                facturaGuardada.setEstado(EstadoFactura.PAGADA);
+                facturaGuardada = facturaRepository.save(facturaGuardada);
+                
+            } catch (Exception e) {
+                log.error("Error al descontar saldo de cuenta {}: {}", requestDTO.getCuentaId(), e.getMessage());
+                // La factura queda en estado PENDIENTE si no se pudo descontar el saldo
+                throw new RuntimeException("Error al procesar el pago: " + e.getMessage());
+            }
+        } else {
+            // Viaje gratuito (ej: cuenta Premium dentro de 100km)
+            log.info("Factura con monto $0 (viaje gratuito). Estado: PAGADA");
+            facturaGuardada.setEstado(EstadoFactura.PAGADA);
+            facturaGuardada = facturaRepository.save(facturaGuardada);
+        }
+        
         return facturaMapper.toResponseDTO(facturaGuardada);
     }
 

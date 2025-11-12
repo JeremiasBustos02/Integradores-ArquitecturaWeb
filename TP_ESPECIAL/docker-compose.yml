@@ -205,31 +205,6 @@ services:
       - microservices-network
     restart: "on-failure:5"
 
-  microservice-admin:
-    build:
-      context: .
-      dockerfile: microservice-admin/Dockerfile
-    container_name: microservice-admin
-    ports:
-      - "8088:8088"
-    depends_on:
-      config-service:
-        condition: service_healthy
-      eureka-service:
-        condition: service_healthy
-      mysql:
-        condition: service_healthy
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - CONFIG_SERVER_URL=http://config-service:8081
-      - EUREKA_SERVER_URL=http://eureka-service:8761/eureka
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - SPRING_FLYWAY_ENABLED=false
-    networks:
-      - microservices-network
-    restart: "on-failure:5"
-
   microservice-viajes:
     build:
       context: .

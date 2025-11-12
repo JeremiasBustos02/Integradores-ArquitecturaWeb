@@ -3,10 +3,11 @@ package com.microservices.usuarios.service;
 import com.microservices.usuarios.dto.request.UsuarioRequestDTO;
 import com.microservices.usuarios.dto.response.CuentaResponseDTO;
 import com.microservices.usuarios.dto.response.UsuarioResponseDTO;
+import com.microservices.usuarios.dto.response.UsuarioUsoDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.PathVariable;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface IUsuarioService {
@@ -36,4 +37,6 @@ public interface IUsuarioService {
     void desasociarUsuarioDeCuenta(Long usuarioId, Long cuentaId);
 
     Long getCuentaParaFacturar(Long usuarioId);
+
+    List<UsuarioUsoDTO> getUsuariosMasFrecuentes(LocalDate desde, LocalDate hasta, String tipoCuenta);
 }

@@ -1,13 +1,20 @@
 package com.microservices.tarifas.controller;
 
+import com.microservices.tarifas.dto.request.AjustePrecioRequestDTO;
+import com.microservices.tarifas.dto.request.PrecioVigenteRequestDTO;
 import com.microservices.tarifas.dto.request.TarifaRequestDTO;
+import com.microservices.tarifas.dto.response.AjustePrecioResponseDTO;
+import com.microservices.tarifas.dto.response.PrecioVigenteResponseDTO;
 import com.microservices.tarifas.dto.response.TarifaResponseDTO;
+import com.microservices.tarifas.service.IPrecioService;
 import com.microservices.tarifas.service.ITarifaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -18,9 +25,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/tarifas")
 @RequiredArgsConstructor
+@Validated
+@Slf4j
 public class TarifaController {
     
     private final ITarifaService tarifaService;
+    private final IPrecioService precioService;
     
     @PostMapping
     public ResponseEntity<TarifaResponseDTO> crearTarifa(@Valid @RequestBody TarifaRequestDTO requestDTO) {
@@ -80,6 +90,48 @@ public class TarifaController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
         List<TarifaResponseDTO> tarifas = tarifaService.obtenerTarifasPorRangoFechas(fechaInicio, fechaFin);
         return ResponseEntity.ok(tarifas);
+    }
+
+    // ==================== GESTIÓN DE PRECIOS VIGENTES ====================
+
+    /**
+     * f. Como administrador quiero definir precios
+     */
+    @GetMapping("/precios")
+    public ResponseEntity<List<PrecioVigenteResponseDTO>> listarPreciosVigentes() {
+        log.info("REST request to get all precios vigentes");
+        return ResponseEntity.ok(precioService.listarVigentes());
+    }
+
+    @PostMapping("/precios")
+    public ResponseEntity<PrecioVigenteResponseDTO> definirPrecioVigente(@Valid @RequestBody PrecioVigenteRequestDTO dto) {
+        log.info("REST request to create precio vigente");
+        PrecioVigenteResponseDTO created = precioService.definirVigente(dto);
+        
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(created.getId())
+                .toUri();
+        
+        return ResponseEntity.created(location).body(created);
+    }
+
+    /**
+     * f. Como administrador quiero programar ajustes de precios
+     */
+    @PostMapping("/precios/ajustes")
+    public ResponseEntity<AjustePrecioResponseDTO> programarAjustePrecio(@Valid @RequestBody AjustePrecioRequestDTO dto) {
+        log.info("REST request to program price adjustment");
+        AjustePrecioResponseDTO created = precioService.programarAjuste(dto);
+        
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(created.getId())
+                .toUri();
+        
+        return ResponseEntity.created(location).body(created);
     }
 }
 

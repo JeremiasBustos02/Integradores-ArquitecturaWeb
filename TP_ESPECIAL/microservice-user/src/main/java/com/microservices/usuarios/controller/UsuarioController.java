@@ -3,6 +3,7 @@ package com.microservices.usuarios.controller;
 import com.microservices.usuarios.dto.request.UsuarioRequestDTO;
 import com.microservices.usuarios.dto.response.CuentaResponseDTO;
 import com.microservices.usuarios.dto.response.UsuarioResponseDTO;
+import com.microservices.usuarios.dto.response.UsuarioUsoDTO;
 import com.microservices.usuarios.service.IUsuarioService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -11,12 +12,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -135,5 +138,18 @@ public class UsuarioController {
     public ResponseEntity<Long> getCuentaParaFacturar(@PathVariable Long usuarioId) {
         Long idCuenta = usuarioService.getCuentaParaFacturar(usuarioId);
         return ResponseEntity.ok(idCuenta);
+    }
+
+    /**
+     * e. Como administrador quiero ver los usuarios que más utilizan los monopatines
+     */
+    @GetMapping("/reporte/usuarios-frecuentes")
+    public ResponseEntity<List<UsuarioUsoDTO>> getUsuariosMasFrecuentes(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+            @RequestParam(required = false) String tipoCuenta) {
+        log.info("REST request to get usuarios frecuentes from {} to {}, tipo: {}", desde, hasta, tipoCuenta);
+        List<UsuarioUsoDTO> usuarios = usuarioService.getUsuariosMasFrecuentes(desde, hasta, tipoCuenta);
+        return ResponseEntity.ok(usuarios);
     }
 }

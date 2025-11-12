@@ -131,6 +131,15 @@ public class CuentaController {
         return ResponseEntity.ok(cuentaActualizada);
     }
 
+    // Endpoint POST adicional para compatibilidad con Feign
+    @PostMapping("/{id}/descontar-saldo")
+    public ResponseEntity<CuentaResponseDTO> descontarSaldoPost(
+            @PathVariable @Positive @NotNull Long id,
+            @RequestParam @Positive BigDecimal monto) {
+        log.info("REST request POST to deduct saldo {} from Cuenta ID: {}", monto, id);
+        return descontarSaldo(id, monto);
+    }
+
     @PatchMapping("/{id}/kilometros")
     public ResponseEntity<CuentaResponseDTO> actualizarKilometros(
             @PathVariable @Positive @NotNull Long id,
@@ -138,6 +147,15 @@ public class CuentaController {
         log.info("REST request to update kilometros {} for Cuenta ID: {}", kilometros, id);
         CuentaResponseDTO cuentaActualizada = cuentaService.actualizarKilometros(id, kilometros);
         return ResponseEntity.ok(cuentaActualizada);
+    }
+
+    // Endpoint POST adicional para compatibilidad con Feign
+    @PostMapping("/{id}/kilometros")
+    public ResponseEntity<CuentaResponseDTO> actualizarKilometrosPost(
+            @PathVariable @Positive @NotNull Long id,
+            @RequestParam @Positive Double kilometros) {
+        log.info("REST request POST to update kilometros {} for Cuenta ID: {}", kilometros, id);
+        return actualizarKilometros(id, kilometros);
     }
 
     @DeleteMapping("/{id}")

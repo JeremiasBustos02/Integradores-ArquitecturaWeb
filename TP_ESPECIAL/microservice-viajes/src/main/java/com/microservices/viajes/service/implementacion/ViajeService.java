@@ -91,13 +91,46 @@ public class ViajeService implements ViajeServiceI {
         if (paradaFin == null || kmRecorridos == null || kmRecorridos < 0) {
             throw new IllegalArgumentException("Parada y kilometros son obligatorios");
         }
+        
+        // Validar que existe la parada de destino
+        ParadaDTO paradaDestino;
         try {
-            ParadaDTO paradaIni = paradaClient.getParadaById(paradaFin);
+            paradaDestino = paradaClient.getParadaById(paradaFin);
         } catch (Exception e) {
             throw new InvalidViajeException("No existe la parada indicada");
         }
+        
         Viaje viaje = viajeRepository.findById(id)
                 .orElseThrow(() -> new ViajeNotFoundException(id));
+        
+        // VALIDACIÓN GPS: Verificar que el monopatín esté cerca de la parada
+        try {
+            MonopatinDTO monopatin = monopatinClient.getMonopatinById(viaje.getMonopatinId());
+            double distanciaEnMetros = calcularDistanciaGPS(
+                monopatin.getLatitud(), 
+                monopatin.getLongitud(),
+                paradaDestino.getLatitud(), 
+                paradaDestino.getLongitud()
+            );
+            
+            // Tolerancia: 50 metros
+            final double TOLERANCIA_METROS = 50.0;
+            if (distanciaEnMetros > TOLERANCIA_METROS) {
+                throw new InvalidViajeException(
+                    String.format("El monopatín debe estar en la parada para finalizar el viaje. " +
+                                "Distancia actual: %.2f metros (máximo permitido: %.0f metros)", 
+                                distanciaEnMetros, TOLERANCIA_METROS)
+                );
+            }
+            log.info("Validación GPS exitosa. Monopatín a {} metros de la parada {}", 
+                    Math.round(distanciaEnMetros), paradaDestino.getNombre());
+        } catch (InvalidViajeException e) {
+            throw e; // Re-lanzar excepciones de validación
+        } catch (Exception e) {
+            log.error("Error al validar ubicación GPS: {}", e.getMessage());
+            throw new RuntimeException("Error al validar ubicación del monopatín: " + e.getMessage());
+        }
+        
         if (viaje.getHoraFin() != null) throw new InvalidViajeException("El viaje ya esta finalizado");
         viaje.setParadaDestinoId(paradaFin);
         viaje.setDistanciaRecorrida(kmRecorridos);
@@ -117,22 +150,63 @@ public class ViajeService implements ViajeServiceI {
             // calculo de la tarifa
             costoTotal = minutosTotales * tarifa.getMontoBase();
 
-            log.info("Viaje {} finalizado. Duración: {} min. Costo: ${}", id, minutosTotales, costoTotal);
+            log.info("Viaje {} finalizado. Duración: {} min. Costo base: ${}", id, minutosTotales, costoTotal);
             if (viaje.isPausaExtensa()) {
                 costoTotal += tarifa.getMontoExtra();
                 log.info("Aplicando tarifa extra por pausa extensa. Monto extra: ${}", tarifa.getMontoExtra());
-
             }
 
         } catch (Exception e) {
             // no existio tarifa
             throw new RuntimeException("Error al calcular la tarifa del viaje: " + e.getMessage());
         }
+        
+        // Obtener cuenta para facturar y aplicar descuentos Premium
+        Long cuentaIdParaFacturar;
+        try {
+            cuentaIdParaFacturar = usuarioClient.getCuentaFacturar(viaje.getUsuarioId());
+            CuentaResponseDTO cuenta = usuarioClient.getCuentaById(cuentaIdParaFacturar);
+            
+            // LÓGICA PREMIUM: Descuento 50% si ya superó los 100km del mes
+            if (cuenta.getTipoCuenta() == TipoCuenta.PREMIUM) {
+                double kmActualesMes = cuenta.getKilometrosRecorridosMes() != null ? cuenta.getKilometrosRecorridosMes() : 0.0;
+                
+                if (kmActualesMes >= 100.0) {
+                    // Ya superó el límite gratuito, aplicar 50% descuento
+                    double costoOriginal = costoTotal;
+                    costoTotal = costoTotal * 0.5;
+                    log.info("Cuenta Premium ID {} con {} km recorridos. Aplicando 50% descuento. Costo: ${} → ${}", 
+                            cuentaIdParaFacturar, kmActualesMes, costoOriginal, costoTotal);
+                } else if (kmActualesMes + kmRecorridos > 100.0) {
+                    // Atraviesa el límite de 100km en este viaje
+                    double kmGratuitos = 100.0 - kmActualesMes;
+                    double kmConDescuento = kmRecorridos - kmGratuitos;
+                    log.info("Cuenta Premium ID {} atraviesa límite de 100km. {} km gratuitos, {} km con 50% descuento", 
+                            cuentaIdParaFacturar, kmGratuitos, kmConDescuento);
+                    // Para simplificar, cobrar proporcional del viaje con descuento
+                    double proporcion = kmConDescuento / kmRecorridos;
+                    double costoOriginal = costoTotal;
+                    costoTotal = (costoTotal * (1 - proporcion)) + (costoTotal * proporcion * 0.5);
+                    log.info("Costo ajustado: ${} → ${}", costoOriginal, costoTotal);
+                } else {
+                    // Dentro del límite de 100km, viaje gratuito
+                    log.info("Cuenta Premium ID {} con {} km, viaje gratuito (dentro de 100km)", 
+                            cuentaIdParaFacturar, kmActualesMes);
+                    costoTotal = 0.0;
+                }
+                
+                // Actualizar kilómetros recorridos del mes
+                usuarioClient.actualizarKilometros(cuentaIdParaFacturar, kmRecorridos);
+            }
+            
+        } catch (Exception e) {
+            log.error("Error al obtener cuenta para facturar: {}", e.getMessage());
+            throw new RuntimeException("Error al obtener cuenta: " + e.getMessage());
+        }
+        
         Viaje viajeAct = viajeRepository.save(viaje);
 
         try {
-            // esperar que me expongan el endpoint para obtener la cuenta a facturar
-            Long cuentaIdParaFacturar = usuarioClient.getCuentaFacturar(viaje.getUsuarioId());
 
 
             FacturaRequestDTO facturaRequest = new FacturaRequestDTO(
@@ -380,6 +454,25 @@ public class ViajeService implements ViajeServiceI {
             }
         }
         return false;
+    }
 
+    /**
+     * Calcula la distancia en metros entre dos puntos GPS usando la fórmula de Haversine
+     * @return distancia en metros
+     */
+    private double calcularDistanciaGPS(double lat1, double lon1, double lat2, double lon2) {
+        final int RADIO_TIERRA_KM = 6371;
+
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        // Retornar en metros (multiplicar por 1000)
+        return RADIO_TIERRA_KM * c * 1000.0;
     }
 }

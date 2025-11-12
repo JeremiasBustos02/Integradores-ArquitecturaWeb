@@ -1,8 +1,11 @@
 package com.microservices.usuarios.service.impl;
 
+import com.microservices.usuarios.client.ViajesFeignClient;
 import com.microservices.usuarios.dto.request.UsuarioRequestDTO;
 import com.microservices.usuarios.dto.response.CuentaResponseDTO;
 import com.microservices.usuarios.dto.response.UsuarioResponseDTO;
+import com.microservices.usuarios.dto.response.UsuarioUsoDTO;
+import com.microservices.usuarios.dto.response.ViajeResponseDTO;
 import com.microservices.usuarios.entity.Cuenta;
 import com.microservices.usuarios.entity.TipoCuenta;
 import com.microservices.usuarios.entity.Usuario;
@@ -22,6 +25,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -37,6 +44,7 @@ public class UsuarioService implements IUsuarioService {
     private final CuentaRepository cuentaRepository;
     private final UsuarioMapper usuarioMapper;
     private final CuentaMapper cuentaMapper;
+    private final ViajesFeignClient viajesFeignClient;
 
     @Override
     public UsuarioResponseDTO createUsuario(UsuarioRequestDTO requestDTO) {
@@ -232,5 +240,78 @@ public class UsuarioService implements IUsuarioService {
         log.info("Usuario desasociado exitosamente de la cuenta");
     }
 
-
+    @Override
+    @Transactional(readOnly = true)
+    public List<UsuarioUsoDTO> getUsuariosMasFrecuentes(LocalDate desde, LocalDate hasta, String tipoCuenta) {
+        log.info("Generando reporte de usuarios más frecuentes desde {} hasta {}, tipo: {}", desde, hasta, tipoCuenta);
+        
+        LocalDateTime inicioDateTime = desde.atStartOfDay();
+        LocalDateTime finDateTime = hasta.atTime(23, 59, 59);
+        
+        // Obtener todos los usuarios
+        List<Usuario> todosUsuarios = usuarioRepository.findAll();
+        
+        // Filtrar por tipo de cuenta si se especifica
+        if (tipoCuenta != null && !tipoCuenta.isBlank()) {
+            TipoCuenta tipoEnum = TipoCuenta.valueOf(tipoCuenta.toUpperCase());
+            todosUsuarios = todosUsuarios.stream()
+                    .filter(u -> u.getCuentas().stream()
+                            .anyMatch(c -> c.getTipoCuenta() == tipoEnum))
+                    .collect(Collectors.toList());
+        }
+        
+        // Calcular estadísticas para cada usuario
+        List<UsuarioUsoDTO> resultado = new ArrayList<>();
+        
+        for (Usuario usuario : todosUsuarios) {
+            try {
+                List<ViajeResponseDTO> viajes = viajesFeignClient.getViajesPorUsuarioEnPeriodo(
+                        usuario.getId(), 
+                        inicioDateTime, 
+                        finDateTime
+                );
+                
+                if (viajes == null || viajes.isEmpty()) {
+                    continue; // Saltar usuarios sin viajes
+                }
+                
+                int cantidadViajes = viajes.size();
+                double totalKm = viajes.stream()
+                        .mapToDouble(v -> v.getDistanciaRecorrida() != null ? v.getDistanciaRecorrida() : 0.0)
+                        .sum();
+                
+                long totalMinutos = viajes.stream()
+                        .filter(v -> v.getHoraInicio() != null && v.getHoraFin() != null)
+                        .mapToLong(v -> Duration.between(v.getHoraInicio(), v.getHoraFin()).toMinutes())
+                        .sum();
+                
+                String tipoCuentaUsuario = usuario.getCuentas().stream()
+                        .findFirst()
+                        .map(c -> c.getTipoCuenta().name())
+                        .orElse("SIN_CUENTA");
+                
+                UsuarioUsoDTO dto = new UsuarioUsoDTO(
+                        usuario.getId(),
+                        usuario.getNombre(),
+                        usuario.getApellido(),
+                        usuario.getEmail(),
+                        tipoCuentaUsuario,
+                        cantidadViajes,
+                        totalKm,
+                        totalMinutos
+                );
+                
+                resultado.add(dto);
+                
+            } catch (Exception e) {
+                log.error("Error al procesar viajes del usuario {}: {}", usuario.getId(), e.getMessage());
+            }
+        }
+        
+        // Ordenar por cantidad de viajes (descendente)
+        resultado.sort((a, b) -> Integer.compare(b.getCantidadViajes(), a.getCantidadViajes()));
+        
+        log.info("Reporte generado con {} usuarios", resultado.size());
+        return resultado;
+    }
 }

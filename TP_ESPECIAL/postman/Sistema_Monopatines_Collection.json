@@ -377,7 +377,51 @@
 					}
 				},
 				{
-					"name": "2.4 Finalizar Viaje",
+					"name": "2.4 Mover Monopatín a Parada Destino",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"console.log('✅ Monopatín movido a parada destino (simulando GPS)');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/monopatines/{{MONOPATIN_ID_1}}/ubicacion?latitud=-37.3250&longitud=-59.1380",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "monopatines", "{{MONOPATIN_ID_1}}", "ubicacion"],
+							"query": [
+								{"key": "latitud", "value": "-37.3250"},
+								{"key": "longitud", "value": "-59.1380"}
+							]
+						},
+						"description": "Actualiza ubicación GPS del monopatín a la parada destino para poder finalizar el viaje."
+					}
+				},
+				{
+					"name": "2.5 Finalizar Viaje (✅ GPS Validado)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    console.log('✅ Viaje finalizado con ID: ' + jsonData.id);",
+									"    console.log('✅ GPS validado correctamente');",
+									"    console.log('✅ Factura generada automáticamente');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "PUT",
 						"header": [{"key": "Content-Type", "value": "application/json"}],
@@ -390,11 +434,449 @@
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "viajes", "{{VIAJE_ID_ACTUAL}}"]
 						},
-						"description": "Finalizar viaje en parada válida. Genera factura automáticamente con cobro mínimo de 1 minuto."
+						"description": "Finalizar viaje. Valida GPS (monopatín debe estar <50m de parada), genera factura y descuenta saldo automáticamente."
+					}
+				},
+				{
+					"name": "2.6 Verificar Saldo Descontado",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/cuentas/{{CUENTA_ID_1}}",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "cuentas", "{{CUENTA_ID_1}}"]
+						},
+						"description": "Verificar que el saldo se descontó automáticamente después del viaje."
 					}
 				}
 			],
 			"description": "Flujo completo de viaje AUTOMATIZADO. Los IDs se capturan y usan automáticamente."
+		},
+		{
+			"name": "2A. Test Validación GPS",
+			"item": [
+				{
+					"name": "2A.1 Iniciar Viaje para GPS Test",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('VIAJE_GPS_TEST_ID', jsonData.id);",
+									"    console.log('✅ Viaje GPS test iniciado: ' + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"monopatinId\": {{MONOPATIN_ID_1}},\n  \"usuarioId\": {{USUARIO_ID_1}},\n  \"tarifaId\": {{TARIFA_ID}},\n  \"paradaInicioId\": {{PARADA_ID_1}}\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/viajes",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "viajes"]
+						},
+						"description": "Iniciar viaje en Parada 1 (Centro)."
+					}
+				},
+				{
+					"name": "2A.2 Intentar Finalizar LEJOS (❌ Debe Fallar)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('GPS Validation Works', function () {",
+									"    pm.response.to.have.status(400);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('metros');",
+									"    console.log('✅ Validación GPS funcionando: ' + jsonData.message);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paradaFin\": {{PARADA_ID_2}},\n  \"kmRecorridos\": 5.5\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/viajes/{{VIAJE_GPS_TEST_ID}}",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "viajes", "{{VIAJE_GPS_TEST_ID}}"]
+						},
+						"description": "Intentar finalizar en parada lejana. Debe fallar con error de GPS."
+					}
+				},
+				{
+					"name": "2A.3 Mover Monopatín a Parada Correcta",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/monopatines/{{MONOPATIN_ID_1}}/ubicacion?latitud=-37.3250&longitud=-59.1380",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "monopatines", "{{MONOPATIN_ID_1}}", "ubicacion"],
+							"query": [
+								{"key": "latitud", "value": "-37.3250"},
+								{"key": "longitud", "value": "-59.1380"}
+							]
+						},
+						"description": "Mover monopatín a Parada 2 para que pase validación GPS."
+					}
+				},
+				{
+					"name": "2A.4 Finalizar Viaje (✅ GPS OK)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Trip Ended Successfully', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.horaFin).to.not.be.null;",
+									"    console.log('✅ Viaje finalizado correctamente (GPS validado)');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paradaFin\": {{PARADA_ID_2}},\n  \"kmRecorridos\": 5.5\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/viajes/{{VIAJE_GPS_TEST_ID}}",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "viajes", "{{VIAJE_GPS_TEST_ID}}"]
+						},
+						"description": "Finalizar viaje con monopatín en parada correcta. Debe funcionar."
+					}
+				}
+			],
+			"description": "Tests de validación GPS: rechaza si está lejos, acepta si está cerca de la parada."
+		},
+		{
+			"name": "2B. Tests Cuenta PREMIUM",
+			"item": [
+				{
+					"name": "2B.1 Preparar Monopatín",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/monopatines/{{MONOPATIN_ID_1}}/estado?estado=DISPONIBLE",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "monopatines", "{{MONOPATIN_ID_1}}", "estado"],
+							"query": [{"key": "estado", "value": "DISPONIBLE"}]
+						}
+					}
+				},
+				{
+					"name": "2B.2 Iniciar Viaje Premium (<100km)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('VIAJE_PREMIUM_ID', jsonData.id);",
+									"    console.log('✅ Viaje Premium iniciado: ' + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"monopatinId\": {{MONOPATIN_ID_1}},\n  \"usuarioId\": {{USUARIO_ID_2}},\n  \"tarifaId\": {{TARIFA_ID}},\n  \"paradaInicioId\": {{PARADA_ID_1}}\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/viajes",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "viajes"]
+						},
+						"description": "Iniciar viaje con cuenta PREMIUM (debería ser GRATIS si <100km del mes)."
+					}
+				},
+				{
+					"name": "2B.3 Mover a Parada (GPS)",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/monopatines/{{MONOPATIN_ID_1}}/ubicacion?latitud=-37.3217&longitud=-59.1332",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "monopatines", "{{MONOPATIN_ID_1}}", "ubicacion"],
+							"query": [
+								{"key": "latitud", "value": "-37.3217"},
+								{"key": "longitud", "value": "-59.1332"}
+							]
+						}
+					}
+				},
+				{
+					"name": "2B.4 Finalizar Viaje Premium (Gratis)",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paradaFin\": {{PARADA_ID_1}},\n  \"kmRecorridos\": 8.0\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/viajes/{{VIAJE_PREMIUM_ID}}",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "viajes", "{{VIAJE_PREMIUM_ID}}"]
+						},
+						"description": "Finalizar viaje Premium. Monto $0 si <100km del mes."
+					}
+				},
+				{
+					"name": "2B.5 Verificar Viaje Gratis",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/cuentas/{{CUENTA_ID_2}}",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "cuentas", "{{CUENTA_ID_2}}"]
+						},
+						"description": "Verificar que saldo no cambió y km se actualizaron."
+					}
+				},
+				{
+					"name": "2B.6 Actualizar a 100km",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/cuentas/{{CUENTA_ID_2}}/kilometros?kilometros=92",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "cuentas", "{{CUENTA_ID_2}}", "kilometros"],
+							"query": [{"key": "kilometros", "value": "92"}]
+						},
+						"description": "Simular que la cuenta llegó a 100km para probar descuento 50%."
+					}
+				},
+				{
+					"name": "2B.7 Preparar Monopatín Again",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/monopatines/{{MONOPATIN_ID_1}}/estado?estado=DISPONIBLE",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "monopatines", "{{MONOPATIN_ID_1}}", "estado"],
+							"query": [{"key": "estado", "value": "DISPONIBLE"}]
+						}
+					}
+				},
+				{
+					"name": "2B.8 Iniciar Viaje Premium (>100km)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('VIAJE_PREMIUM_DESC_ID', jsonData.id);",
+									"    console.log('✅ Viaje Premium >100km iniciado: ' + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"monopatinId\": {{MONOPATIN_ID_1}},\n  \"usuarioId\": {{USUARIO_ID_2}},\n  \"tarifaId\": {{TARIFA_ID}},\n  \"paradaInicioId\": {{PARADA_ID_1}}\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/viajes",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "viajes"]
+						}
+					}
+				},
+				{
+					"name": "2B.9 Finalizar Viaje (50% Descuento)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    console.log('✅ Viaje finalizado con 50% descuento aplicado');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paradaFin\": {{PARADA_ID_1}},\n  \"kmRecorridos\": 10.0\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/viajes/{{VIAJE_PREMIUM_DESC_ID}}",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "viajes", "{{VIAJE_PREMIUM_DESC_ID}}"]
+						},
+						"description": "Finalizar viaje con >100km. Aplica 50% descuento automáticamente."
+					}
+				},
+				{
+					"name": "2B.10 Verificar Descuento 50%",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/facturas",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "facturas"]
+						},
+						"description": "Verificar que el monto es 50% del normal (ejemplo: $50 → $25)."
+					}
+				}
+			],
+			"description": "Tests específicos para funcionalidad Premium: viajes gratis <100km y 50% descuento >100km."
+		},
+		{
+			"name": "2C. Tests Admin - Reportes",
+			"item": [
+				{
+					"name": "2C.1 Reporte Usuarios Frecuentes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/usuarios/reporte/usuarios-frecuentes?desde=2025-01-01&hasta=2025-12-31",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "usuarios", "reporte", "usuarios-frecuentes"],
+							"query": [
+								{"key": "desde", "value": "2025-01-01"},
+								{"key": "hasta", "value": "2025-12-31"}
+							]
+						},
+						"description": "Reporte de usuarios más frecuentes. MOVIDO a microservice-user."
+					}
+				},
+				{
+					"name": "2C.2 Reporte Usuarios por Tipo PREMIUM",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/usuarios/reporte/usuarios-frecuentes?desde=2025-01-01&hasta=2025-12-31&tipoCuenta=PREMIUM",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "usuarios", "reporte", "usuarios-frecuentes"],
+							"query": [
+								{"key": "desde", "value": "2025-01-01"},
+								{"key": "hasta", "value": "2025-12-31"},
+								{"key": "tipoCuenta", "value": "PREMIUM"}
+							]
+						},
+						"description": "Filtrar usuarios frecuentes solo de cuentas PREMIUM. MOVIDO a microservice-user."
+					}
+				},
+				{
+					"name": "2C.3 Total Facturado (Meses)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/facturas/reporte/total-facturado?anio=2025&mesInicio=1&mesFin=12",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "facturas", "reporte", "total-facturado"],
+							"query": [
+								{"key": "anio", "value": "2025"},
+								{"key": "mesInicio", "value": "1"},
+								{"key": "mesFin", "value": "12"}
+							]
+						},
+						"description": "Total facturado en rango de meses. Ya existe en microservice-facturacion."
+					}
+				},
+				{
+					"name": "2C.4 Anular Cuenta",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/cuentas/3/deshabilitar",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "cuentas", "3", "deshabilitar"]
+						},
+						"description": "Como administrador, anular/deshabilitar una cuenta de usuario."
+					}
+				},
+				{
+					"name": "2C.5 Definir Precio Vigente",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"precioKm\": 60.0,\n  \"precioMin\": 12.0,\n  \"moneda\": \"ARS\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/tarifas/precios",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "tarifas", "precios"]
+						},
+						"description": "Definir nuevo precio vigente. MOVIDO a microservice-tarifas."
+					}
+				},
+				{
+					"name": "2C.6 Programar Ajuste de Precio",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"precioKm\": 70.0,\n  \"precioMin\": 15.0,\n  \"extraPausaMultiplicador\": 2.0,\n  \"efectivaDesde\": \"2025-12-01T00:00:00Z\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/tarifas/precios/ajustes",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "tarifas", "precios", "ajustes"]
+						},
+						"description": "Programar ajuste de precio futuro (se aplica automáticamente). MOVIDO a microservice-tarifas."
+					}
+				}
+			],
+			"description": "Tests de funcionalidades administrativas y reportes."
 		},
 		{
 			"name": "3. Funcionalidad A - Reporte Kilómetros",

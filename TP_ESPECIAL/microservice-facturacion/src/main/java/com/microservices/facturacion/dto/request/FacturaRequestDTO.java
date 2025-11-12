@@ -21,7 +21,6 @@ public class FacturaRequestDTO {
     private String viajeId;
 
     @NotNull(message = "El monto total es obligatorio")
-    @Positive(message = "El monto total debe ser positivo")
     private Double montoTotal;
 
     @NotNull(message = "La fecha de emisión es obligatoria")

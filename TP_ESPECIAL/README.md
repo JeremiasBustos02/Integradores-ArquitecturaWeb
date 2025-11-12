@@ -23,34 +23,52 @@ El sistema incluye los siguientes servicios:
 | **Config Service** | 8081 | - | Gestión de configuración centralizada |
 | **Eureka Service** | 8761 | - | Registro y descubrimiento de servicios |
 | **Gateway** | 8080 | `auth_db` | API Gateway con autenticación JWT |
-| **Microservice User** | 8083 | `usuarios_db` | Gestión de usuarios y cuentas |
-| **Microservice Monopatin** | 8082 | `monopatin_db` | Gestión de monopatines y viajes |
-| **Microservice Tarifas** | 8084 | `tarifas_db` | Gestión de tarifas y precios |
-| **Microservice Facturación** | 8085 | `facturacion_db` | Gestión de facturación y reportes |
-| **MySQL** | 3306 | - | Servidor de base de datos |
+| **Microservice User** | 8083 | `usuarios_db` | Gestión de usuarios, cuentas y reportes de uso |
+| **Microservice Monopatin** | 8082 | `monopatin_db` | Gestión de monopatines y reportes de kilómetros |
+| **Microservice Tarifas** | 8084 | `tarifas_db` | Gestión de tarifas, precios y ajustes programados |
+| **Microservice Facturación** | 8085 | `facturacion_db` | Gestión de facturación y reportes financieros |
+| **Microservice Viajes** | 8086 | `viajes_db` (MongoDB) | Gestión de viajes, pausas y validación GPS |
+| **Microservice Parada** | 8087 | `parada_db` | Gestión de paradas |
+| **MySQL** | 3306 | - | Servidor de base de datos relacional |
+| **MongoDB** | 27017 | - | Servidor de base de datos NoSQL |
 
 ### 📊 Bases de Datos
 
-El sistema utiliza múltiples bases de datos MySQL (una por microservicio):
+El sistema utiliza múltiples bases de datos (una por microservicio):
 
+**MySQL:**
 - **auth_db**: Datos de autenticación (Gateway)
 - **usuarios_db**: Usuarios, cuentas y relaciones
-- **monopatin_db**: Monopatines, viajes y ubicaciones
-- **tarifas_db**: Tarifas, precios y vigencias
-- **facturacion_db**: Facturas, estados y reportes
+- **monopatin_db**: Monopatines y ubicaciones GPS
+- **tarifas_db**: Tarifas, precios vigentes y ajustes programados
+- **facturacion_db**: Facturas, estados y reportes financieros
+- **parada_db**: Paradas y ubicaciones
 
-> Todas las bases de datos se crean automáticamente con `createDatabaseIfNotExist=true`
+**MongoDB:**
+- **viaje_db**: Viajes, pausas y datos temporales de uso
+
+> Todas las bases de datos se crean automáticamente
 
 ## ✨ Características
 
+### **Core del Sistema:**
 - ✅ **Autenticación JWT** completa
 - ✅ **Descubrimiento de Servicios** con Eureka
-- ✅ **API Gateway** con enrutamiento
+- ✅ **API Gateway** con enrutamiento inteligente
 - ✅ **Configuración Centralizada** con Spring Cloud Config
 - ✅ **Seguridad basada en roles** (ADMIN, USER)
-- ✅ **Base de datos MySQL** integrada
-- ✅ **Arquitectura de Microservicios** escalable
-- ✅ **Docker** ready
+- ✅ **Arquitectura de Microservicios** escalable y desacoplada
+- ✅ **Docker** ready con health checks
+
+### **Funcionalidades Avanzadas:**
+- 🛰️ **Validación GPS** - Verificación de ubicación (50m tolerancia) al finalizar viajes
+- 💰 **Pago Automático** - Descuento de saldo al generar factura
+- ⭐ **Cuentas Premium** - Viajes gratis <100km/mes, 50% descuento >100km
+- ⏱️ **Detección de Pausas Extensas** - Cargo extra >15 minutos
+- 📊 **Reportes Administrativos** - Usuarios frecuentes, facturación, uso de monopatines
+- 🔄 **Ajustes de Precio Programados** - Scheduler automático
+- 🗺️ **Búsqueda por Proximidad** - Monopatines cercanos con cálculo GPS
+- 🔧 **Gestión de Mantenimiento** - Estados y trazabilidad de monopatines
 
 ## 📋 Prerrequisitos
 
@@ -357,93 +375,136 @@ curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
 
 ## 📡 Endpoints Disponibles
 
+> **Acceso:** Todos los endpoints se acceden vía Gateway en `http://localhost:8080`
+
 ### 🔐 Autenticación (Gateway)
 - `POST /api/authenticate` - Login y obtener JWT token
-- `POST /api/usuarios` - Registrar nuevo usuario
+- `POST /api/register` - Registrar nuevo usuario
 
-### 👥 Microservice User (vía Gateway)
+---
 
-#### Usuarios
-- `GET /api/usuarios` - Obtener todos los usuarios (paginado)
-- `POST /api/usuarios` - Crear nuevo usuario
-- `GET /api/usuarios/{id}` - Obtener usuario por ID
-- `GET /api/usuarios/{id}/cuentas` - Obtener todas las cuentas del usuario
-- `GET /api/usuarios/email/{email}` - Obtener usuario por email
-- `GET /api/usuarios/celular/{celular}` - Obtener usuario por celular
+### 👤 Microservice User (Puerto 8083)
+
+#### **Gestión de Usuarios**
+- `POST /api/usuarios` - Crear usuario
+- `GET /api/usuarios` - Listar usuarios (paginado)
+- `GET /api/usuarios/{id}` - Obtener por ID
+- `GET /api/usuarios/email/{email}` - Buscar por email
+- `GET /api/usuarios/celular/{celular}` - Buscar por celular
 - `PUT /api/usuarios/{id}` - Actualizar usuario
 - `DELETE /api/usuarios/{id}` - Eliminar usuario
-- `GET /api/usuarios/search?nombre={nombre}&apellido={apellido}` - Buscar usuarios
-- `POST /api/usuarios/{usuarioId}/cuentas/{cuentaId}` - Asociar usuario a cuenta
-- `DELETE /api/usuarios/{usuarioId}/cuentas/{cuentaId}` - Desasociar usuario
+- `POST /api/usuarios/{usuarioId}/cuentas/{cuentaId}` - Asociar a cuenta
+- `DELETE /api/usuarios/{usuarioId}/cuentas/{cuentaId}` - Desasociar
 
-#### Cuentas
-- `GET /api/cuentas` - Obtener todas las cuentas (paginado)
-- `POST /api/cuentas` - Crear nueva cuenta
-- `GET /api/cuentas/{id}` - Obtener cuenta por ID
-- `GET /api/cuentas/mercado-pago/{idMercadoPago}` - Cuenta por ID Mercado Pago
-- `GET /api/cuentas/estado/{estado}` - Cuentas por estado
-- `GET /api/cuentas/tipo/{tipo}` - Cuentas por tipo (BASICA/PREMIUM)
+#### **Gestión de Cuentas**
+- `POST /api/cuentas` - Crear cuenta
+- `GET /api/cuentas` - Listar cuentas (paginado)
+- `GET /api/cuentas/{id}` - Obtener por ID
+- `GET /api/cuentas/estado/{true|false}` - Filtrar por estado
+- `GET /api/cuentas/tipo/{BASICA|PREMIUM}` - Filtrar por tipo
+- `PATCH /api/cuentas/{id}/cargar-saldo?monto=X` - Cargar saldo
+- `PATCH /api/cuentas/{id}/descontar-saldo?monto=X` - Descontar saldo
 - `PATCH /api/cuentas/{id}/habilitar` - Habilitar cuenta
-- `PATCH /api/cuentas/{id}/deshabilitar` - Deshabilitar cuenta
-- `PATCH /api/cuentas/{id}/cargar-saldo?monto={monto}` - Cargar saldo
-- `PATCH /api/cuentas/{id}/descontar-saldo?monto={monto}` - Descontar saldo
-- `DELETE /api/cuentas/{id}` - Eliminar cuenta
+- `PATCH /api/cuentas/{id}/deshabilitar` - 🔴 Anular cuenta
+- `POST /api/cuentas/{id}/renovar-cupo` - Renovar cupo Premium
 
-### 🛴 Microservice Monopatin (vía Gateway)
+#### **📊 Reportes**
+- `GET /api/usuarios/reporte/usuarios-frecuentes?desde=DATE&hasta=DATE&tipoCuenta=PREMIUM` - Usuarios más frecuentes ✨
 
-#### CRUD de Monopatines
-- `GET /api/monopatines` - Listar todos los monopatines
-- `POST /api/monopatines` - Crear nuevo monopatín
-- `GET /api/monopatines/{id}` - Obtener monopatín por ID
-- `PUT /api/monopatines/{id}` - Actualizar monopatín
-- `DELETE /api/monopatines/{id}` - Eliminar monopatín
+---
 
-#### Gestión de Viajes
+### 🛴 Microservice Monopatin (Puerto 8082)
+
+#### **CRUD de Monopatines**
+- `POST /api/monopatines` - Crear monopatín
+- `GET /api/monopatines` - Listar monopatines
+- `GET /api/monopatines/{id}` - Obtener por ID
+- `PUT /api/monopatines/{id}` - Actualizar
+- `DELETE /api/monopatines/{id}` - Eliminar
+
+#### **Gestión de Estado y Mantenimiento**
+- `PUT /api/monopatines/{id}/estado?estado={DISPONIBLE|EN_USO|MANTENIMIENTO}` - Cambiar estado
+- `POST /api/monopatines/{id}/mantenimiento` - Marcar en mantenimiento
+- `DELETE /api/monopatines/{id}/mantenimiento` - Sacar de mantenimiento
+
+#### **Ubicación GPS** 🛰️
+- `PUT /api/monopatines/{id}/ubicacion?latitud=X&longitud=Y` - Actualizar ubicación
+- `GET /api/monopatines/cercanos?latitud=X&longitud=Y&radioKm=5` - Buscar cercanos
+
+#### **📊 Reportes**
+- `GET /api/monopatines/reporte/kilometros?incluirPausas=true` - Reporte de uso por kilómetros
+- `GET /api/monopatines/reporte/viajes?cantidad=X` - Monopatines con más de X viajes
+
+---
+
+### 🚶 Microservice Viajes (Puerto 8086 - MongoDB)
+
+#### **Gestión de Viajes**
 - `POST /api/viajes` - Iniciar viaje
-- `PUT /api/viajes/{id}/finalizar` - Finalizar viaje
-- `GET /api/viajes` - Listar viajes
+- `PUT /api/viajes/{id}` - 🛰️ Finalizar viaje (con validación GPS)
 - `GET /api/viajes/{id}` - Obtener viaje por ID
+- `POST /api/viajes/{id}/pausa/iniciar` - Pausar viaje
+- `PUT /api/viajes/{id}/pausa/finalizar` - Reanudar viaje
 
-> 📚 Para más detalles ver documentación específica del microservicio
+#### **📊 Reportes**
+- `GET /api/viajes/reportes/usuario/{usuarioId}` - Viajes de un usuario
+- `GET /api/viajes/reportes/usuario/{usuarioId}/periodo?inicio=X&fin=Y` - Viajes en período
+- `GET /api/viajes/reportes/{monopatinId}/cantidad` - Cantidad por monopatín
 
-### 💰 Microservice Tarifas
+---
 
-#### CRUD de Tarifas
-- `POST /api/tarifas` - Crear nueva tarifa (incluye ajuste de precios)
-- `GET /api/tarifas` - Listar todas las tarifas
-- `GET /api/tarifas/{id}` - Obtener tarifa por ID
-- `PUT /api/tarifas/{id}` - Actualizar tarifa
-- `DELETE /api/tarifas/{id}` - Eliminar tarifa
+### 📍 Microservice Parada (Puerto 8087)
+- `POST /api/paradas` - Crear parada
+- `GET /api/paradas` - Listar paradas
+- `GET /api/paradas/{id}` - Obtener por ID
+- `PUT /api/paradas/{id}` - Actualizar
+- `DELETE /api/paradas/{id}` - Eliminar
 
-#### Consultas Especiales
-- `GET /api/tarifas/activa` - Obtener tarifa actualmente activa
-- `GET /api/tarifas/vigente?fecha={fecha}` - Tarifa vigente en fecha específica
-- `GET /api/tarifas/buscar?fechaInicio={fecha}&fechaFin={fecha}` - Buscar por rango
+---
 
-> **💡 Ajuste de Precios**: Para ajustar precios, crear nueva tarifa con `activa: true`
+### 💵 Microservice Tarifas (Puerto 8084)
 
-### 📄 Microservice Facturación
+#### **CRUD de Tarifas**
+- `POST /api/tarifas` - Crear tarifa
+- `GET /api/tarifas` - Listar tarifas
+- `GET /api/tarifas/{id}` - Obtener por ID
+- `PUT /api/tarifas/{id}` - Actualizar
+- `DELETE /api/tarifas/{id}` - Eliminar
+- `GET /api/tarifas/activa` - Obtener tarifa activa
+- `GET /api/tarifas/vigente?fecha=DATE` - Tarifa vigente en fecha
 
-#### CRUD de Facturas
-- `POST /api/facturas` - Crear nueva factura
-- `GET /api/facturas` - Listar todas las facturas
-- `GET /api/facturas/{id}` - Obtener factura por ID
-- `PUT /api/facturas/{id}` - Actualizar factura
-- `DELETE /api/facturas/{id}` - Eliminar factura
-- `PATCH /api/facturas/{id}/estado?estado={estado}` - Cambiar estado
+#### **Gestión de Precios Vigentes** ✨
+- `GET /api/tarifas/precios` - Listar precios vigentes
+- `POST /api/tarifas/precios` - Definir nuevo precio vigente
 
-#### Consultas y Filtros
+#### **Ajustes Programados** 🔄
+- `POST /api/tarifas/precios/ajustes` - Programar ajuste de precio (aplicación automática)
+
+---
+
+### 📄 Microservice Facturación (Puerto 8085)
+
+#### **CRUD de Facturas**
+- `POST /api/facturas` - 💰 Crear factura (descuenta saldo automáticamente)
+- `GET /api/facturas` - Listar facturas
+- `GET /api/facturas/{id}` - Obtener por ID
+- `PUT /api/facturas/{id}` - Actualizar
+- `DELETE /api/facturas/{id}` - Eliminar
+- `PATCH /api/facturas/{id}/estado?estado=PAGADA` - Cambiar estado
+
+#### **Consultas y Filtros**
 - `GET /api/facturas/cuenta/{cuentaId}` - Facturas por cuenta
-- `GET /api/facturas/estado/{estado}` - Facturas por estado
-- `GET /api/facturas/rango-fechas?fechaInicio={fecha}&fechaFin={fecha}` - Por rango
-- `GET /api/facturas/cuenta/{cuentaId}/rango-fechas?...` - Cuenta + rango
+- `GET /api/facturas/estado/{estado}` - Filtrar por estado
+- `GET /api/facturas/rango-fechas?fechaInicio=X&fechaFin=Y` - Por rango de fechas
 
-#### Reportes
-- `GET /api/facturas/reporte/total-facturado?mesInicio={mes}&mesFin={mes}&anio={año}` - Reporte financiero
+#### **📊 Reportes**
+- `GET /api/facturas/reporte/total-facturado?anio=2025&mesInicio=1&mesFin=12` - Total facturado
 
-**Estados válidos**: `PENDIENTE`, `PAGADA`, `VENCIDA`, `CANCELADA`
+**Estados:** `PENDIENTE`, `PAGADA`, `VENCIDA`, `CANCELADA`
 
-> 📚 Para más detalles ver [MICROSERVICES_README.md](./MICROSERVICES_README.md)
+---
+
+> 📚 **Documentación completa:** Ver [postman/Sistema_Monopatines_Collection.json](./postman/) para todos los endpoints con ejemplos
 
 ## ⚙️ Configuración
 
