@@ -27,7 +27,7 @@ import java.util.Locale;
 @RequiredArgsConstructor
 @Validated
 @Slf4j
-@RequestMapping("/api/viaje")
+@RequestMapping("/api/viajes")
 public class ViajeController {
     private final ViajeServiceI viajeService;
 
@@ -82,23 +82,23 @@ public class ViajeController {
     }
 
     //c. Como administrador quiero consultar los monopatines con más de X viajes en un cierto año.
-    @GetMapping("/reportes/viajes/{monopatinid}/conteo-anual")
+    @GetMapping("/reportes/{monopatinid}/conteo-anual")
     public ResponseEntity<Long> getViajesAnualesPorMonopatin(@PathVariable @NotNull Long monopatinid, @RequestParam int anio) {
         return ResponseEntity.ok(viajeService.contarViajesPorMonopatinEnAnio(monopatinid, anio));
     }
 
-    @GetMapping("/reportes/viajes/usuario/{usuarioId}")
+    @GetMapping("/reportes/usuario/{usuarioId}")
     public ResponseEntity<List<ViajeResponseDTO>> getViajesPorUsuario(@PathVariable @NotNull Long usuarioId) {
         return ResponseEntity.ok(viajeService.getViajesByUsuario(usuarioId));
     }
 
-    @GetMapping("/api/viajes/reportes/{monopatinId}/cantidad")
+    @GetMapping("/api/reportes/{monopatinId}/cantidad")
     public ResponseEntity<Integer> getCantidadViajesPorMoopatin(@PathVariable @NotNull Long monopatinId) {
         return ResponseEntity.ok(viajeService.viajesXMonopatin(monopatinId));
     }
 
     //* Como usuario quiero saber cuánto he usado los monopatines en un período...
-    @GetMapping("/reportes/viajes/usuario/{usuarioId}/periodo")
+    @GetMapping("/reportes/usuario/{usuarioId}/periodo")
     public ResponseEntity<List<ViajeResponseDTO>> getViajesPorUsuarioEnPeriodo(
             @PathVariable @NotNull @Positive Long usuarioId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicio,

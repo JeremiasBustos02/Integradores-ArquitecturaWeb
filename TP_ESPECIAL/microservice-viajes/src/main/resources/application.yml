@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: microservice-viajes
+  config:
+    import: "optional:configserver:${CONFIG_SERVER_URL:http://config-service:8081}"
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:default}
+  cloud:
+    config:
+      fail-fast: false
+      retry:
+        max-attempts: 20
+        initial-interval: 1500
+        multiplier: 1.2
+        max-interval: 3000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always

@@ -16,11 +16,9 @@ public interface ViajeRepository extends MongoRepository<Viaje, String> {
 
     List<Viaje> getViajesByMonopatinId(Long id);
 
-    Integer getViajesXMonopatin(Long monopatinId);
-    ///
+    public abstract Integer countByMonopatinId(Long monopatinId);
 
     //reporte de uso por usuario
-
     List<Viaje> findByUsuarioId(Long usuarioId);
 
 

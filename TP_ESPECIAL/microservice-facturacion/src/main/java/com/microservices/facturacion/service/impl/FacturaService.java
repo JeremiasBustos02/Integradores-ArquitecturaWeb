@@ -1,6 +1,5 @@
 package com.microservices.facturacion.service.impl;
 
-import com.microservices.facturacion.client.CuentaFeignClient;
 import com.microservices.facturacion.client.TarifaFeignClient;
 import com.microservices.facturacion.dto.request.FacturaRequestDTO;
 import com.microservices.facturacion.dto.response.FacturaResponseDTO;
@@ -15,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -28,7 +26,6 @@ public class FacturaService implements IFacturaService {
     private final FacturaRepository facturaRepository;
     private final FacturaMapper facturaMapper;
     private final TarifaFeignClient tarifaFeignClient;
-    private final CuentaFeignClient cuentaFeignClient;
 
     @Override
     @Transactional
@@ -37,16 +34,8 @@ public class FacturaService implements IFacturaService {
 
         // Generar número de factura único
         factura.setNumeroFactura(generarNumeroFactura());
+
         Factura facturaGuardada = facturaRepository.save(factura);
-
-        try {
-            Double precio = requestDTO.getMontoTotal();
-            BigDecimal miBigDecimal = BigDecimal.valueOf(precio);
-            cuentaFeignClient.descontarSaldo(requestDTO.getCuentaId(), miBigDecimal);
-
-        } catch (Exception e) {
-            throw new RuntimeException("No se pudo descontar el saldo");
-        }
         return facturaMapper.toResponseDTO(facturaGuardada);
     }
 
@@ -167,4 +156,3 @@ public class FacturaService implements IFacturaService {
         return "FACT-" + timestamp + "-" + String.format("%05d", count);
     }
 }
-

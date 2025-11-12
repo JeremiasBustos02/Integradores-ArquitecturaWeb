@@ -35,5 +35,5 @@ public interface IUsuarioService {
 
     void desasociarUsuarioDeCuenta(Long usuarioId, Long cuentaId);
 
-    Long getCuentaParaFacturar(Long usuarioId)
+    Long getCuentaParaFacturar(Long usuarioId);
 }

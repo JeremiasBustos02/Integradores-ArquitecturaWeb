@@ -35,6 +35,13 @@ spring:
           filters:
             - StripPrefix=0
 
+        - id: viajes-route
+          uri: lb://microservice-viajes
+          predicates:
+            - Path=/api/viajes/**
+          filters:
+            - StripPrefix=0
+
 eureka:
   client:
     service-url:

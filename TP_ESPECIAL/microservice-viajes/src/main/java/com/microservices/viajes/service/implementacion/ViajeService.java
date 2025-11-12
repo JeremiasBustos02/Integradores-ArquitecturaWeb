@@ -272,7 +272,7 @@ public class ViajeService implements ViajeServiceI {
     @Override
     public Integer viajesXMonopatin(Long monopatinId){
         if (monopatinId == null)throw new RuntimeException("El id del monopatin debe ser valido");
-        return viajeRepository.getViajesXMonopatin(monopatinId);
+        return viajeRepository.countByMonopatinId(monopatinId);
     }
     private long calcularTiempoViaje(Viaje viaje, boolean incluirPausas) {
         if (viaje.getHoraInicio() == null || viaje.getHoraFin() == null) {

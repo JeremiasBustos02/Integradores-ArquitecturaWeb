@@ -1,0 +1,29 @@
+spring:
+  data:
+    mongodb:
+      host: mongodb
+      port: 27017
+      database: viaje_db
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-service:8761/eureka
+    registry-fetch-interval-seconds: 5
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+
+microservices:
+  monopatin:
+    url: http://microservice-monopatin:8082
+  user:
+    url: http://microservice-user:8083
+  parada:
+    url: http://microservice-parada:8087
+
+logging:
+  level:
+    com.microservices.viaje: DEBUG
+    org.springframework.web: DEBUG

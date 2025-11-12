@@ -20,15 +20,27 @@ services:
       retries: 10
       start_period: 30s
 
-  mongo:
-    image: mongo:6.0
-    container_name: microservices-mongo
+  mongodb:
+    image: mongo:7.0
+    container_name: microservices-mongodb
     ports:
       - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: viaje_db
+      # Para producción agregar:
+      # MONGO_INITDB_ROOT_USERNAME: admin
+      # MONGO_INITDB_ROOT_PASSWORD: password
     volumes:
       - mongo_data:/data/db
     networks:
       - microservices-network
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   config-service:
     build:
@@ -204,7 +216,7 @@ services:
         condition: service_healthy
       eureka-service:
         condition: service_healthy
-      mongo:
+      mongodb:
         condition: service_started
       microservice-parada:
         condition: service_started
@@ -220,9 +232,11 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - CONFIG_SERVER_URL=http://config-service:8081
       - EUREKA_SERVER_URL=http://eureka-service:8761/eureka
-      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/viajes-microservice
+      - MONGO_HOST=mongodb
+      - MONGO_PORT=27017
     networks:
-      - microservices-network
+        - microservices-network
+    restart: on-failure:5
 
   microservice-parada:
     build:
