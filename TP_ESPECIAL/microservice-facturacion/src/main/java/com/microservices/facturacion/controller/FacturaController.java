@@ -11,7 +11,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,7 +27,14 @@ public class FacturaController {
     @PostMapping
     public ResponseEntity<FacturaResponseDTO> crearFactura(@Valid @RequestBody FacturaRequestDTO requestDTO) {
         FacturaResponseDTO factura = facturaService.crearFactura(requestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(factura);
+        
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(factura.getId())
+                .toUri();
+        
+        return ResponseEntity.created(location).body(factura);
     }
     
     @PutMapping("/{id}")

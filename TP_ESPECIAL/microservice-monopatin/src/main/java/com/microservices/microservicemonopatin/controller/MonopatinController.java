@@ -11,7 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -25,8 +27,15 @@ public class MonopatinController {
 
     @PostMapping
     public ResponseEntity<MonopatinDTO> crear(@Valid @RequestBody MonopatinRequestDTO monopatinDTO) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(monopatinService.crear(monopatinDTO));
+        MonopatinDTO creado = monopatinService.crear(monopatinDTO);
+        
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(creado.getId())
+                .toUri();
+        
+        return ResponseEntity.created(location).body(creado);
     }
 
     @GetMapping("/{id}")
@@ -92,7 +101,7 @@ public class MonopatinController {
             @RequestParam Double latitud,
             @RequestParam Double longitud) {
         monopatinService.actualizarUbicacion(id, latitud, longitud);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     // ==================== REPORTES ====================
@@ -127,6 +136,6 @@ public class MonopatinController {
             @RequestParam Long tiempoUso,
             @RequestParam Long tiempoPausas) {
         monopatinService.registrarUsoDeViaje(id, kmRecorridos, tiempoUso, tiempoPausas);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

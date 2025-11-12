@@ -39,8 +39,8 @@ public class ViajeController {
                 request.getMonopatinId(), request.getUsuarioId(), request.getTarifaId(), request.getParadaInicioId()
         );
         URI location = ServletUriComponentsBuilder
-                .fromCurrentContextPath()
-                .path("/api/viaje/{id}")
+                .fromCurrentRequest()
+                .path("/{id}")
                 .buildAndExpand(viaje.getId())
                 .toUri();
 
@@ -92,8 +92,8 @@ public class ViajeController {
         return ResponseEntity.ok(viajeService.getViajesByUsuario(usuarioId));
     }
 
-    @GetMapping("/api/reportes/{monopatinId}/cantidad")
-    public ResponseEntity<Integer> getCantidadViajesPorMoopatin(@PathVariable @NotNull Long monopatinId) {
+    @GetMapping("/reportes/{monopatinId}/cantidad")
+    public ResponseEntity<Integer> getCantidadViajesPorMonopatin(@PathVariable @NotNull Long monopatinId) {
         return ResponseEntity.ok(viajeService.viajesXMonopatin(monopatinId));
     }
 

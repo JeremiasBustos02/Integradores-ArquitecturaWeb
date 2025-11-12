@@ -9,7 +9,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -23,7 +25,14 @@ public class TarifaController {
     @PostMapping
     public ResponseEntity<TarifaResponseDTO> crearTarifa(@Valid @RequestBody TarifaRequestDTO requestDTO) {
         TarifaResponseDTO tarifa = tarifaService.crearTarifa(requestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(tarifa);
+        
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(tarifa.getId())
+                .toUri();
+        
+        return ResponseEntity.created(location).body(tarifa);
     }
     
     @PutMapping("/{id}")

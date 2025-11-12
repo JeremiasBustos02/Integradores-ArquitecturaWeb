@@ -3,7 +3,6 @@ package com.microservices.usuarios.controller;
 import com.microservices.usuarios.dto.request.UsuarioRequestDTO;
 import com.microservices.usuarios.dto.response.CuentaResponseDTO;
 import com.microservices.usuarios.dto.response.UsuarioResponseDTO;
-import com.microservices.usuarios.entity.Usuario;
 import com.microservices.usuarios.service.IUsuarioService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -120,7 +119,7 @@ public class UsuarioController {
             @PathVariable @Positive @NotNull Long cuentaId) {
         log.info("REST request to associate Usuario ID: {} to Cuenta ID: {}", usuarioId, cuentaId);
         usuarioService.asociarUsuarioACuenta(usuarioId, cuentaId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{usuarioId}/cuentas/{cuentaId}")
@@ -129,16 +128,12 @@ public class UsuarioController {
             @PathVariable @Positive @NotNull Long cuentaId) {
         log.info("REST request to disassociate Usuario ID: {} from Cuenta ID: {}", usuarioId, cuentaId);
         usuarioService.desasociarUsuarioDeCuenta(usuarioId, cuentaId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("{usuarioId}/cuentas/cuenta-para-facturar")
-
+    @GetMapping("/{usuarioId}/cuentas/cuenta-para-facturar")
     public ResponseEntity<Long> getCuentaParaFacturar(@PathVariable Long usuarioId) {
-
         Long idCuenta = usuarioService.getCuentaParaFacturar(usuarioId);
-
         return ResponseEntity.ok(idCuenta);
-
     }
 }

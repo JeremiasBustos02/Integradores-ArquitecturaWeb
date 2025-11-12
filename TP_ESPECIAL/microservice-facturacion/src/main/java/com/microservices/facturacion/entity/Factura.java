@@ -26,7 +26,7 @@ public class Factura {
     private Long cuentaId;
 
     @Column(name = "viaje_id")
-    private Long viajeId;
+    private String viajeId;
 
     @Column(name = "monto_total", nullable = false)
     private Double montoTotal;
@@ -53,7 +53,7 @@ public class Factura {
     @Column(name = "tipo_cuenta")
     private String tipoCuenta;
 
-    public Factura(String numeroFactura, Long cuentaId, Long viajeId, Double montoTotal,
+    public Factura(String numeroFactura, Long cuentaId, String viajeId, Double montoTotal,
                    LocalDateTime fechaEmision, LocalDate fechaVencimiento, EstadoFactura estado,
                    String descripcion, Integer periodoMes, Integer periodoAnio, String tipoCuenta) {
         this.numeroFactura = numeroFactura;

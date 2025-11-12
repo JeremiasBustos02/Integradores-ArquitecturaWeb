@@ -6,10 +6,10 @@ import com.microservices.parada.dto.response.ResponseParadaDTO;
 import com.microservices.parada.entity.Parada;
 import com.microservices.parada.repository.ParadaRepository;
 import com.microservices.parada.service.ParadaServiceI;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +24,7 @@ public class ParadaService implements ParadaServiceI {
     private final ParadaMapper mapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<ResponseParadaDTO> getParadasById(List<Long> idParadas) {
         if (idParadas == null || idParadas.isEmpty()) {
             return new ArrayList<>();
@@ -33,14 +34,13 @@ public class ParadaService implements ParadaServiceI {
         return mapper.toResponseDTOList(paradas);
     }
 
-
     @Override
     public ResponseParadaDTO crearParada(RequestParadaDTO requestDTO) {
-            Parada parada = mapper.toEntity(requestDTO);
-            Parada paradaGuardada = paradaRepository.save(parada);
-            log.info("Parada creada con ID: {}", paradaGuardada.getId());
-            return mapper.toResponseDTO(paradaGuardada);
-        }
+        Parada parada = mapper.toEntity(requestDTO);
+        Parada paradaGuardada = paradaRepository.save(parada);
+        log.info("Parada creada con ID: {}", paradaGuardada.getId());
+        return mapper.toResponseDTO(paradaGuardada);
+    }
 
     @Override
     public ResponseParadaDTO actualizarParada(Long id, RequestParadaDTO requestDTO) {
@@ -56,12 +56,14 @@ public class ParadaService implements ParadaServiceI {
         return mapper.toResponseDTO(paradaActualizada);
     }
 
-
     @Override
+    @Transactional(readOnly = true)
     public List<ResponseParadaDTO> obtenerTodas() {
         return mapper.toResponseDTOList(paradaRepository.findAll());
     }
+
     @Override
+    @Transactional(readOnly = true)
     public ResponseParadaDTO getParadaById(Long id) {
         if (id == null || id < 0) throw new IllegalArgumentException("El id debe ser valido");
         Parada parada = paradaRepository.findById(id)

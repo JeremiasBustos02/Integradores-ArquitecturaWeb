@@ -16,7 +16,7 @@ public class FacturaResponseDTO {
     private Long id;
     private String numeroFactura;
     private Long cuentaId;
-    private Long viajeId;
+    private String viajeId;
     private Double montoTotal;
     private LocalDateTime fechaEmision;
     private LocalDate fechaVencimiento;

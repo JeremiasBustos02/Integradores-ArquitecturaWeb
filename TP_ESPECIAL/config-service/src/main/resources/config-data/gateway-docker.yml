@@ -31,7 +31,14 @@ spring:
         - id: facturacion-route
           uri: lb://microservice-facturacion
           predicates:
-            - Path=/api/facturas**
+            - Path=/api/facturas/**
+          filters:
+            - StripPrefix=0
+
+        - id: parada-route
+          uri: lb://microservice-parada
+          predicates:
+            - Path=/api/paradas/**
           filters:
             - StripPrefix=0
 
@@ -41,12 +48,6 @@ spring:
             - Path=/api/viajes/**
           filters:
             - StripPrefix=0
-        - id: parada_route
-          uri: lb://microservice-parada
-          predicates:
-            - Path=/api/parada/**
-          filters:
-              - StripPrefix=0
 eureka:
   client:
     service-url:

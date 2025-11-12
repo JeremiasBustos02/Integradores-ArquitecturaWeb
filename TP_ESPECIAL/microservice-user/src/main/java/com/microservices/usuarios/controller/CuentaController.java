@@ -151,6 +151,6 @@ public class CuentaController {
     public ResponseEntity<Void> renovarCupoPremium(@PathVariable @Positive @NotNull Long id) {
         log.info("REST request to renew premium cupo for Cuenta ID: {}", id);
         cuentaService.renovarCupoPremium(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }
