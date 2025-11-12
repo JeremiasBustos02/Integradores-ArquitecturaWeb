@@ -1,5 +1,6 @@
 package com.microservices.parada.repository;
 
+import com.microservices.parada.dto.response.ResponseParadaDTO;
 import com.microservices.parada.entity.Parada;
 import org.springframework.data.jpa.repository.JpaRepository;
 

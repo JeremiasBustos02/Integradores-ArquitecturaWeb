@@ -2,6 +2,7 @@ package com.microservices.parada.controller;
 
 import com.microservices.parada.dto.response.ResponseParadaDTO;
 import com.microservices.parada.dto.request.RequestParadaDTO;
+import com.microservices.parada.service.ParadaServiceI;
 import com.microservices.parada.service.impl.ParadaService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -21,10 +22,10 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/api/paradas")
 public class ParadaController {
-    private final ParadaService service;
+    private final ParadaServiceI service;
 
     @GetMapping("/{id}")
-    ResponseEntity<ResponseParadaDTO> getParadaById(@PathVariable @NotNull Long id) { // ¡@PathVariable!
+    ResponseEntity<ResponseParadaDTO> getParadaById(@PathVariable @NotNull Long id) {
         return ResponseEntity.ok(service.getParadaById(id));
     }
 
@@ -59,7 +60,7 @@ public class ParadaController {
         return ResponseEntity.noContent().build();
     }
 
-
+    //para mapear en viaje
     @PostMapping("/batch")
     ResponseEntity<List<ResponseParadaDTO>> getParadasByIds(@RequestBody List<Long> ids) {
         return ResponseEntity.ok(service.getParadasById(ids));

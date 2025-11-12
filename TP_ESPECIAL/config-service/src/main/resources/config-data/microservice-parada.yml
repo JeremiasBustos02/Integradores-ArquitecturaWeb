@@ -6,9 +6,11 @@ eureka:
     fetch-registry: true
     register-with-eureka: true
     service-url:
-      defaultZone: ${EUREKA_SERVER_URL:http://eureka-service:8761/eureka}
+      default-zone: ${EUREKA_SERVER_URL:http://eureka-service:8761/eureka}
   instance:
     prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
+
 
 spring:
   application:
@@ -39,6 +41,15 @@ management:
 
 logging:
   level:
-    com.microservices.usuarios: DEBUG
+    com.microservices.parada: DEBUG
     org.springframework.web: DEBUG
     org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+

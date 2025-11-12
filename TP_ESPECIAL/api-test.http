@@ -1,0 +1,47 @@
+### --- PRUEBAS DE MSVC-PARADA ---
+
+### 1. Crear una Parada
+# (El Gateway redirige /api/paradas a msvc-parada)
+POST http://localhost:8080/api/paradas
+Content-Type: application/json
+
+{
+  "nombre": "Parada de Prueba (Gateway)",
+  "latitud": -34.60,
+  "longitud": -58.38
+}
+@paradaId = {{CREAR.response.body.id}}
+
+### 2. Obtener la Parada creada
+GET http://localhost:8080/api/paradas/{{paradaId}}
+
+
+### 3. Obtener TODAS las Paradas
+GET http://localhost:8080/api/paradas
+
+
+### --- PRUEBAS DE MSVC-VIAJE ---
+# (¡Asegúrate de que los IDs (1, 10, 20) existan
+# en tu base de datos de monopatin, usuario, tarifa y parada!)
+
+### 4. Iniciar un Viaje
+# (El Gateway redirige /api/viaje a msvc-viaje)
+POST http://localhost:8080/api/viaje
+Content-Type: application/json
+
+{
+  "monopatinId": 1,
+  "usuarioId": 1,
+  "tarifaId": 1,
+  "paradaInicioId": 1
+}
+@viajeId = {{CREAR.response.body.id}}
+
+### 5. Finalizar el Viaje
+PUT http://localhost:8080/api/viaje/{{viajeId}}
+Content-Type: application/json
+
+{
+  "paradaFin": 2,
+  "kmRecorridos": 3.5
+}

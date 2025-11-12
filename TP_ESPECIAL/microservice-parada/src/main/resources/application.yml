@@ -1,0 +1,5 @@
+    spring:
+        application:
+            name: microservice-parada
+        config:
+            import: "optional:configserver:${CONFIG_SERVER_URL:http://config-service:8081}"

@@ -207,7 +207,7 @@ services:
   microservice-viajes:
     build:
       context: .
-      dockerfile: ./microservice-viajes/Dockerfile
+      dockerfile: microservice-viajes/Dockerfile
     container_name: microservice-viajes
     ports:
       - "8086:8086"
@@ -241,7 +241,7 @@ services:
   microservice-parada:
     build:
       context: .
-      dockerfile: ./microservice-parada/Dockerfile
+      dockerfile: microservice-parada/Dockerfile
     container_name: microservice-parada
     ports:
       - "8087:8087"

@@ -61,7 +61,7 @@ public class ParadaService implements ParadaServiceI {
     public List<ResponseParadaDTO> obtenerTodas() {
         return mapper.toResponseDTOList(paradaRepository.findAll());
     }
-
+    @Override
     public ResponseParadaDTO getParadaById(Long id) {
         if (id == null || id < 0) throw new IllegalArgumentException("El id debe ser valido");
         Parada parada = paradaRepository.findById(id)
