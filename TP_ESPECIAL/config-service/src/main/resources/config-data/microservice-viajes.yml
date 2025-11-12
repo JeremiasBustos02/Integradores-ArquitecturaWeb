@@ -38,6 +38,11 @@ microservices:
     url: http://localhost:8083
   parada:
     url: http://localhost:8087
+  facturacion:
+    url: http://localhost:8085
+  tarifa:
+    url: http://localhost:8084
+
 
 logging:
   level:
