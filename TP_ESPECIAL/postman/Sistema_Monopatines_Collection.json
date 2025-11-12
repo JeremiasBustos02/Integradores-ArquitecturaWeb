@@ -1,0 +1,773 @@
+{
+	"info": {
+		"_postman_id": "b2c3d4e5-f6g7-8901-bcde-fg1234567891",
+		"name": "Sistema Monopatines - TP Especial V2",
+		"description": "Colección AUTOMATIZADA con captura de IDs. Los endpoints son accesibles sin autenticación JWT.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Setup Inicial - Crear Datos Base",
+			"item": [
+				{
+					"name": "1.1 Crear Tarifa Inicial",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('TARIFA_ID_1', jsonData.id);",
+									"    console.log('✅ Tarifa creada con ID: ' + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"montoBase\": 50.0,\n  \"montoExtra\": 100.0,\n  \"fechaVigencia\": \"2025-01-01\",\n  \"activa\": true,\n  \"descripcion\": \"Tarifa Inicial 2025\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/tarifas",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "tarifas"]
+						}
+					}
+				},
+				{
+					"name": "1.2 Crear Parada 1 - Centro",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('PARADA_ID_1', jsonData.id);",
+									"    console.log('✅ Parada 1 creada con ID: ' + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Parada Centro\",\n  \"latitud\": -37.3217,\n  \"longitud\": -59.1332\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/paradas",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "paradas"]
+						}
+					}
+				},
+				{
+					"name": "1.3 Crear Parada 2 - Plaza",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('PARADA_ID_2', jsonData.id);",
+									"    console.log('✅ Parada 2 creada con ID: ' + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Parada Plaza\",\n  \"latitud\": -37.3250,\n  \"longitud\": -59.1380\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/paradas",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "paradas"]
+						}
+					}
+				},
+				{
+					"name": "1.4 Crear Usuario 1 - Juan",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201 || pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('USUARIO_ID_1', jsonData.id);",
+									"    console.log('✅ Usuario 1 creado/existente con ID: ' + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Juan\",\n  \"apellido\": \"Pérez\",\n  \"celular\": \"2234567890\",\n  \"email\": \"juan.perez@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/usuarios",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "usuarios"]
+						}
+					}
+				},
+				{
+					"name": "1.5 Crear Usuario 2 - María",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201 || pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('USUARIO_ID_2', jsonData.id);",
+									"    console.log('✅ Usuario 2 creado/existente con ID: ' + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"María\",\n  \"apellido\": \"García\",\n  \"celular\": \"2234567891\",\n  \"email\": \"maria.garcia@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/usuarios",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "usuarios"]
+						}
+					}
+				},
+				{
+					"name": "1.6 Crear Cuenta BÁSICA",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201 || pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('CUENTA_ID_1', jsonData.id);",
+									"    console.log('✅ Cuenta BÁSICA creada con ID: ' + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idCuentaMercadoPago\": 100001,\n  \"tipoCuenta\": \"BASICA\",\n  \"saldoInicial\": 5000.00\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/cuentas",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "cuentas"]
+						}
+					}
+				},
+				{
+					"name": "1.7 Crear Cuenta PREMIUM",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201 || pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('CUENTA_ID_2', jsonData.id);",
+									"    console.log('✅ Cuenta PREMIUM creada con ID: ' + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idCuentaMercadoPago\": 100002,\n  \"tipoCuenta\": \"PREMIUM\",\n  \"saldoInicial\": 10000.00\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/cuentas",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "cuentas"]
+						}
+					}
+				},
+				{
+					"name": "1.8 Asociar Usuario 1 a Cuenta 1",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/usuarios/{{USUARIO_ID_1}}/cuentas/{{CUENTA_ID_1}}",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "usuarios", "{{USUARIO_ID_1}}", "cuentas", "{{CUENTA_ID_1}}"]
+						}
+					}
+				},
+				{
+					"name": "1.9 Asociar Usuario 2 a Cuenta 2",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/usuarios/{{USUARIO_ID_2}}/cuentas/{{CUENTA_ID_2}}",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "usuarios", "{{USUARIO_ID_2}}", "cuentas", "{{CUENTA_ID_2}}"]
+						}
+					}
+				},
+				{
+					"name": "1.10 Crear Monopatín 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('MONOPATIN_ID_1', jsonData.id);",
+									"    console.log('✅ Monopatín 1 creado con ID: ' + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"latitud\": -37.3217,\n  \"longitud\": -59.1332,\n  \"estado\": \"DISPONIBLE\",\n  \"idParadaActual\": null\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/monopatines",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "monopatines"]
+						}
+					}
+				},
+				{
+					"name": "1.11 Crear Monopatín 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('MONOPATIN_ID_2', jsonData.id);",
+									"    console.log('✅ Monopatín 2 creado con ID: ' + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"latitud\": -37.3250,\n  \"longitud\": -59.1380,\n  \"estado\": \"DISPONIBLE\",\n  \"idParadaActual\": null\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/monopatines",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "monopatines"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Gestión de Viajes - FLUJO COMPLETO",
+			"item": [
+				{
+					"name": "2.1 Iniciar Viaje",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('VIAJE_ID_ACTUAL', jsonData.id);",
+									"    console.log('✅ Viaje creado con ID: ' + jsonData.id);",
+									"    console.log('📌 Usar este ID en los siguientes requests');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"monopatinId\": {{MONOPATIN_ID_1}},\n  \"usuarioId\": {{USUARIO_ID_1}},\n  \"tarifaId\": {{TARIFA_ID_1}},\n  \"paradaInicioId\": {{PARADA_ID_1}}\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/viajes",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "viajes"]
+						},
+						"description": "Iniciar viaje. El ID se captura automáticamente y se usa en los siguientes requests."
+					}
+				},
+				{
+					"name": "2.2 Pausar Viaje",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/viajes/{{VIAJE_ID_ACTUAL}}/pausa/iniciar",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "viajes", "{{VIAJE_ID_ACTUAL}}", "pausa", "iniciar"]
+						},
+						"description": "Pausar el viaje. Usa automáticamente el ID del viaje creado en 2.1"
+					}
+				},
+				{
+					"name": "2.3 Reanudar Viaje (Finalizar Pausa)",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/viajes/{{VIAJE_ID_ACTUAL}}/pausa/finalizar",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "viajes", "{{VIAJE_ID_ACTUAL}}", "pausa", "finalizar"]
+						},
+						"description": "Reanudar viaje. Si la pausa duró >15 min, se marca como extensa."
+					}
+				},
+				{
+					"name": "2.4 Finalizar Viaje",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paradaFin\": {{PARADA_ID_2}},\n  \"kmRecorridos\": 5.5\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/viajes/{{VIAJE_ID_ACTUAL}}",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "viajes", "{{VIAJE_ID_ACTUAL}}"]
+						},
+						"description": "Finalizar viaje en parada válida. Genera factura automáticamente con cobro mínimo de 1 minuto."
+					}
+				}
+			],
+			"description": "Flujo completo de viaje AUTOMATIZADO. Los IDs se capturan y usan automáticamente."
+		},
+		{
+			"name": "3. Funcionalidad A - Reporte Kilómetros",
+			"item": [
+				{
+					"name": "A.1 Reporte CON Pausas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/monopatines/reporte/kilometros?incluirPausas=true",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "monopatines", "reporte", "kilometros"],
+							"query": [{"key": "incluirPausas", "value": "true"}]
+						}
+					}
+				},
+				{
+					"name": "A.2 Reporte SIN Pausas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/monopatines/reporte/kilometros?incluirPausas=false",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "monopatines", "reporte", "kilometros"],
+							"query": [{"key": "incluirPausas", "value": "false"}]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Funcionalidad B - Anular Cuentas",
+			"item": [
+				{
+					"name": "B.1 Deshabilitar Cuenta (Anular)",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/cuentas/{{CUENTA_ID_1}}/deshabilitar",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "cuentas", "{{CUENTA_ID_1}}", "deshabilitar"]
+						}
+					}
+				},
+				{
+					"name": "B.2 Habilitar Cuenta",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/cuentas/{{CUENTA_ID_1}}/habilitar",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "cuentas", "{{CUENTA_ID_1}}", "habilitar"]
+						}
+					}
+				},
+				{
+					"name": "B.3 Ver Cuentas por Estado",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/cuentas/estado/false?page=0&size=10",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "cuentas", "estado", "false"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Funcionalidad C - Monopatines con X Viajes",
+			"item": [
+				{
+					"name": "C.1 Monopatines con más de X viajes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/monopatines/reporte/viajes?cantidad=0",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "monopatines", "reporte", "viajes"],
+							"query": [{"key": "cantidad", "value": "0"}]
+						},
+						"description": "Cambiar 'cantidad' a 1, 2, 5, etc. para filtrar"
+					}
+				}
+			]
+		},
+		{
+			"name": "6. Funcionalidad D - Total Facturado",
+			"item": [
+				{
+					"name": "D.1 Total Facturado - Rango Meses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/facturas/reporte/total-facturado?mesInicio=1&mesFin=12&anio=2025",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "facturas", "reporte", "total-facturado"],
+							"query": [
+								{"key": "mesInicio", "value": "1"},
+								{"key": "mesFin", "value": "12"},
+								{"key": "anio", "value": "2025"}
+							]
+						}
+					}
+				},
+				{
+					"name": "D.2 Total Facturado - Primer Trimestre",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/facturas/reporte/total-facturado?mesInicio=1&mesFin=3&anio=2025",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "facturas", "reporte", "total-facturado"],
+							"query": [
+								{"key": "mesInicio", "value": "1"},
+								{"key": "mesFin", "value": "3"},
+								{"key": "anio", "value": "2025"}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "7. Funcionalidad F - Ajuste de Precios",
+			"item": [
+				{
+					"name": "F.1 Crear Nueva Tarifa con Fecha Futura",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"montoBase\": 60.0,\n  \"montoExtra\": 120.0,\n  \"fechaVigencia\": \"2025-06-01\",\n  \"activa\": true,\n  \"descripcion\": \"Ajuste de Precios - Verano 2025\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/tarifas",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "tarifas"]
+						}
+					}
+				},
+				{
+					"name": "F.2 Ver Tarifa Activa Actual",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/tarifas/activa",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "tarifas", "activa"]
+						}
+					}
+				},
+				{
+					"name": "F.3 Ver Todas las Tarifas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/tarifas",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "tarifas"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "8. Funcionalidad G - Monopatines Cercanos",
+			"item": [
+				{
+					"name": "G.1 Buscar Monopatines Cercanos (5km)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/monopatines/cercanos?latitud=-37.3217&longitud=-59.1332&radioKm=5.0",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "monopatines", "cercanos"],
+							"query": [
+								{"key": "latitud", "value": "-37.3217"},
+								{"key": "longitud", "value": "-59.1332"},
+								{"key": "radioKm", "value": "5.0"}
+							]
+						}
+					}
+				},
+				{
+					"name": "G.2 Buscar Monopatines Cercanos (2km)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/monopatines/cercanos?latitud=-37.3250&longitud=-59.1380&radioKm=2.0",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "monopatines", "cercanos"],
+							"query": [
+								{"key": "latitud", "value": "-37.3250"},
+								{"key": "longitud", "value": "-59.1380"},
+								{"key": "radioKm", "value": "2.0"}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "9. Funcionalidad H - Uso por Usuario",
+			"item": [
+				{
+					"name": "H.1 Viajes de Usuario en Período",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/viajes/reportes/usuario/{{USUARIO_ID_1}}/periodo?inicio=2025-01-01T00:00:00&fin=2025-12-31T23:59:59",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "viajes", "reportes", "usuario", "{{USUARIO_ID_1}}", "periodo"],
+							"query": [
+								{"key": "inicio", "value": "2025-01-01T00:00:00"},
+								{"key": "fin", "value": "2025-12-31T23:59:59"}
+							]
+						}
+					}
+				},
+				{
+					"name": "H.2 Todos los Viajes de Usuario",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/viajes/reportes/usuario/{{USUARIO_ID_1}}",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "viajes", "reportes", "usuario", "{{USUARIO_ID_1}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "10. Gestión de Mantenimiento",
+			"item": [
+				{
+					"name": "10.1 Marcar Monopatín en Mantenimiento",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/monopatines/{{MONOPATIN_ID_2}}/mantenimiento",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "monopatines", "{{MONOPATIN_ID_2}}", "mantenimiento"]
+						}
+					}
+				},
+				{
+					"name": "10.2 Sacar Monopatín de Mantenimiento",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/monopatines/{{MONOPATIN_ID_2}}/mantenimiento/finalizar",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "monopatines", "{{MONOPATIN_ID_2}}", "mantenimiento", "finalizar"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "11. Consultas Adicionales",
+			"item": [
+				{
+					"name": "Ver Todos los Monopatines",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/monopatines",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "monopatines"]
+						}
+					}
+				},
+				{
+					"name": "Ver Todas las Paradas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/paradas",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "paradas"]
+						}
+					}
+				},
+				{
+					"name": "Ver Todos los Usuarios",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/usuarios?page=0&size=20",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "usuarios"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "20"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Ver Todas las Cuentas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/cuentas?page=0&size=20",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "cuentas"],
+							"query": [
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "20"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Ver Todas las Facturas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/facturas",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "facturas"]
+						}
+					}
+				},
+				{
+					"name": "Ver Cuentas de un Usuario",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/usuarios/{{USUARIO_ID_1}}/cuentas",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "usuarios", "{{USUARIO_ID_1}}", "cuentas"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}
+

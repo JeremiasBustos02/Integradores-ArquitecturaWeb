@@ -6,6 +6,7 @@
 - [Características](#-características)
 - [Prerrequisitos](#-prerrequisitos)
 - [Instalación y Ejecución](#-instalación-y-ejecución)
+- [Colecciones Postman](#-colecciones-postman)
 - [Pruebas de la API](#-pruebas-de-la-api)
 - [URLs de Servicios](#-urls-de-servicios)
 - [Endpoints Disponibles](#-endpoints-disponibles)
@@ -192,6 +193,67 @@ cd microservice-facturacion && mvn spring-boot:run
 ```
 
 </details>
+
+## 📮 Colecciones Postman
+
+Se han creado **colecciones completas de Postman** para probar todas las funcionalidades del sistema.
+
+### 📦 Archivos Disponibles
+
+En la carpeta `/postman/`:
+
+- **`Sistema_Monopatines_Collection.json`** - Colección con 38 requests **100% AUTOMATIZADOS**
+- **`Sistema_Monopatines_Environment.json`** - Variables de entorno configuradas
+- **`README_POSTMAN.md`** - Guía detallada de uso
+- **`MEJORAS_AUTOMATIZACION.md`** - Explicación de la automatización
+
+> **✨ Características Especiales**:
+> - Los endpoints son accesibles **sin autenticación JWT**
+> - Los IDs se capturan **automáticamente** con test scripts
+> - Flujo de viajes **completamente automatizado** (sin copiar/pegar IDs)
+> - Compatible con **Newman CLI** para ejecución automática
+
+### 🚀 Quick Start
+
+1. **Importar en Postman**:
+   - Import → Seleccionar `Sistema_Monopatines_Collection.json`
+   - Import → Seleccionar `Sistema_Monopatines_Environment.json`
+
+2. **Activar Environment**:
+   - Selector de environments (top-right) → "Sistema Monopatines - Local"
+
+3. **Ejecutar Setup Inicial**:
+   - Carpeta **"1. Setup Inicial"** → Ejecutar todos los requests en orden
+   - Esto crea: tarifas, paradas, usuarios, cuentas, monopatines
+   - ✅ **Los IDs se capturan automáticamente** en variables
+
+4. **Probar Funcionalidades** (100% automatizadas):
+   - Carpeta **"3. Funcionalidad A"** → Reporte de kilómetros
+   - Carpeta **"4. Funcionalidad B"** → Anular cuentas
+   - Carpeta **"5. Funcionalidad C"** → Monopatines con X viajes
+   - Carpeta **"6. Funcionalidad D"** → Total facturado
+   - Carpeta **"7. Funcionalidad F"** → Ajuste de precios
+   - Carpeta **"8. Funcionalidad G"** → Monopatines cercanos
+   - Carpeta **"9. Funcionalidad H"** → Uso por usuario
+
+### 📊 Cobertura
+
+La colección cubre **7 de 8** funcionalidades requeridas (87.5%):
+
+| Funcionalidad | Estado | Carpeta |
+|---------------|--------|---------|
+| a. Reporte kilómetros (con/sin pausas) | ✅ | 3. Funcionalidad A |
+| b. Anular cuentas | ✅ | 4. Funcionalidad B |
+| c. Monopatines con X viajes | ✅ | 5. Funcionalidad C |
+| d. Total facturado | ✅ | 6. Funcionalidad D |
+| e. Usuarios top | ❌ NO IMPLEMENTADO | - |
+| f. Ajuste de precios | ✅ | 7. Funcionalidad F |
+| g. Monopatines cercanos | ✅ | 8. Funcionalidad G |
+| h. Uso por usuario | ✅ | 9. Funcionalidad H |
+
+> 📚 Ver `postman/README_POSTMAN.md` para instrucciones detalladas y casos de prueba
+
+---
 
 ## 🧪 Pruebas de la API
 

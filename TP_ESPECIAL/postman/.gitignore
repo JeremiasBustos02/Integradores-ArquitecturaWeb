@@ -1,0 +1,11 @@
+# Newman test reports
+newman-report.html
+newman-report-*.html
+
+# Newman run folders
+newman/
+
+# Temporary files
+*.tmp
+*.log
+

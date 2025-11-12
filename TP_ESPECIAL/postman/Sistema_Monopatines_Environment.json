@@ -1,0 +1,73 @@
+{
+	"id": "env-sistema-monopatines",
+	"name": "Sistema Monopatines - Local",
+	"values": [
+		{
+			"key": "BASE_URL",
+			"value": "http://localhost:8080",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "USUARIO_ID_1",
+			"value": "1",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "USUARIO_ID_2",
+			"value": "2",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "CUENTA_ID_1",
+			"value": "1",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "CUENTA_ID_2",
+			"value": "2",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "MONOPATIN_ID_1",
+			"value": "1",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "MONOPATIN_ID_2",
+			"value": "2",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "PARADA_ID_1",
+			"value": "1",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "PARADA_ID_2",
+			"value": "2",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "TARIFA_ID_1",
+			"value": "1",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "VIAJE_ID_ACTUAL",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment"
+}
