@@ -14,47 +14,47 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Factura {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Column(name = "numero_factura", unique = true, nullable = false)
     private String numeroFactura;
-    
+
     @Column(name = "cuenta_id", nullable = false)
     private Long cuentaId;
-    
+
     @Column(name = "viaje_id")
     private Long viajeId;
-    
+
     @Column(name = "monto_total", nullable = false)
     private Double montoTotal;
-    
+
     @Column(name = "fecha_emision", nullable = false)
     private LocalDateTime fechaEmision;
-    
+
     @Column(name = "fecha_vencimiento")
     private LocalDate fechaVencimiento;
-    
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EstadoFactura estado;
-    
+
     @Column(columnDefinition = "TEXT")
     private String descripcion;
-    
+
     @Column(name = "periodo_mes")
     private Integer periodoMes;
-    
+
     @Column(name = "periodo_anio")
     private Integer periodoAnio;
-    
+
     @Column(name = "tipo_cuenta")
     private String tipoCuenta;
-    
-    public Factura(String numeroFactura, Long cuentaId, Long viajeId, Double montoTotal, 
-                   LocalDateTime fechaEmision, LocalDate fechaVencimiento, EstadoFactura estado, 
+
+    public Factura(String numeroFactura, Long cuentaId, Long viajeId, Double montoTotal,
+                   LocalDateTime fechaEmision, LocalDate fechaVencimiento, EstadoFactura estado,
                    String descripcion, Integer periodoMes, Integer periodoAnio, String tipoCuenta) {
         this.numeroFactura = numeroFactura;
         this.cuentaId = cuentaId;
@@ -69,4 +69,3 @@ public class Factura {
         this.tipoCuenta = tipoCuenta;
     }
 }
-

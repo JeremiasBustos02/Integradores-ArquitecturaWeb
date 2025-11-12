@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * Cliente Feign para comunicarse con el microservicio de Viajes
  */
-@FeignClient(name = "microservice-viaje", url = "${microservice.viaje.url:http://localhost:8082}")
+@FeignClient(name = "microservice-viajes", url = "${microservice.viaje.url:http://localhost:8082}")
 public interface ViajeFeignClient {
 
     /**
@@ -17,7 +17,7 @@ public interface ViajeFeignClient {
      * @param monopatinId ID del monopatín
      * @return cantidad de viajes realizados
      */
-    @GetMapping("/api/viajes/monopatin/{monopatinId}/cantidad")
+    @GetMapping("/api/viajes/reportes/{monopatinId}/cantidad")
     Integer contarViajesPorMonopatin(@PathVariable Long monopatinId);
 
     /**
@@ -27,7 +27,7 @@ public interface ViajeFeignClient {
      * @param anio        año a consultar
      * @return cantidad de viajes en ese año
      */
-    @GetMapping("/api/viajes/monopatin/{monopatinId}/cantidad/anio")
+    @GetMapping("/api/viajes/reportes/viajes/{monopatinid}/conteo-anual")
     Integer contarViajesPorMonopatinYAnio(
             @PathVariable Long monopatinId,
             @RequestParam int anio);

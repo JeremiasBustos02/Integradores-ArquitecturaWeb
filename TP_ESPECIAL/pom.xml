@@ -27,6 +27,10 @@
         <module>microservice-monopatin</module>
         <module>microservice-tarifas</module>
         <module>microservice-facturacion</module>
+        <module>microservice-viajes</module>
+        <module>microservice-parada</module>
+        <module>microservice-viajes</module>
+
     </modules>
 
     <properties>

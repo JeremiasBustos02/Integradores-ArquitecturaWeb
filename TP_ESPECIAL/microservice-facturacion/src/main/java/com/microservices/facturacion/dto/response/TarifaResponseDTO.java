@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TarifaResponseDTO {
-    
+
     private Long id;
     private Double montoBase;
     private Double montoExtra;
@@ -18,4 +18,3 @@ public class TarifaResponseDTO {
     private Boolean activa;
     private String descripcion;
 }
-

@@ -22,29 +22,29 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class FacturaService implements IFacturaService {
-    
+
     private final FacturaRepository facturaRepository;
     private final FacturaMapper facturaMapper;
     private final TarifaFeignClient tarifaFeignClient;
-    
+
     @Override
     @Transactional
     public FacturaResponseDTO crearFactura(FacturaRequestDTO requestDTO) {
         Factura factura = facturaMapper.toEntity(requestDTO);
-        
+
         // Generar número de factura único
         factura.setNumeroFactura(generarNumeroFactura());
-        
+
         Factura facturaGuardada = facturaRepository.save(factura);
         return facturaMapper.toResponseDTO(facturaGuardada);
     }
-    
+
     @Override
     @Transactional
     public FacturaResponseDTO actualizarFactura(Long id, FacturaRequestDTO requestDTO) {
         Factura factura = facturaRepository.findById(id)
                 .orElseThrow(() -> new FacturaNotFoundException("Factura no encontrada con id: " + id));
-        
+
         factura.setCuentaId(requestDTO.getCuentaId());
         factura.setViajeId(requestDTO.getViajeId());
         factura.setMontoTotal(requestDTO.getMontoTotal());
@@ -55,11 +55,11 @@ public class FacturaService implements IFacturaService {
         factura.setPeriodoMes(requestDTO.getPeriodoMes());
         factura.setPeriodoAnio(requestDTO.getPeriodoAnio());
         factura.setTipoCuenta(requestDTO.getTipoCuenta());
-        
+
         Factura facturaActualizada = facturaRepository.save(factura);
         return facturaMapper.toResponseDTO(facturaActualizada);
     }
-    
+
     @Override
     @Transactional(readOnly = true)
     public FacturaResponseDTO obtenerFacturaPorId(Long id) {
@@ -67,7 +67,7 @@ public class FacturaService implements IFacturaService {
                 .orElseThrow(() -> new FacturaNotFoundException("Factura no encontrada con id: " + id));
         return facturaMapper.toResponseDTO(factura);
     }
-    
+
     @Override
     @Transactional(readOnly = true)
     public List<FacturaResponseDTO> obtenerTodasLasFacturas() {
@@ -76,7 +76,7 @@ public class FacturaService implements IFacturaService {
                 .map(facturaMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     @Transactional
     public void eliminarFactura(Long id) {
@@ -85,7 +85,7 @@ public class FacturaService implements IFacturaService {
         }
         facturaRepository.deleteById(id);
     }
-    
+
     @Override
     @Transactional(readOnly = true)
     public List<FacturaResponseDTO> obtenerFacturasPorCuenta(Long cuentaId) {
@@ -94,7 +94,7 @@ public class FacturaService implements IFacturaService {
                 .map(facturaMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     @Transactional(readOnly = true)
     public List<FacturaResponseDTO> obtenerFacturasPorEstado(EstadoFactura estado) {
@@ -103,7 +103,7 @@ public class FacturaService implements IFacturaService {
                 .map(facturaMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     @Transactional(readOnly = true)
     public List<FacturaResponseDTO> obtenerFacturasPorRangoFechas(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
@@ -112,7 +112,7 @@ public class FacturaService implements IFacturaService {
                 .map(facturaMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     @Transactional(readOnly = true)
     public List<FacturaResponseDTO> obtenerFacturasPorCuentaYRangoFechas(Long cuentaId, LocalDateTime fechaInicio, LocalDateTime fechaFin) {
@@ -121,34 +121,34 @@ public class FacturaService implements IFacturaService {
                 .map(facturaMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     @Transactional(readOnly = true)
     public ReporteTotalFacturadoDTO obtenerTotalFacturadoEnRangoMeses(Integer mesInicio, Integer mesFin, Integer anio) {
         Double totalFacturado = facturaRepository.calcularTotalFacturadoEnRangoMeses(mesInicio, mesFin, anio);
         Long cantidadFacturas = facturaRepository.contarFacturasEnRangoMeses(mesInicio, mesFin, anio);
-        
+
         if (totalFacturado == null) {
             totalFacturado = 0.0;
         }
         if (cantidadFacturas == null) {
             cantidadFacturas = 0L;
         }
-        
+
         return new ReporteTotalFacturadoDTO(mesInicio, mesFin, anio, totalFacturado, cantidadFacturas);
     }
-    
+
     @Override
     @Transactional
     public FacturaResponseDTO cambiarEstadoFactura(Long id, EstadoFactura nuevoEstado) {
         Factura factura = facturaRepository.findById(id)
                 .orElseThrow(() -> new FacturaNotFoundException("Factura no encontrada con id: " + id));
-        
+
         factura.setEstado(nuevoEstado);
         Factura facturaActualizada = facturaRepository.save(factura);
         return facturaMapper.toResponseDTO(facturaActualizada);
     }
-    
+
     private String generarNumeroFactura() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         String timestamp = LocalDateTime.now().format(formatter);
@@ -156,4 +156,3 @@ public class FacturaService implements IFacturaService {
         return "FACT-" + timestamp + "-" + String.format("%05d", count);
     }
 }
-

@@ -1,0 +1,15 @@
+version: '3.8'
+#Prueba local de viajes
+services:
+  mongo-db:
+    image: mongo:latest
+    container_name: mongo_local_db
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+
+volumes:
+  mongodata:
+    driver: local

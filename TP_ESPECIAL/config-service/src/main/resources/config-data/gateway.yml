@@ -48,7 +48,14 @@ spring:
             - Path=/api/facturacion/**
           filters:
             - StripPrefix=0
-      
+
+        - id: viajes-route
+          uri: lb://microservice-viajes
+          predicates:
+            - Path=/api/viajes/**
+          filters:
+            - StripPrefix=0
+
       globalcors:
         cors-configurations:
           '[/**]':
@@ -64,7 +71,7 @@ spring:
             exposedHeaders:
               - Authorization
             allowCredentials: false
-      
+
       discovery:
         locator:
           enabled: true
