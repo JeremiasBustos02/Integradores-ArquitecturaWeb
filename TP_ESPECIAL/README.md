@@ -256,7 +256,7 @@ En la carpeta `/postman/`:
 
 ### 📊 Cobertura
 
-La colección cubre **7 de 8** funcionalidades requeridas (87.5%):
+La colección cubre **todas las 8 funcionalidades** requeridas (100%) ✅:
 
 | Funcionalidad | Estado | Carpeta |
 |---------------|--------|---------|
@@ -264,8 +264,8 @@ La colección cubre **7 de 8** funcionalidades requeridas (87.5%):
 | b. Anular cuentas | ✅ | 4. Funcionalidad B |
 | c. Monopatines con X viajes | ✅ | 5. Funcionalidad C |
 | d. Total facturado | ✅ | 6. Funcionalidad D |
-| e. Usuarios top | ❌ NO IMPLEMENTADO | - |
-| f. Ajuste de precios | ✅ | 7. Funcionalidad F |
+| e. Usuarios top (más frecuentes) | ✅ | 10. Usuarios Frecuentes |
+| f. Ajuste de precios programados | ✅ | 7. Funcionalidad F |
 | g. Monopatines cercanos | ✅ | 8. Funcionalidad G |
 | h. Uso por usuario | ✅ | 9. Funcionalidad H |
 

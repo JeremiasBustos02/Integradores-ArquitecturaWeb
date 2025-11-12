@@ -15,7 +15,7 @@ public class ViajeResponseDTO {
     private String id;
     private LocalDateTime horaInicio;
     private LocalDateTime horaFin;
-    private double kmRecorridos;
+    private Double distanciaRecorrida;
     private ParadaDTO paradaInicio;
     private ParadaDTO paradaFin;
     private boolean pausaExtensa;

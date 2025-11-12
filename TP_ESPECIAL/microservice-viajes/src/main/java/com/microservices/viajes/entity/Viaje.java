@@ -25,7 +25,7 @@ public class Viaje {
     @Field//fin viaje
     private LocalDateTime horaFin;
     @Field
-    private double distanciaRecorrida;
+    private Double distanciaRecorrida;
     @Field
     private Long paradaOrigenId;
     @Field

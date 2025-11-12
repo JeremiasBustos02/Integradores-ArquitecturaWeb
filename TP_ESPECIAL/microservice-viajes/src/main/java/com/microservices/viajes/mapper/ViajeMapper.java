@@ -21,7 +21,7 @@ public interface ViajeMapper {
     Viaje toEntity(ViajeRequestDTO requestDTO);
 
     // Entity -> Response
-    @Mappings({@Mapping(source = "distanciaRecorrida", target = "kmRecorridos"),
+    @Mappings({@Mapping(source = "distanciaRecorrida", target = "distanciaRecorrida"),
             @Mapping(target = "pausaExtensa", ignore = true)})
     ViajeResponseDTO toResponseDTO(Viaje viaje);
 

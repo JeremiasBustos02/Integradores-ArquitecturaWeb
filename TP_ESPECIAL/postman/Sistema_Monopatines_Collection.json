@@ -457,6 +457,23 @@
 			"name": "2A. Test Validación GPS",
 			"item": [
 				{
+					"name": "2A.0 Preparar Monopatín en Parada 1",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/monopatines/{{MONOPATIN_ID_1}}/ubicacion?latitud=-37.3217&longitud=-59.1332",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "monopatines", "{{MONOPATIN_ID_1}}", "ubicacion"],
+							"query": [
+								{"key": "latitud", "value": "-37.3217"},
+								{"key": "longitud", "value": "-59.1332"}
+							]
+						},
+						"description": "Asegurar que el monopatín esté en Parada 1 (Centro) antes del test GPS."
+					}
+				},
+				{
 					"name": "2A.1 Iniciar Viaje para GPS Test",
 					"event": [
 						{
@@ -466,7 +483,7 @@
 									"if (pm.response.code === 201) {",
 									"    var jsonData = pm.response.json();",
 									"    pm.environment.set('VIAJE_GPS_TEST_ID', jsonData.id);",
-									"    console.log('✅ Viaje GPS test iniciado: ' + jsonData.id);",
+									"    console.log('Viaje GPS test iniciado: ' + jsonData.id);",
 									"}"
 								],
 								"type": "text/javascript"
@@ -478,7 +495,7 @@
 						"header": [{"key": "Content-Type", "value": "application/json"}],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"monopatinId\": {{MONOPATIN_ID_1}},\n  \"usuarioId\": {{USUARIO_ID_1}},\n  \"tarifaId\": {{TARIFA_ID}},\n  \"paradaInicioId\": {{PARADA_ID_1}}\n}"
+							"raw": "{\n  \"monopatinId\": {{MONOPATIN_ID_1}},\n  \"usuarioId\": {{USUARIO_ID_1}},\n  \"tarifaId\": {{TARIFA_ID_1}},\n  \"paradaInicioId\": {{PARADA_ID_1}}\n}"
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/viajes",
@@ -489,7 +506,7 @@
 					}
 				},
 				{
-					"name": "2A.2 Intentar Finalizar LEJOS (❌ Debe Fallar)",
+					"name": "2A.2 Intentar Finalizar LEJOS (Debe Fallar)",
 					"event": [
 						{
 							"listen": "test",
@@ -499,7 +516,7 @@
 									"    pm.response.to.have.status(400);",
 									"    var jsonData = pm.response.json();",
 									"    pm.expect(jsonData.message).to.include('metros');",
-									"    console.log('✅ Validación GPS funcionando: ' + jsonData.message);",
+									"    console.log('Validación GPS funcionando: ' + jsonData.message);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -539,7 +556,7 @@
 					}
 				},
 				{
-					"name": "2A.4 Finalizar Viaje (✅ GPS OK)",
+					"name": "2A.4 Finalizar Viaje (GPS OK)",
 					"event": [
 						{
 							"listen": "test",
@@ -549,7 +566,7 @@
 									"    pm.response.to.have.status(200);",
 									"    var jsonData = pm.response.json();",
 									"    pm.expect(jsonData.horaFin).to.not.be.null;",
-									"    console.log('✅ Viaje finalizado correctamente (GPS validado)');",
+									"    console.log('Viaje finalizado correctamente (GPS validado)');",
 									"});"
 								],
 								"type": "text/javascript"
@@ -612,7 +629,7 @@
 						"header": [{"key": "Content-Type", "value": "application/json"}],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"monopatinId\": {{MONOPATIN_ID_1}},\n  \"usuarioId\": {{USUARIO_ID_2}},\n  \"tarifaId\": {{TARIFA_ID}},\n  \"paradaInicioId\": {{PARADA_ID_1}}\n}"
+							"raw": "{\n  \"monopatinId\": {{MONOPATIN_ID_1}},\n  \"usuarioId\": {{USUARIO_ID_2}},\n  \"tarifaId\": {{TARIFA_ID_1}},\n  \"paradaInicioId\": {{PARADA_ID_1}}\n}"
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/viajes",
@@ -717,7 +734,7 @@
 						"header": [{"key": "Content-Type", "value": "application/json"}],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"monopatinId\": {{MONOPATIN_ID_1}},\n  \"usuarioId\": {{USUARIO_ID_2}},\n  \"tarifaId\": {{TARIFA_ID}},\n  \"paradaInicioId\": {{PARADA_ID_1}}\n}"
+							"raw": "{\n  \"monopatinId\": {{MONOPATIN_ID_1}},\n  \"usuarioId\": {{USUARIO_ID_2}},\n  \"tarifaId\": {{TARIFA_ID_1}},\n  \"paradaInicioId\": {{PARADA_ID_1}}\n}"
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/viajes",
