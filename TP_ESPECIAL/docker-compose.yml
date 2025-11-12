@@ -1,3 +1,4 @@
+# docker-compose.yml
 services:
   mysql:
     image: mysql:8.0
@@ -82,7 +83,7 @@ services:
       - DB_PORT=3306
     networks:
       - microservices-network
-    restart: on-failure:5
+    restart: "on-failure:5"
 
   microservice-user:
     build:
@@ -106,7 +107,7 @@ services:
       - DB_PORT=3306
     networks:
       - microservices-network
-    restart: on-failure:5
+    restart: "on-failure:5"
 
   microservice-monopatin:
     build:
@@ -130,7 +131,7 @@ services:
       - DB_PORT=3306
     networks:
       - microservices-network
-    restart: on-failure:5
+    restart: "on-failure:5"
 
   microservice-tarifas:
     build:
@@ -154,7 +155,7 @@ services:
       - DB_PORT=3306
     networks:
       - microservices-network
-    restart: on-failure:5
+    restart: "on-failure:5"
 
   microservice-facturacion:
     build:
@@ -180,7 +181,34 @@ services:
       - DB_PORT=3306
     networks:
       - microservices-network
-    restart: on-failure:5
+    restart: "on-failure:5"
+
+  microservice-admin:
+    build:
+      context: .
+      # El Dockerfile dentro de microservice-admin usa el patrón que pediste (copia pom/src internos)
+      dockerfile: microservice-admin/Dockerfile
+    container_name: microservice-admin
+    ports:
+      - "8086:8086"
+    depends_on:
+      config-service:
+        condition: service_healthy
+      eureka-service:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVER_URL=http://config-service:8081
+      - EUREKA_SERVER_URL=http://eureka-service:8761/eureka
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/auth_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_FLYWAY_ENABLED=false
+    networks:
+      - microservices-network
+    restart: "on-failure:5"
 
 volumes:
   mysql_data:
@@ -188,3 +216,4 @@ volumes:
 networks:
   microservices-network:
     driver: bridge
+
