@@ -1,35 +1,51 @@
 server:
-  port: 8086
+  port: 8088
+
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://eureka-service:8761/eureka}
+  instance:
+    prefer-ip-address: true
+
 spring:
   application:
     name: microservice-admin
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/admin_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: password
   jpa:
     hibernate:
       ddl-auto: update
-    open-in-view: false
+    show-sql: true
+    database: mysql
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
   flyway:
-    enabled: true
+    enabled: ${SPRING_FLYWAY_ENABLED:true}
     baseline-on-migrate: true
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_SERVER_URL:http://eureka-service:8761/eureka}
-    register-with-eureka: true
-    fetch-registry: true
-  instance:
-    prefer-ip-address: true
+
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,mappings
+        include: health,info,metrics
   endpoint:
     health:
       show-details: always
+
+logging:
+  level:
+    com.monopatines.admin: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+
 springdoc:
   api-docs:
     enabled: true

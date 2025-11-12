@@ -208,11 +208,10 @@ services:
   microservice-admin:
     build:
       context: .
-      # El Dockerfile dentro de microservice-admin usa el patrón que pediste (copia pom/src internos)
       dockerfile: microservice-admin/Dockerfile
     container_name: microservice-admin
     ports:
-      - "8086:8086"
+      - "8088:8088"
     depends_on:
       config-service:
         condition: service_healthy
@@ -224,9 +223,8 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - CONFIG_SERVER_URL=http://config-service:8081
       - EUREKA_SERVER_URL=http://eureka-service:8761/eureka
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/auth_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=password
+      - DB_HOST=mysql
+      - DB_PORT=3306
       - SPRING_FLYWAY_ENABLED=false
     networks:
       - microservices-network

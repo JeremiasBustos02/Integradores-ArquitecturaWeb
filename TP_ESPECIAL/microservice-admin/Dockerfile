@@ -10,5 +10,5 @@ RUN mvn -q -e -B clean package -DskipTests
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=build /app/microservice-admin/target/*.jar app.jar
-EXPOSE 8086
-ENTRYPOINT ["java","-jar","-Dspring.profiles.active=docker","app.jar"]
+EXPOSE 8088
+ENTRYPOINT ["java", "-jar", "app.jar"]
