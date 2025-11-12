@@ -9,10 +9,10 @@ import java.util.List;
 
 @FeignClient(name="microservice-user")
 public interface UserClient {
-    @PatchMapping("/users/{id}/anular") 
+    @PatchMapping("/api/usuarios/{id}/anular") 
     void anular(@PathVariable Long id);
  
-    @GetMapping("/users/uso")
+    @GetMapping("/api/usuarios/uso")
     List<UsuarioUsoDTO> usuariosMasFrecuentes(@RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate desde,
                                            @RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate hasta,
                                            @RequestParam(required=false) String tipo);

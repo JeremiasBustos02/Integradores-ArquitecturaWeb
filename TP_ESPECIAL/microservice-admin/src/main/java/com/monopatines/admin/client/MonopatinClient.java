@@ -11,12 +11,11 @@ import java.util.List;
 
 @FeignClient(name="microservice-monopatin")
 public interface MonopatinClient {
-    @GetMapping("/monopatines/reportes/uso")
+    @GetMapping("/api/monopatines/reportes/uso")
     List<UsoMonopatinDTO> reporteUso(@RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate desde,
                                   @RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate hasta,
                                   @RequestParam(defaultValue="false") boolean incluirPausas);
 
-    @GetMapping("/monopatines/reportes/viajes-anuales")
-    
+    @GetMapping("/api/monopatines/reportes/viajes-anuales")
     List<MonopatinResumenDTO> monopatinesConMasViajes(@RequestParam int anio, @RequestParam int minViajes);
 }

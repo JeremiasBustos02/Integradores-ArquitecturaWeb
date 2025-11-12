@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name = "microservice-tarifas")
 public interface TarifaClientRest {
-    @GetMapping("api/tarifas/{id}")
+    @GetMapping("/api/tarifas/{id}")
     TarifaDTO getTarifaById(@PathVariable @NotNull Long id);
 
 }

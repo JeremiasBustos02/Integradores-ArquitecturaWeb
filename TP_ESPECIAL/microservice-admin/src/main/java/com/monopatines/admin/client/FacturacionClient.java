@@ -6,6 +6,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(name="microservice-facturacion")
 public interface FacturacionClient {
-    @GetMapping("/facturacion/total")
-    TotalFacturadoDTO total(@RequestParam int anio, @RequestParam int mesDesde, @RequestParam int mesHasta);
+    @GetMapping("/api/facturas/reporte/total-facturado")
+    TotalFacturadoDTO total(@RequestParam int anio, @RequestParam("mesInicio") int mesDesde, @RequestParam("mesFin") int mesHasta);
 }

@@ -15,6 +15,6 @@ public interface MonopatinClientRest {
     MonopatinDTO getMonopatinById(@PathVariable("id") Long id);
 
     //actualizar estado monopatin
-    @PutMapping("api/monopatines/{id}/estado")
+    @PutMapping("/api/monopatines/{id}/estado")
     MonopatinDTO actualizarEstado(@PathVariable("id") Long id, @RequestParam EstadosMonopatin estado);
 }

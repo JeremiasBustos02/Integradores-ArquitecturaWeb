@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * Cliente Feign para comunicarse con el microservicio de Viajes
  */
-@FeignClient(name = "microservice-viajes", url = "${microservice.viaje.url:http://localhost:8082}")
+@FeignClient(name = "microservice-viajes")
 public interface ViajeFeignClient {
 
     /**

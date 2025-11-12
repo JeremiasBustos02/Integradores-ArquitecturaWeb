@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "microservice-facturacion")
 public interface FacturacionClientRest {
-    @PostMapping("api/facturas")
+    @PostMapping("/api/facturas")
     FacturaResponseDTO crearFactura(@Valid @RequestBody FacturaRequestDTO factura);
 }

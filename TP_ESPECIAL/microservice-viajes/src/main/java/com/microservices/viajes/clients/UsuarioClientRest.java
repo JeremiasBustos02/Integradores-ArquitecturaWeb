@@ -13,7 +13,7 @@ public interface UsuarioClientRest {
     @GetMapping("/api/usuarios/{id}/cuentas")
     List<CuentaResponseDTO> getCuentasUsuario(@PathVariable("id") Long usuarioId);
 
-    @GetMapping("api/usuarios/{usuarioId}/cuentas/cuenta-para-facturar")
+    @GetMapping("/api/usuarios/{usuarioId}/cuentas/cuenta-para-facturar")
     Long getCuentaFacturar(@PathVariable("usuarioId") Long usuarioId);
 
     // --- Métodos agregados solo para compatibilidad con tests ---
