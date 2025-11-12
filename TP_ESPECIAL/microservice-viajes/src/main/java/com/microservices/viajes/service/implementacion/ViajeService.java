@@ -107,6 +107,12 @@ public class ViajeService implements ViajeServiceI {
             TarifaDTO tarifa = tarifaClient.getTarifaById(viaje.getTarifaId());
 
             long minutosTotales = Duration.between(viaje.getHoraInicio(), viaje.getHoraFin()).toMinutes();
+            
+            // Garantizar cobro mínimo de 1 minuto
+            if (minutosTotales < 1) {
+                minutosTotales = 1;
+                log.info("Aplicando tiempo mínimo de 1 minuto para viaje {}", id);
+            }
 
             // calculo de la tarifa
             costoTotal = minutosTotales * tarifa.getMontoBase();
