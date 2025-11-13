@@ -72,7 +72,7 @@ public class ParadaService implements ParadaServiceI {
     }
 
     @Override
-    public void eliminarParada(Long id) { // Ahora devuelve void
+    public void eliminarParada(Long id) {
         if (!paradaRepository.existsById(id)) {
             throw new IllegalArgumentException("No se encontro la parada con id " + id);
         }
