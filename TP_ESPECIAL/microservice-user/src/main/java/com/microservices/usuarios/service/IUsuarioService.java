@@ -2,6 +2,7 @@ package com.microservices.usuarios.service;
 
 import com.microservices.usuarios.dto.request.UsuarioRequestDTO;
 import com.microservices.usuarios.dto.response.CuentaResponseDTO;
+import com.microservices.usuarios.dto.response.UsuarioAuthResponseDTO;
 import com.microservices.usuarios.dto.response.UsuarioResponseDTO;
 import com.microservices.usuarios.dto.response.UsuarioUsoDTO;
 import org.springframework.data.domain.Page;
@@ -13,6 +14,8 @@ import java.util.List;
 public interface IUsuarioService {
 
     UsuarioResponseDTO createUsuario(UsuarioRequestDTO requestDTO);
+
+    UsuarioAuthResponseDTO getUsuarioByEmailForAuth(String email);
 
     UsuarioResponseDTO getUsuarioById(Long id);
 

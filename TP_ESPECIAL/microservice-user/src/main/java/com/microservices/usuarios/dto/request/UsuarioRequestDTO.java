@@ -1,5 +1,6 @@
 package com.microservices.usuarios.dto.request;
 
+import com.microservices.usuarios.entity.Rol;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -25,4 +26,9 @@ public class UsuarioRequestDTO {
     @NotBlank(message = "El email es obligatorio")
     @Email(message = "El email debe tener un formato válido")
     private String email;
+    
+    @NotBlank(message = "La contraseña es obligatoria")
+    private String password;
+    
+    private Rol rol = Rol.USUARIO;
 }

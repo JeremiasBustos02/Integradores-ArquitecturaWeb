@@ -20,7 +20,8 @@ spring:
     database: mysql
   cloud:
     gateway:
-      routes:
+      mvc:
+        routes:
         - id: usuarios-route
           uri: lb://microservice-user
           predicates:

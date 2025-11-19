@@ -3,6 +3,7 @@ package com.microservices.usuarios.service.impl;
 import com.microservices.usuarios.client.ViajesFeignClient;
 import com.microservices.usuarios.dto.request.UsuarioRequestDTO;
 import com.microservices.usuarios.dto.response.CuentaResponseDTO;
+import com.microservices.usuarios.dto.response.UsuarioAuthResponseDTO;
 import com.microservices.usuarios.dto.response.UsuarioResponseDTO;
 import com.microservices.usuarios.dto.response.UsuarioUsoDTO;
 import com.microservices.usuarios.dto.response.ViajeResponseDTO;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +47,7 @@ public class UsuarioService implements IUsuarioService {
     private final UsuarioMapper usuarioMapper;
     private final CuentaMapper cuentaMapper;
     private final ViajesFeignClient viajesFeignClient;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UsuarioResponseDTO createUsuario(UsuarioRequestDTO requestDTO) {
@@ -61,6 +64,8 @@ public class UsuarioService implements IUsuarioService {
         }
 
         Usuario usuario = usuarioMapper.toEntity(requestDTO);
+
+        usuario.setPassword(passwordEncoder.encode(requestDTO.getPassword()));
         Usuario savedUsuario = usuarioRepository.save(usuario);
 
         log.info("Usuario creado exitosamente con ID: {}", savedUsuario.getId());
@@ -74,6 +79,21 @@ public class UsuarioService implements IUsuarioService {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNotFoundException(id));
         return usuarioMapper.toResponseDTO(usuario);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UsuarioAuthResponseDTO getUsuarioByEmailForAuth(String email) {
+        log.info("Buscando usuario para autenticación con email: {}", email);
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con email: " + email));
+        
+        UsuarioAuthResponseDTO dto = new UsuarioAuthResponseDTO();
+        dto.setId(usuario.getId());
+        dto.setEmail(usuario.getEmail());
+        dto.setPassword(usuario.getPassword());
+        dto.setRol(usuario.getRol());
+        return dto;
     }
 
     @Override
@@ -189,6 +209,14 @@ public class UsuarioService implements IUsuarioService {
         usuario.setApellido(requestDTO.getApellido());
         usuario.setCelular(requestDTO.getCelular());
         usuario.setEmail(requestDTO.getEmail());
+
+        if (requestDTO.getPassword() != null && !requestDTO.getPassword().isBlank()) {
+            usuario.setPassword(passwordEncoder.encode(requestDTO.getPassword()));
+        }
+
+        if (requestDTO.getRol() != null) {
+            usuario.setRol(requestDTO.getRol());
+        }
 
         Usuario updatedUsuario = usuarioRepository.save(usuario);
         log.info("Usuario actualizado exitosamente con ID: {}", updatedUsuario.getId());

@@ -1,23 +1,18 @@
-package com.microservices.gateway.security.jwt;
+package com.microservices.facturacion.security.jwt;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 public class JwtFilter extends OncePerRequestFilter {
     private final Logger log = LoggerFactory.getLogger(JwtFilter.class);
@@ -31,7 +26,7 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     @Override
-    public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String jwt = resolveToken(request);
         try {
             if (StringUtils.hasText(jwt) && this.tokenProvider.validateToken(jwt)) {
@@ -41,8 +36,8 @@ public class JwtFilter extends OncePerRequestFilter {
         } catch (ExpiredJwtException e) {
             log.info("REST request UNAUTHORIZED - La sesión ha expirado.");
             response.setStatus(498);
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.getWriter().write(new JwtErrorDTO().toJson());
+            response.setContentType("application/json");
+            response.getWriter().write("{\"message\":\"Token expired\",\"date\":\"" + java.time.LocalDateTime.now() + "\"}");
             return;
         }
         filterChain.doFilter(request, response);
@@ -55,20 +50,5 @@ public class JwtFilter extends OncePerRequestFilter {
         }
         return null;
     }
-
-    @Getter
-    private static class JwtErrorDTO {
-        private final String message = "Token expirado";
-        private final String date = LocalDateTime.now().toString();
-
-        public JwtErrorDTO() {}
-
-        public String toJson() {
-            try {
-                return new ObjectMapper().writeValueAsString(this);
-            } catch (RuntimeException | JsonProcessingException ex) {
-                return String.format("{ message: %s }", this.message);
-            }
-        }
-    }
 }
+

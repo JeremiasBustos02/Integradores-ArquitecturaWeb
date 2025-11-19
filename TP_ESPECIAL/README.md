@@ -9,6 +9,7 @@
 - [Colecciones Postman](#-colecciones-postman)
 - [Pruebas de la API](#-pruebas-de-la-api)
 - [URLs de Servicios](#-urls-de-servicios)
+- [Autenticación JWT](#-autenticación-jwt)
 - [Endpoints Disponibles](#-endpoints-disponibles)
 - [Configuración](#-configuración)
 - [Agregar Nuevos Microservicios](#-agregar-nuevos-microservicios)
@@ -373,13 +374,273 @@ curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
 
 > **Nota**: En producción, todos los microservicios deben accederse **solo a través del Gateway** (puerto 8080)
 
+## 🔐 Autenticación JWT
+
+El sistema utiliza **autenticación basada en JWT (JSON Web Tokens)** para proteger todos los endpoints REST. La autenticación se gestiona centralmente a través del **API Gateway**.
+
+### 📋 Cómo Funciona la Autenticación JWT
+
+#### 1. **Flujo de Autenticación**
+
+```
+┌─────────┐         ┌──────────┐         ┌─────────────────┐
+│ Cliente │────────▶│  Gateway │────────▶│ Microservice-User│
+└─────────┘         └──────────┘         └─────────────────┘
+     │                    │                        │
+     │  1. POST /api/     │                        │
+     │     authenticate   │                        │
+     │───────────────────▶│                        │
+     │                    │  2. Validar credenciales│
+     │                    │───────────────────────▶│
+     │                    │                        │
+     │                    │  3. Usuario + Rol      │
+     │                    │◀───────────────────────│
+     │                    │                        │
+     │  4. JWT Token      │                        │
+     │◀───────────────────│                        │
+     │                    │                        │
+     │  5. Request con    │                        │
+     │     Bearer Token   │                        │
+     │───────────────────▶│                        │
+     │                    │  6. Validar Token     │
+     │                    │     y extraer rol      │
+     │                    │                        │
+     │  7. Response       │                        │
+     │◀───────────────────│                        │
+```
+
+#### 2. **Proceso Detallado**
+
+1. **Registro/Creación de Usuario**:
+   - El cliente crea un usuario mediante `POST /api/usuarios`
+   - El password se encripta con BCrypt antes de almacenarse
+   - Se asigna un rol: `ADMIN` o `USUARIO`
+
+2. **Autenticación**:
+   - El cliente envía credenciales a `POST /api/authenticate`
+   - El Gateway valida las credenciales consultando `microservice-user`
+   - Si son válidas, se genera un JWT token que contiene:
+     - Email del usuario (subject)
+     - Rol del usuario (authorities)
+     - Fecha de expiración (24 horas)
+
+3. **Uso del Token**:
+   - El cliente incluye el token en el header `Authorization: Bearer <token>`
+   - El Gateway valida el token en cada request
+   - Se extrae el rol y se verifica el acceso al endpoint
+
+#### 3. **Roles Disponibles**
+
+| Rol | Constante | Descripción |
+|-----|-----------|-------------|
+| **ADMIN** | `AuthorityConstant.ADMIN` | Acceso completo a todos los endpoints, incluyendo reportes y gestión administrativa |
+| **USUARIO** | `AuthorityConstant.USUARIO` | Acceso a endpoints generales, sin acceso a reportes ni gestión administrativa |
+
+### 🛡️ Endpoints Protegidos por Roles
+
+#### ✅ **Endpoints Públicos** (Sin autenticación)
+
+Estos endpoints están disponibles sin token:
+
+- `POST /api/authenticate` - Autenticación y obtención de token
+- `POST /api/usuarios` - Crear nuevo usuario
+- `OPTIONS /**` - Preflight requests (CORS)
+
+#### 🔒 **Endpoints Requieren Autenticación** (Cualquier rol: ADMIN o USUARIO)
+
+Todos los endpoints que requieren autenticación pero no tienen restricción de rol específico:
+
+**Microservice User:**
+- `GET /api/usuarios` - Listar usuarios
+- `GET /api/usuarios/{id}` - Obtener usuario por ID
+- `GET /api/usuarios/email/{email}` - Buscar por email
+- `GET /api/usuarios/celular/{celular}` - Buscar por celular
+- `PUT /api/usuarios/{id}` - Actualizar usuario
+- `DELETE /api/usuarios/{id}` - Eliminar usuario
+- `GET /api/usuarios/{id}/cuentas` - Obtener cuentas del usuario
+- `POST /api/usuarios/{usuarioId}/cuentas/{cuentaId}` - Asociar usuario a cuenta
+- `DELETE /api/usuarios/{usuarioId}/cuentas/{cuentaId}` - Desasociar usuario de cuenta
+- `GET /api/cuentas` - Listar cuentas
+- `GET /api/cuentas/{id}` - Obtener cuenta por ID
+- `PATCH /api/cuentas/{id}/cargar-saldo` - Cargar saldo
+- `PATCH /api/cuentas/{id}/descontar-saldo` - Descontar saldo
+- `PATCH /api/cuentas/{id}/habilitar` - Habilitar cuenta
+- `PATCH /api/cuentas/{id}/deshabilitar` - Deshabilitar cuenta
+- `POST /api/cuentas/{id}/renovar-cupo` - Renovar cupo Premium
+
+**Microservice Monopatin:**
+- `GET /api/monopatines` - Listar monopatines
+- `GET /api/monopatines/{id}` - Obtener monopatín por ID
+- `POST /api/monopatines` - Crear monopatín
+- `PUT /api/monopatines/{id}` - Actualizar monopatín
+- `DELETE /api/monopatines/{id}` - Eliminar monopatín
+- `PUT /api/monopatines/{id}/estado` - Cambiar estado
+- `PUT /api/monopatines/{id}/ubicacion` - Actualizar ubicación GPS
+- `GET /api/monopatines/cercanos` - Buscar monopatines cercanos
+
+**Microservice Viajes:**
+- `POST /api/viajes` - Iniciar viaje
+- `PUT /api/viajes/{id}` - Finalizar viaje
+- `GET /api/viajes/{id}` - Obtener viaje por ID
+- `POST /api/viajes/{id}/pausa/iniciar` - Pausar viaje
+- `PUT /api/viajes/{id}/pausa/finalizar` - Reanudar viaje
+
+**Microservice Parada:**
+- `GET /api/paradas` - Listar paradas
+- `GET /api/paradas/{id}` - Obtener parada por ID
+- `POST /api/paradas` - Crear parada
+- `PUT /api/paradas/{id}` - Actualizar parada
+- `DELETE /api/paradas/{id}` - Eliminar parada
+
+#### 👑 **Endpoints Solo ADMIN**
+
+Estos endpoints requieren el rol `ADMIN`:
+
+**Reportes de Monopatines:**
+- `GET /api/monopatines/reporte/**` - Todos los reportes de monopatines
+  - `GET /api/monopatines/reporte/kilometros` - Reporte de kilómetros
+  - `GET /api/monopatines/reporte/viajes` - Monopatines con más viajes
+
+**Reportes de Usuarios:**
+- `GET /api/usuarios/reporte/**` - Todos los reportes de usuarios
+  - `GET /api/usuarios/reporte/usuarios-frecuentes` - Usuarios más frecuentes
+
+**Gestión de Tarifas:**
+- `GET /api/tarifas/**` - Todos los endpoints de tarifas
+  - `GET /api/tarifas` - Listar tarifas
+  - `POST /api/tarifas` - Crear tarifa
+  - `PUT /api/tarifas/{id}` - Actualizar tarifa
+  - `DELETE /api/tarifas/{id}` - Eliminar tarifa
+  - `GET /api/tarifas/activa` - Obtener tarifa activa
+  - `POST /api/tarifas/precios` - Definir precio vigente
+  - `POST /api/tarifas/precios/ajustes` - Programar ajuste de precio
+
+**Gestión de Facturación:**
+- `GET /api/facturas/**` - Todos los endpoints de facturación
+  - `GET /api/facturas` - Listar facturas
+  - `POST /api/facturas` - Crear factura
+  - `GET /api/facturas/{id}` - Obtener factura por ID
+  - `PUT /api/facturas/{id}` - Actualizar factura
+  - `DELETE /api/facturas/{id}` - Eliminar factura
+  - `PATCH /api/facturas/{id}/estado` - Cambiar estado
+  - `GET /api/facturas/reporte/total-facturado` - Reporte de facturación
+
+### 📝 Ejemplos de Uso
+
+#### 1. Crear Usuario y Autenticarse
+
+```bash
+# 1. Crear usuario (público)
+curl -X POST http://localhost:8080/api/usuarios \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nombre": "Juan",
+    "apellido": "Pérez",
+    "celular": "1234567890",
+    "email": "juan@example.com",
+    "password": "password123",
+    "rol": "USUARIO"
+  }'
+
+# 2. Autenticarse y obtener token
+curl -X POST http://localhost:8080/api/authenticate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "juan@example.com",
+    "password": "password123"
+  }'
+
+# Respuesta:
+# {
+#   "id_token": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqdWFuQGV4YW1wbGUuY29tIiwiYXV0aCI6IlVTVUFSSU8iLCJleHAiOjE3NjM2NzY2MjEsImlhdCI6MTc2MzU5MDIyMX0..."
+# }
+```
+
+#### 2. Usar Token para Acceder a Endpoints Protegidos
+
+```bash
+# Guardar token en variable
+TOKEN="eyJhbGciOiJIUzUxMiJ9..."
+
+# Acceder a endpoint que requiere autenticación (cualquier rol)
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/monopatines
+
+# Acceder a endpoint que requiere rol ADMIN (fallará si el usuario es USUARIO)
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/tarifas
+```
+
+#### 3. Crear Usuario ADMIN
+
+```bash
+curl -X POST http://localhost:8080/api/usuarios \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nombre": "Admin",
+    "apellido": "Sistema",
+    "celular": "9876543210",
+    "email": "admin@example.com",
+    "password": "admin123",
+    "rol": "ADMIN"
+  }'
+```
+
+#### 4. Verificar Acceso por Rol
+
+```bash
+# Con token de USUARIO - Acceso permitido
+curl -H "Authorization: Bearer $USER_TOKEN" \
+  http://localhost:8080/api/monopatines
+# ✅ 200 OK
+
+# Con token de USUARIO - Acceso denegado (requiere ADMIN)
+curl -H "Authorization: Bearer $USER_TOKEN" \
+  http://localhost:8080/api/tarifas
+# ❌ 403 Forbidden
+
+# Con token de ADMIN - Acceso permitido
+curl -H "Authorization: Bearer $ADMIN_TOKEN" \
+  http://localhost:8080/api/tarifas
+# ✅ 200 OK
+```
+
+### ⚙️ Configuración Técnica
+
+#### Token JWT
+
+- **Algoritmo**: HS512 (HMAC con SHA-512)
+- **Validez**: 24 horas (86400 segundos)
+- **Contenido del Token**:
+  - `sub`: Email del usuario
+  - `auth`: Rol del usuario (ADMIN o USUARIO)
+  - `exp`: Fecha de expiración
+  - `iat`: Fecha de emisión
+
+#### Seguridad
+
+- **Password Encoding**: BCrypt (10 rounds)
+- **Sesiones**: Stateless (sin sesiones del servidor)
+- **CSRF**: Deshabilitado (no necesario con JWT)
+- **CORS**: Configurado para permitir requests desde cualquier origen
+
+#### Validación del Token
+
+El `JwtFilter` intercepta todas las requests y:
+1. Extrae el token del header `Authorization: Bearer <token>`
+2. Valida la firma y expiración del token
+3. Extrae el rol del usuario del token
+4. Establece el contexto de seguridad de Spring
+5. Permite o deniega el acceso según las reglas configuradas
+
+---
+
 ## 📡 Endpoints Disponibles
 
 > **Acceso:** Todos los endpoints se acceden vía Gateway en `http://localhost:8080`
 
 ### 🔐 Autenticación (Gateway)
 - `POST /api/authenticate` - Login y obtener JWT token
-- `POST /api/register` - Registrar nuevo usuario
 
 ---
 

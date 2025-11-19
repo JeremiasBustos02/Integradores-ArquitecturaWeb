@@ -33,6 +33,14 @@ public class Usuario {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false)
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "varchar(20) default 'USUARIO'")
+    @Builder.Default
+    private Rol rol = Rol.USUARIO;
+
     @Column(name = "fecha_alta", nullable = false, updatable = false)
     private LocalDateTime fechaAlta;
 

@@ -2,6 +2,7 @@ package com.microservices.usuarios.controller;
 
 import com.microservices.usuarios.dto.request.UsuarioRequestDTO;
 import com.microservices.usuarios.dto.response.CuentaResponseDTO;
+import com.microservices.usuarios.dto.response.UsuarioAuthResponseDTO;
 import com.microservices.usuarios.dto.response.UsuarioResponseDTO;
 import com.microservices.usuarios.dto.response.UsuarioUsoDTO;
 import com.microservices.usuarios.service.IUsuarioService;
@@ -56,6 +57,13 @@ public class UsuarioController {
     public ResponseEntity<UsuarioResponseDTO> getUsuarioByEmail(@PathVariable String email) {
         log.info("REST request to get Usuario by email: {}", email);
         UsuarioResponseDTO usuario = usuarioService.getUsuarioByEmail(email);
+        return ResponseEntity.ok(usuario);
+    }
+
+    @GetMapping("/email/{email}/auth")
+    public ResponseEntity<UsuarioAuthResponseDTO> getUsuarioByEmailForAuth(@PathVariable String email) {
+        log.info("REST request to get Usuario for auth by email: {}", email);
+        UsuarioAuthResponseDTO usuario = usuarioService.getUsuarioByEmailForAuth(email);
         return ResponseEntity.ok(usuario);
     }
 
