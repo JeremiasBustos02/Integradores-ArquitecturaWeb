@@ -1014,50 +1014,84 @@ El sistema incluye usuarios predefinidos (ver `init-scripts/init.sql`):
 
 ## 🧪 Ejemplos de Prueba de Microservicios
 
-### Usuarios y Cuentas Microservice
+> **⚠️ IMPORTANTE**: Todos los endpoints (excepto crear usuario y autenticarse) requieren un token JWT.
+> Primero debes autenticarte y obtener un token antes de hacer requests a endpoints protegidos.
+
+### Paso 0: Autenticarse y Obtener Token
 
 ```bash
-# 1. Crear un usuario
-curl -X POST http://localhost:8083/api/usuarios \
+# 1. Crear un usuario (público, no requiere token)
+curl -X POST http://localhost:8080/api/usuarios \
   -H "Content-Type: application/json" \
   -d '{
     "nombre": "Juan",
     "apellido": "Pérez",
     "celular": "1234567890",
-    "email": "juan.perez@example.com"
+    "email": "juan.perez@example.com",
+    "password": "password123",
+    "rol": "USUARIO"
   }'
 
-# 2. Crear una cuenta
-curl -X POST http://localhost:8083/api/cuentas \
+# 2. Autenticarse y obtener token
+TOKEN=$(curl -s -X POST http://localhost:8080/api/authenticate \
   -H "Content-Type: application/json" \
+  -d '{
+    "username": "juan.perez@example.com",
+    "password": "password123"
+  }' | jq -r '.id_token')
+
+echo "Token: $TOKEN"
+```
+
+### Usuarios y Cuentas Microservice
+
+```bash
+# 1. Crear una cuenta (requiere autenticación)
+curl -X POST http://localhost:8080/api/cuentas \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
   -d '{
     "idCuentaMercadoPago": 123456,
     "tipoCuenta": "PREMIUM",
     "saldo": 5000.00
   }'
 
-# 3. Asociar usuario a cuenta
-curl -X POST http://localhost:8083/api/usuarios/1/cuentas/1
+# 2. Asociar usuario a cuenta
+curl -X POST http://localhost:8080/api/usuarios/1/cuentas/1 \
+  -H "Authorization: Bearer $TOKEN"
 
-# 4. Obtener todas las cuentas de un usuario
-curl http://localhost:8083/api/usuarios/1/cuentas
+# 3. Obtener todas las cuentas de un usuario
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/usuarios/1/cuentas
 
-# 5. Obtener usuarios de una cuenta
-curl http://localhost:8083/api/usuarios/cuenta/1
+# 4. Obtener usuarios de una cuenta
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/usuarios/cuenta/1
 
-# 6. Cargar saldo en una cuenta
-curl -X PATCH "http://localhost:8083/api/cuentas/1/cargar-saldo?monto=1000.00"
+# 5. Cargar saldo en una cuenta
+curl -X PATCH "http://localhost:8080/api/cuentas/1/cargar-saldo?monto=1000.00" \
+  -H "Authorization: Bearer $TOKEN"
 
-# 7. Descontar saldo (usado al finalizar viaje)
-curl -X PATCH "http://localhost:8083/api/cuentas/1/descontar-saldo?monto=250.50"
+# 6. Descontar saldo (usado al finalizar viaje)
+curl -X PATCH "http://localhost:8080/api/cuentas/1/descontar-saldo?monto=250.50" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### Tarifas Microservice
+### Tarifas Microservice (Requiere rol ADMIN)
 
 ```bash
-# 1. Crear una tarifa inicial
-curl -X POST http://localhost:8084/api/tarifas \
+# Primero crear un usuario ADMIN y obtener su token
+ADMIN_TOKEN=$(curl -s -X POST http://localhost:8080/api/authenticate \
   -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin@example.com",
+    "password": "admin123"
+  }' | jq -r '.id_token')
+
+# 1. Crear una tarifa inicial (requiere ADMIN)
+curl -X POST http://localhost:8080/api/tarifas \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
   -d '{
     "montoBase": 100.0,
     "montoExtra": 50.0,
@@ -1066,12 +1100,14 @@ curl -X POST http://localhost:8084/api/tarifas \
     "descripcion": "Tarifa inicial 2025"
   }'
 
-# 2. Obtener tarifa activa
-curl http://localhost:8084/api/tarifas/activa
+# 2. Obtener tarifa activa (requiere ADMIN)
+curl -H "Authorization: Bearer $ADMIN_TOKEN" \
+  http://localhost:8080/api/tarifas/activa
 
-# 3. Crear nueva tarifa (ajuste de precios)
-curl -X POST http://localhost:8084/api/tarifas \
+# 3. Crear nueva tarifa (ajuste de precios) (requiere ADMIN)
+curl -X POST http://localhost:8080/api/tarifas \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
   -d '{
     "montoBase": 120.0,
     "montoExtra": 60.0,
@@ -1080,16 +1116,21 @@ curl -X POST http://localhost:8084/api/tarifas \
     "descripcion": "Ajuste de precios - Verano"
   }'
 
-# 4. Listar todas las tarifas
-curl http://localhost:8084/api/tarifas
+# 4. Listar todas las tarifas (requiere ADMIN)
+curl -H "Authorization: Bearer $ADMIN_TOKEN" \
+  http://localhost:8080/api/tarifas
 ```
 
-### Facturación Microservice
+### Facturación Microservice (Requiere rol ADMIN)
 
 ```bash
-# 1. Crear una factura
-curl -X POST http://localhost:8085/api/facturas \
+# Usar el token de ADMIN obtenido anteriormente
+# ADMIN_TOKEN=$(curl -s -X POST http://localhost:8080/api/authenticate ...)
+
+# 1. Crear una factura (requiere ADMIN)
+curl -X POST http://localhost:8080/api/facturas \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
   -d '{
     "cuentaId": 1,
     "montoTotal": 250.0,
@@ -1102,43 +1143,67 @@ curl -X POST http://localhost:8085/api/facturas \
     "tipoCuenta": "BASICA"
   }'
 
-# 2. Consultar facturas por cuenta
-curl http://localhost:8085/api/facturas/cuenta/1
+# 2. Consultar facturas por cuenta (requiere ADMIN)
+curl -H "Authorization: Bearer $ADMIN_TOKEN" \
+  http://localhost:8080/api/facturas/cuenta/1
 
-# 3. Cambiar estado de factura
-curl -X PATCH "http://localhost:8085/api/facturas/1/estado?estado=PAGADA"
+# 3. Cambiar estado de factura (requiere ADMIN)
+curl -X PATCH "http://localhost:8080/api/facturas/1/estado?estado=PAGADA" \
+  -H "Authorization: Bearer $ADMIN_TOKEN"
 
-# 4. Reporte de facturación
-curl "http://localhost:8085/api/facturas/reporte/total-facturado?mesInicio=1&mesFin=3&anio=2025"
+# 4. Reporte de facturación (requiere ADMIN)
+curl -H "Authorization: Bearer $ADMIN_TOKEN" \
+  "http://localhost:8080/api/facturas/reporte/total-facturado?mesInicio=1&mesFin=3&anio=2025"
 
-# 5. Facturas por estado
-curl http://localhost:8085/api/facturas/estado/PENDIENTE
+# 5. Facturas por estado (requiere ADMIN)
+curl -H "Authorization: Bearer $ADMIN_TOKEN" \
+  http://localhost:8080/api/facturas/estado/PENDIENTE
 ```
 
 ### Flujo Completo de Prueba
 
 ```bash
-# 1. Crear tarifa
-curl -X POST http://localhost:8084/api/tarifas \
+# 0. Obtener token de ADMIN
+ADMIN_TOKEN=$(curl -s -X POST http://localhost:8080/api/authenticate \
   -H "Content-Type: application/json" \
+  -d '{"username": "admin@example.com", "password": "admin123"}' \
+  | jq -r '.id_token')
+
+# 1. Crear tarifa (requiere ADMIN)
+curl -X POST http://localhost:8080/api/tarifas \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
   -d '{"montoBase": 100.0, "montoExtra": 50.0, "fechaVigencia": "2025-01-01", "activa": true}'
 
-# 2. Verificar tarifa activa
-curl http://localhost:8084/api/tarifas/activa
+# 2. Verificar tarifa activa (requiere ADMIN)
+curl -H "Authorization: Bearer $ADMIN_TOKEN" \
+  http://localhost:8080/api/tarifas/activa
 
-# 3. Crear cuenta (debe existir previamente en usuarios-microservice)
-# curl -X POST http://localhost:8083/api/cuentas ...
-
-# 4. Crear factura asociada a cuenta
-curl -X POST http://localhost:8085/api/facturas \
+# 3. Obtener token de usuario regular
+USER_TOKEN=$(curl -s -X POST http://localhost:8080/api/authenticate \
   -H "Content-Type: application/json" \
+  -d '{"username": "juan.perez@example.com", "password": "password123"}' \
+  | jq -r '.id_token')
+
+# 4. Crear cuenta (requiere autenticación)
+curl -X POST http://localhost:8080/api/cuentas \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $USER_TOKEN" \
+  -d '{"idCuentaMercadoPago": 123456, "tipoCuenta": "PREMIUM", "saldo": 5000.00}'
+
+# 5. Crear factura asociada a cuenta (requiere ADMIN)
+curl -X POST http://localhost:8080/api/facturas \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
   -d '{"cuentaId": 1, "montoTotal": 250.0, "fechaEmision": "2025-01-15T10:30:00", "estado": "PENDIENTE", "periodoMes": 1, "periodoAnio": 2025}'
 
-# 5. Consultar facturas de la cuenta
-curl http://localhost:8085/api/facturas/cuenta/1
+# 6. Consultar facturas de la cuenta (requiere ADMIN)
+curl -H "Authorization: Bearer $ADMIN_TOKEN" \
+  http://localhost:8080/api/facturas/cuenta/1
 
-# 6. Generar reporte de facturación
-curl "http://localhost:8085/api/facturas/reporte/total-facturado?mesInicio=1&mesFin=12&anio=2025"
+# 7. Generar reporte de facturación (requiere ADMIN)
+curl -H "Authorization: Bearer $ADMIN_TOKEN" \
+  "http://localhost:8080/api/facturas/reporte/total-facturado?mesInicio=1&mesFin=12&anio=2025"
 ```
 
 ## 🤝 Contribución

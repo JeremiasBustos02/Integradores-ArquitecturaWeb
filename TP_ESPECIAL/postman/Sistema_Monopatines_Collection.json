@@ -2,10 +2,144 @@
 	"info": {
 		"_postman_id": "b2c3d4e5-f6g7-8901-bcde-fg1234567891",
 		"name": "Sistema Monopatines - TP Especial V2",
-		"description": "Colección AUTOMATIZADA con captura de IDs. Los endpoints son accesibles sin autenticación JWT.",
+		"description": "Colección AUTOMATIZADA con captura de IDs y autenticación JWT. Todos los endpoints requieren autenticación excepto crear usuario y autenticarse.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
+		{
+			"name": "0. Autenticación JWT",
+			"item": [
+				{
+					"name": "0.1 Crear Usuario ADMIN",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201 || pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('ADMIN_USER_ID', jsonData.id);",
+									"    console.log('✅ Usuario ADMIN creado con ID: ' + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Admin\",\n  \"apellido\": \"Sistema\",\n  \"celular\": \"9999999999\",\n  \"email\": \"admin@test.com\",\n  \"password\": \"admin123\",\n  \"rol\": \"ADMIN\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/usuarios",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "usuarios"]
+						},
+						"description": "Crear usuario con rol ADMIN. Este endpoint es público (no requiere autenticación)."
+					}
+				},
+				{
+					"name": "0.2 Crear Usuario USUARIO",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201 || pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('USER_USER_ID', jsonData.id);",
+									"    console.log('✅ Usuario USUARIO creado con ID: ' + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Usuario\",\n  \"apellido\": \"Test\",\n  \"celular\": \"8888888888\",\n  \"email\": \"user@test.com\",\n  \"password\": \"user123\",\n  \"rol\": \"USUARIO\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/usuarios",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "usuarios"]
+						},
+						"description": "Crear usuario con rol USUARIO. Este endpoint es público (no requiere autenticación)."
+					}
+				},
+				{
+					"name": "0.3 Autenticarse como ADMIN",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('ADMIN_TOKEN', jsonData.id_token);",
+									"    console.log('✅ Token ADMIN obtenido: ' + jsonData.id_token.substring(0, 50) + '...');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"admin@test.com\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/authenticate",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "authenticate"]
+						},
+						"description": "Autenticarse como ADMIN y obtener token JWT. El token se guarda automáticamente en la variable ADMIN_TOKEN."
+					}
+				},
+				{
+					"name": "0.4 Autenticarse como USUARIO",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('USER_TOKEN', jsonData.id_token);",
+									"    console.log('✅ Token USUARIO obtenido: ' + jsonData.id_token.substring(0, 50) + '...');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"user@test.com\",\n  \"password\": \"user123\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/authenticate",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "authenticate"]
+						},
+						"description": "Autenticarse como USUARIO y obtener token JWT. El token se guarda automáticamente en la variable USER_TOKEN."
+					}
+				}
+			],
+			"description": "⚠️ IMPORTANTE: Ejecutar esta sección PRIMERO para obtener tokens JWT. Los tokens se guardan automáticamente en variables de entorno."
+		},
 		{
 			"name": "1. Setup Inicial - Crear Datos Base",
 			"item": [
@@ -28,7 +162,10 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"montoBase\": 50.0,\n  \"montoExtra\": 100.0,\n  \"fechaVigencia\": \"2025-01-01\",\n  \"activa\": true,\n  \"descripcion\": \"Tarifa Inicial 2025\"\n}"
@@ -37,7 +174,8 @@
 							"raw": "{{BASE_URL}}/api/tarifas",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "tarifas"]
-						}
+						},
+						"description": "⚠️ Requiere rol ADMIN. Usa token de ADMIN_TOKEN."
 					}
 				},
 				{
@@ -59,7 +197,10 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"nombre\": \"Parada Centro\",\n  \"latitud\": -37.3217,\n  \"longitud\": -59.1332\n}"
@@ -68,7 +209,8 @@
 							"raw": "{{BASE_URL}}/api/paradas",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "paradas"]
-						}
+						},
+						"description": "Requiere autenticación (cualquier rol). Usa token de USER_TOKEN o ADMIN_TOKEN."
 					}
 				},
 				{
@@ -90,7 +232,10 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"nombre\": \"Parada Plaza\",\n  \"latitud\": -37.3250,\n  \"longitud\": -59.1380\n}"
@@ -99,7 +244,8 @@
 							"raw": "{{BASE_URL}}/api/paradas",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "paradas"]
-						}
+						},
+						"description": "Requiere autenticación (cualquier rol). Usa token de USER_TOKEN o ADMIN_TOKEN."
 					}
 				},
 				{
@@ -124,13 +270,14 @@
 						"header": [{"key": "Content-Type", "value": "application/json"}],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"nombre\": \"Juan\",\n  \"apellido\": \"Pérez\",\n  \"celular\": \"2234567890\",\n  \"email\": \"juan.perez@example.com\"\n}"
+							"raw": "{\n  \"nombre\": \"Juan\",\n  \"apellido\": \"Pérez\",\n  \"celular\": \"2234567890\",\n  \"email\": \"juan.perez@example.com\",\n  \"password\": \"juan123\",\n  \"rol\": \"USUARIO\"\n}"
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/usuarios",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "usuarios"]
-						}
+						},
+						"description": "⚠️ Este endpoint es PÚBLICO (no requiere autenticación). Se usa para crear usuarios."
 					}
 				},
 				{
@@ -155,13 +302,14 @@
 						"header": [{"key": "Content-Type", "value": "application/json"}],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"nombre\": \"María\",\n  \"apellido\": \"García\",\n  \"celular\": \"2234567891\",\n  \"email\": \"maria.garcia@example.com\"\n}"
+							"raw": "{\n  \"nombre\": \"María\",\n  \"apellido\": \"García\",\n  \"celular\": \"2234567891\",\n  \"email\": \"maria.garcia@example.com\",\n  \"password\": \"maria123\",\n  \"rol\": \"USUARIO\"\n}"
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/usuarios",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "usuarios"]
-						}
+						},
+						"description": "⚠️ Este endpoint es PÚBLICO (no requiere autenticación). Se usa para crear usuarios."
 					}
 				},
 				{
@@ -183,7 +331,10 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"idCuentaMercadoPago\": 100001,\n  \"tipoCuenta\": \"BASICA\",\n  \"saldoInicial\": 5000.00\n}"
@@ -192,7 +343,8 @@
 							"raw": "{{BASE_URL}}/api/cuentas",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "cuentas"]
-						}
+						},
+						"description": "Requiere autenticación (cualquier rol). Usa token de USER_TOKEN o ADMIN_TOKEN."
 					}
 				},
 				{
@@ -214,7 +366,10 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"idCuentaMercadoPago\": 100002,\n  \"tipoCuenta\": \"PREMIUM\",\n  \"saldoInicial\": 10000.00\n}"
@@ -223,31 +378,38 @@
 							"raw": "{{BASE_URL}}/api/cuentas",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "cuentas"]
-						}
+						},
+						"description": "Requiere autenticación (cualquier rol). Usa token de USER_TOKEN o ADMIN_TOKEN."
 					}
 				},
 				{
 					"name": "1.8 Asociar Usuario 1 a Cuenta 1",
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/usuarios/{{USUARIO_ID_1}}/cuentas/{{CUENTA_ID_1}}",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "usuarios", "{{USUARIO_ID_1}}", "cuentas", "{{CUENTA_ID_1}}"]
-						}
+						},
+						"description": "Requiere autenticación (cualquier rol). Usa token de USER_TOKEN o ADMIN_TOKEN."
 					}
 				},
 				{
 					"name": "1.9 Asociar Usuario 2 a Cuenta 2",
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/usuarios/{{USUARIO_ID_2}}/cuentas/{{CUENTA_ID_2}}",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "usuarios", "{{USUARIO_ID_2}}", "cuentas", "{{CUENTA_ID_2}}"]
-						}
+						},
+						"description": "Requiere autenticación (cualquier rol). Usa token de USER_TOKEN o ADMIN_TOKEN."
 					}
 				},
 				{
@@ -269,7 +431,10 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"latitud\": -37.3217,\n  \"longitud\": -59.1332,\n  \"estado\": \"DISPONIBLE\",\n  \"idParadaActual\": null\n}"
@@ -278,7 +443,8 @@
 							"raw": "{{BASE_URL}}/api/monopatines",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "monopatines"]
-						}
+						},
+						"description": "Requiere autenticación (cualquier rol). Usa token de USER_TOKEN o ADMIN_TOKEN."
 					}
 				},
 				{
@@ -300,7 +466,10 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"latitud\": -37.3250,\n  \"longitud\": -59.1380,\n  \"estado\": \"DISPONIBLE\",\n  \"idParadaActual\": null\n}"
@@ -309,7 +478,8 @@
 							"raw": "{{BASE_URL}}/api/monopatines",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "monopatines"]
-						}
+						},
+						"description": "Requiere autenticación (cualquier rol). Usa token de USER_TOKEN o ADMIN_TOKEN."
 					}
 				}
 			]
@@ -337,7 +507,10 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"monopatinId\": {{MONOPATIN_ID_1}},\n  \"usuarioId\": {{USUARIO_ID_1}},\n  \"tarifaId\": {{TARIFA_ID_1}},\n  \"paradaInicioId\": {{PARADA_ID_1}}\n}"
@@ -347,33 +520,37 @@
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "viajes"]
 						},
-						"description": "Iniciar viaje. El ID se captura automáticamente y se usa en los siguientes requests."
+						"description": "Iniciar viaje. Requiere autenticación (cualquier rol). El ID se captura automáticamente y se usa en los siguientes requests."
 					}
 				},
 				{
 					"name": "2.2 Pausar Viaje",
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/viajes/{{VIAJE_ID_ACTUAL}}/pausa/iniciar",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "viajes", "{{VIAJE_ID_ACTUAL}}", "pausa", "iniciar"]
 						},
-						"description": "Pausar el viaje. Usa automáticamente el ID del viaje creado en 2.1"
+						"description": "Pausar el viaje. Requiere autenticación (cualquier rol). Usa automáticamente el ID del viaje creado en 2.1"
 					}
 				},
 				{
 					"name": "2.3 Reanudar Viaje (Finalizar Pausa)",
 					"request": {
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/viajes/{{VIAJE_ID_ACTUAL}}/pausa/finalizar",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "viajes", "{{VIAJE_ID_ACTUAL}}", "pausa", "finalizar"]
 						},
-						"description": "Reanudar viaje. Si la pausa duró >15 min, se marca como extensa."
+						"description": "Reanudar viaje. Requiere autenticación (cualquier rol). Si la pausa duró >15 min, se marca como extensa."
 					}
 				},
 				{
@@ -391,7 +568,9 @@
 					],
 					"request": {
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/monopatines/{{MONOPATIN_ID_1}}/ubicacion?latitud=-37.3250&longitud=-59.1380",
 							"host": ["{{BASE_URL}}"],
@@ -401,7 +580,7 @@
 								{"key": "longitud", "value": "-59.1380"}
 							]
 						},
-						"description": "Actualiza ubicación GPS del monopatín a la parada destino para poder finalizar el viaje."
+						"description": "Actualiza ubicación GPS del monopatín. Requiere autenticación (cualquier rol). Actualiza ubicación GPS del monopatín a la parada destino para poder finalizar el viaje."
 					}
 				},
 				{
@@ -424,7 +603,10 @@
 					],
 					"request": {
 						"method": "PUT",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"paradaFin\": {{PARADA_ID_2}},\n  \"kmRecorridos\": 5.5\n}"
@@ -434,20 +616,22 @@
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "viajes", "{{VIAJE_ID_ACTUAL}}"]
 						},
-						"description": "Finalizar viaje. Valida GPS (monopatín debe estar <50m de parada), genera factura y descuenta saldo automáticamente."
+						"description": "Finalizar viaje. Requiere autenticación (cualquier rol). Valida GPS (monopatín debe estar <50m de parada), genera factura y descuenta saldo automáticamente."
 					}
 				},
 				{
 					"name": "2.6 Verificar Saldo Descontado",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/cuentas/{{CUENTA_ID_1}}",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "cuentas", "{{CUENTA_ID_1}}"]
 						},
-						"description": "Verificar que el saldo se descontó automáticamente después del viaje."
+						"description": "Verificar que el saldo se descontó automáticamente después del viaje. Requiere autenticación (cualquier rol)."
 					}
 				}
 			],
@@ -460,7 +644,9 @@
 					"name": "2A.0 Preparar Monopatín en Parada 1",
 					"request": {
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/monopatines/{{MONOPATIN_ID_1}}/ubicacion?latitud=-37.3217&longitud=-59.1332",
 							"host": ["{{BASE_URL}}"],
@@ -542,7 +728,9 @@
 					"name": "2A.3 Mover Monopatín a Parada Correcta",
 					"request": {
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/monopatines/{{MONOPATIN_ID_1}}/ubicacion?latitud=-37.3250&longitud=-59.1380",
 							"host": ["{{BASE_URL}}"],
@@ -598,7 +786,9 @@
 					"name": "2B.1 Preparar Monopatín",
 					"request": {
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/monopatines/{{MONOPATIN_ID_1}}/estado?estado=DISPONIBLE",
 							"host": ["{{BASE_URL}}"],
@@ -676,7 +866,9 @@
 					"name": "2B.5 Verificar Viaje Gratis",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/cuentas/{{CUENTA_ID_2}}",
 							"host": ["{{BASE_URL}}"],
@@ -689,7 +881,9 @@
 					"name": "2B.6 Actualizar a 100km",
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/cuentas/{{CUENTA_ID_2}}/kilometros?kilometros=92",
 							"host": ["{{BASE_URL}}"],
@@ -703,7 +897,9 @@
 					"name": "2B.7 Preparar Monopatín Again",
 					"request": {
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/monopatines/{{MONOPATIN_ID_1}}/estado?estado=DISPONIBLE",
 							"host": ["{{BASE_URL}}"],
@@ -777,7 +973,9 @@
 					"name": "2B.10 Verificar Descuento 50%",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/facturas",
 							"host": ["{{BASE_URL}}"],
@@ -796,7 +994,9 @@
 					"name": "2C.1 Reporte Usuarios Frecuentes",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/usuarios/reporte/usuarios-frecuentes?desde=2025-01-01&hasta=2025-12-31",
 							"host": ["{{BASE_URL}}"],
@@ -806,14 +1006,16 @@
 								{"key": "hasta", "value": "2025-12-31"}
 							]
 						},
-						"description": "Reporte de usuarios más frecuentes. MOVIDO a microservice-user."
+						"description": "⚠️ Requiere rol ADMIN. Reporte de usuarios más frecuentes. MOVIDO a microservice-user."
 					}
 				},
 				{
 					"name": "2C.2 Reporte Usuarios por Tipo PREMIUM",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/usuarios/reporte/usuarios-frecuentes?desde=2025-01-01&hasta=2025-12-31&tipoCuenta=PREMIUM",
 							"host": ["{{BASE_URL}}"],
@@ -824,14 +1026,16 @@
 								{"key": "tipoCuenta", "value": "PREMIUM"}
 							]
 						},
-						"description": "Filtrar usuarios frecuentes solo de cuentas PREMIUM. MOVIDO a microservice-user."
+						"description": "⚠️ Requiere rol ADMIN. Filtrar usuarios frecuentes solo de cuentas PREMIUM. MOVIDO a microservice-user."
 					}
 				},
 				{
 					"name": "2C.3 Total Facturado (Meses)",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/facturas/reporte/total-facturado?anio=2025&mesInicio=1&mesFin=12",
 							"host": ["{{BASE_URL}}"],
@@ -842,27 +1046,32 @@
 								{"key": "mesFin", "value": "12"}
 							]
 						},
-						"description": "Total facturado en rango de meses. Ya existe en microservice-facturacion."
+						"description": "⚠️ Requiere rol ADMIN. Total facturado en rango de meses. Ya existe en microservice-facturacion."
 					}
 				},
 				{
 					"name": "2C.4 Anular Cuenta",
 					"request": {
 						"method": "PATCH",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
-							"raw": "{{BASE_URL}}/api/cuentas/3/deshabilitar",
+							"raw": "{{BASE_URL}}/api/cuentas/{{CUENTA_ID_1}}/deshabilitar",
 							"host": ["{{BASE_URL}}"],
-							"path": ["api", "cuentas", "3", "deshabilitar"]
+							"path": ["api", "cuentas", "{{CUENTA_ID_1}}", "deshabilitar"]
 						},
-						"description": "Como administrador, anular/deshabilitar una cuenta de usuario."
+						"description": "Anular/deshabilitar una cuenta de usuario. Requiere autenticación (cualquier rol)."
 					}
 				},
 				{
 					"name": "2C.5 Definir Precio Vigente",
 					"request": {
 						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"precioKm\": 60.0,\n  \"precioMin\": 12.0,\n  \"moneda\": \"ARS\"\n}"
@@ -872,14 +1081,17 @@
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "tarifas", "precios"]
 						},
-						"description": "Definir nuevo precio vigente. MOVIDO a microservice-tarifas."
+						"description": "⚠️ Requiere rol ADMIN. Definir nuevo precio vigente. MOVIDO a microservice-tarifas."
 					}
 				},
 				{
 					"name": "2C.6 Programar Ajuste de Precio",
 					"request": {
 						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"precioKm\": 70.0,\n  \"precioMin\": 15.0,\n  \"extraPausaMultiplicador\": 2.0,\n  \"efectivaDesde\": \"2025-12-01T00:00:00Z\"\n}"
@@ -889,7 +1101,7 @@
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "tarifas", "precios", "ajustes"]
 						},
-						"description": "Programar ajuste de precio futuro (se aplica automáticamente). MOVIDO a microservice-tarifas."
+						"description": "⚠️ Requiere rol ADMIN. Programar ajuste de precio futuro (se aplica automáticamente). MOVIDO a microservice-tarifas."
 					}
 				}
 			],
@@ -902,26 +1114,32 @@
 					"name": "A.1 Reporte CON Pausas",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/monopatines/reporte/kilometros?incluirPausas=true",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "monopatines", "reporte", "kilometros"],
 							"query": [{"key": "incluirPausas", "value": "true"}]
-						}
+						},
+						"description": "⚠️ Requiere rol ADMIN."
 					}
 				},
 				{
 					"name": "A.2 Reporte SIN Pausas",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/monopatines/reporte/kilometros?incluirPausas=false",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "monopatines", "reporte", "kilometros"],
 							"query": [{"key": "incluirPausas", "value": "false"}]
-						}
+						},
+						"description": "⚠️ Requiere rol ADMIN."
 					}
 				}
 			]
@@ -933,31 +1151,39 @@
 					"name": "B.1 Deshabilitar Cuenta (Anular)",
 					"request": {
 						"method": "PATCH",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/cuentas/{{CUENTA_ID_1}}/deshabilitar",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "cuentas", "{{CUENTA_ID_1}}", "deshabilitar"]
-						}
+						},
+						"description": "Requiere autenticación (cualquier rol)."
 					}
 				},
 				{
 					"name": "B.2 Habilitar Cuenta",
 					"request": {
 						"method": "PATCH",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/cuentas/{{CUENTA_ID_1}}/habilitar",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "cuentas", "{{CUENTA_ID_1}}", "habilitar"]
-						}
+						},
+						"description": "Requiere autenticación (cualquier rol)."
 					}
 				},
 				{
 					"name": "B.3 Ver Cuentas por Estado",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/cuentas/estado/false?page=0&size=10",
 							"host": ["{{BASE_URL}}"],
@@ -966,7 +1192,8 @@
 								{"key": "page", "value": "0"},
 								{"key": "size", "value": "10"}
 							]
-						}
+						},
+						"description": "Requiere autenticación (cualquier rol)."
 					}
 				}
 			]
@@ -978,14 +1205,16 @@
 					"name": "C.1 Monopatines con más de X viajes",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/monopatines/reporte/viajes?cantidad=0",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "monopatines", "reporte", "viajes"],
 							"query": [{"key": "cantidad", "value": "0"}]
 						},
-						"description": "Cambiar 'cantidad' a 1, 2, 5, etc. para filtrar"
+						"description": "⚠️ Requiere rol ADMIN. Cambiar 'cantidad' a 1, 2, 5, etc. para filtrar"
 					}
 				}
 			]
@@ -997,7 +1226,9 @@
 					"name": "D.1 Total Facturado - Rango Meses",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/facturas/reporte/total-facturado?mesInicio=1&mesFin=12&anio=2025",
 							"host": ["{{BASE_URL}}"],
@@ -1007,14 +1238,17 @@
 								{"key": "mesFin", "value": "12"},
 								{"key": "anio", "value": "2025"}
 							]
-						}
+						},
+						"description": "⚠️ Requiere rol ADMIN."
 					}
 				},
 				{
 					"name": "D.2 Total Facturado - Primer Trimestre",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/facturas/reporte/total-facturado?mesInicio=1&mesFin=3&anio=2025",
 							"host": ["{{BASE_URL}}"],
@@ -1024,7 +1258,8 @@
 								{"key": "mesFin", "value": "3"},
 								{"key": "anio", "value": "2025"}
 							]
-						}
+						},
+						"description": "⚠️ Requiere rol ADMIN."
 					}
 				}
 			]
@@ -1036,7 +1271,10 @@
 					"name": "F.1 Crear Nueva Tarifa con Fecha Futura",
 					"request": {
 						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"montoBase\": 60.0,\n  \"montoExtra\": 120.0,\n  \"fechaVigencia\": \"2025-06-01\",\n  \"activa\": true,\n  \"descripcion\": \"Ajuste de Precios - Verano 2025\"\n}"
@@ -1045,31 +1283,38 @@
 							"raw": "{{BASE_URL}}/api/tarifas",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "tarifas"]
-						}
+						},
+						"description": "⚠️ Requiere rol ADMIN."
 					}
 				},
 				{
 					"name": "F.2 Ver Tarifa Activa Actual",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/tarifas/activa",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "tarifas", "activa"]
-						}
+						},
+						"description": "⚠️ Requiere rol ADMIN."
 					}
 				},
 				{
 					"name": "F.3 Ver Todas las Tarifas",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/tarifas",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "tarifas"]
-						}
+						},
+						"description": "⚠️ Requiere rol ADMIN."
 					}
 				}
 			]
@@ -1081,7 +1326,9 @@
 					"name": "G.1 Buscar Monopatines Cercanos (5km)",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/monopatines/cercanos?latitud=-37.3217&longitud=-59.1332&radioKm=5.0",
 							"host": ["{{BASE_URL}}"],
@@ -1091,14 +1338,17 @@
 								{"key": "longitud", "value": "-59.1332"},
 								{"key": "radioKm", "value": "5.0"}
 							]
-						}
+						},
+						"description": "Requiere autenticación (cualquier rol)."
 					}
 				},
 				{
 					"name": "G.2 Buscar Monopatines Cercanos (2km)",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/monopatines/cercanos?latitud=-37.3250&longitud=-59.1380&radioKm=2.0",
 							"host": ["{{BASE_URL}}"],
@@ -1108,7 +1358,8 @@
 								{"key": "longitud", "value": "-59.1380"},
 								{"key": "radioKm", "value": "2.0"}
 							]
-						}
+						},
+						"description": "Requiere autenticación (cualquier rol)."
 					}
 				}
 			]
@@ -1120,7 +1371,9 @@
 					"name": "H.1 Viajes de Usuario en Período",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/viajes/reportes/usuario/{{USUARIO_ID_1}}/periodo?inicio=2025-01-01T00:00:00&fin=2025-12-31T23:59:59",
 							"host": ["{{BASE_URL}}"],
@@ -1129,19 +1382,23 @@
 								{"key": "inicio", "value": "2025-01-01T00:00:00"},
 								{"key": "fin", "value": "2025-12-31T23:59:59"}
 							]
-						}
+						},
+						"description": "Requiere autenticación (cualquier rol)."
 					}
 				},
 				{
 					"name": "H.2 Todos los Viajes de Usuario",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/viajes/reportes/usuario/{{USUARIO_ID_1}}",
 							"host": ["{{BASE_URL}}"],
 							"path": ["api", "viajes", "reportes", "usuario", "{{USUARIO_ID_1}}"]
-						}
+						},
+						"description": "Requiere autenticación (cualquier rol)."
 					}
 				}
 			]
@@ -1153,7 +1410,9 @@
 					"name": "10.1 Marcar Monopatín en Mantenimiento",
 					"request": {
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/monopatines/{{MONOPATIN_ID_2}}/mantenimiento",
 							"host": ["{{BASE_URL}}"],
@@ -1165,7 +1424,9 @@
 					"name": "10.2 Sacar Monopatín de Mantenimiento",
 					"request": {
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/monopatines/{{MONOPATIN_ID_2}}/mantenimiento/finalizar",
 							"host": ["{{BASE_URL}}"],
@@ -1182,7 +1443,9 @@
 					"name": "Ver Todos los Monopatines",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/monopatines",
 							"host": ["{{BASE_URL}}"],
@@ -1194,7 +1457,9 @@
 					"name": "Ver Todas las Paradas",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/paradas",
 							"host": ["{{BASE_URL}}"],
@@ -1206,7 +1471,9 @@
 					"name": "Ver Todos los Usuarios",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/usuarios?page=0&size=20",
 							"host": ["{{BASE_URL}}"],
@@ -1222,7 +1489,9 @@
 					"name": "Ver Todas las Cuentas",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/cuentas?page=0&size=20",
 							"host": ["{{BASE_URL}}"],
@@ -1238,7 +1507,9 @@
 					"name": "Ver Todas las Facturas",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/facturas",
 							"host": ["{{BASE_URL}}"],
@@ -1250,7 +1521,9 @@
 					"name": "Ver Cuentas de un Usuario",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{USER_TOKEN}}"}
+						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/usuarios/{{USUARIO_ID_1}}/cuentas",
 							"host": ["{{BASE_URL}}"],
