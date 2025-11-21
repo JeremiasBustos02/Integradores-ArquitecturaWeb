@@ -49,6 +49,12 @@ spring:
             - Path=/api/viajes/**
           filters:
             - StripPrefix=0
+        - id: iaservice-route
+          uri: lb://microservice-iaservice
+          predicates:
+              - Path=/api/ia/**
+          filters:
+              - StripPrefix=0
 eureka:
   client:
     service-url:

@@ -262,6 +262,42 @@ services:
     networks:
       - microservices-network
 
+  microservice-iaservice:
+    build:
+      context: .
+      dockerfile: microservice-iaservice/Dockerfile
+    container_name: microservice-iaservice
+    ports:
+      - "8088:8088"
+    depends_on:
+      config-service:
+        condition: service_healthy
+      eureka-service:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
+      mysql:
+        condition: service_started
+      microservice-parada:
+        condition: service_started
+      microservice-tarifas:
+        condition: service_started
+      microservice-facturacion:
+        condition: service_started
+      microservice-user:
+        condition: service_started
+      microservice-monopatin:
+        condition: service_started
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVER_URL=http://config-service:8081
+      - EUREKA_SERVER_URL=http://eureka-service:8761/eureka
+      - DB_HOST=mysql
+      - DB_PORT=3306
+    networks:
+      - microservices-network
+    restart: on-failure:5
+
 volumes:
   mysql_data:
   mongo_data:

@@ -30,6 +30,7 @@
         <module>microservice-viajes</module>
         <module>microservice-parada</module>
         <module>microservice-viajes</module>
+        <module>microservice-iaservice</module>
 
     </modules>
 

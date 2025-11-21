@@ -1,0 +1,19 @@
+BASE DE DATOS NoSQL (MongoDB): monopatin_db
+
+COLECCIÓN: viajes
+Descripción: Almacena el registro de cada viaje realizado, incluyendo tiempos, distancias y pausas.
+CAMPOS:
+- _id: ObjectId (Identificador único de Mongo)
+- horaInicio: Date (Fecha y hora de inicio)
+- horaFin: Date (Fecha y hora de fin, puede ser null si está en curso)
+- distanciaRecorrida: Double (Distancia en kilómetros)
+- paradaOrigenId: Long (ID numérico, referencia a tabla Paradas en SQL)
+- paradaDestinoId: Long (ID numérico, referencia a tabla Paradas en SQL)
+- monopatinId: Long (ID numérico, referencia a tabla Monopatines en SQL)
+- tarifaId: Long (ID numérico, referencia a tabla Tarifas en SQL)
+- usuarioId: Long (ID numérico, referencia a tabla Usuarios en SQL)
+- pausaExtensa: Boolean (True si el viaje tuvo pausas largas)
+- pausas: Array (Lista de documentos incrustados con los detalles de cada pausa)
+    Estructura interna de "pausas":
+    - tiempoInicio: Date
+    - tiempoFin: Date

@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: jdbc:mysql://mysql:3306/ia_db?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+    username: root
+    password: password
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-service:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+    registry-fetch-interval-seconds: 5
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+
+microservice:
+  viaje:
+    url: http://microservice-viaje:8086
+  monopatin:
+    url: http://microservice-monopatin:8082
+  tarifas:
+    url: http://microservice-tarifas:8084
+  facturacion:
+    url: http://microservice-facturacion:8085
+  user:
+    url: http://microservice-user:8083
