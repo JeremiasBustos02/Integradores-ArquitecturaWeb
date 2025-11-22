@@ -11,7 +11,7 @@
 - [URLs de Servicios](#-urls-de-servicios)
 - [Autenticación JWT](#-autenticación-jwt)
 - [Endpoints Disponibles](#-endpoints-disponibles)
-- [Configuración](#-configuración)
+- [Configuración de Variables de Entorno](#️-configuración-de-variables-de-entorno)
 - [Agregar Nuevos Microservicios](#-agregar-nuevos-microservicios)
 - [Tecnologías Utilizadas](#-tecnologías-utilizadas)
 
@@ -97,7 +97,25 @@ git clone <repository-url>
 cd TP_ESPECIAL
 ```
 
-#### Paso 2: Ejecutar con Docker Compose
+#### Paso 2: Configurar Variables de Entorno
+
+**Importante:** Antes de ejecutar el sistema, debes configurar la API key de Groq:
+
+```bash
+# Copiar el archivo de ejemplo
+cp .env.example .env
+
+# Editar el archivo .env y agregar tu API key de Groq
+# Obtén tu API key en: https://console.groq.com/keys
+nano .env
+```
+
+El archivo `.env` debe contener:
+```env
+GROQ_API_KEY=tu_api_key_real_aqui
+```
+
+#### Paso 3: Ejecutar con Docker Compose
 
 ```bash
 # Construir y ejecutar todos los servicios
@@ -936,6 +954,47 @@ Actualizar `SecurityConfig.java`:
 ```java
 .requestMatchers("/api/nuevo/**").hasAuthority(AuthorityConstant.USER)
 ```
+
+## ⚙️ Configuración de Variables de Entorno
+
+El sistema utiliza variables de entorno para valores sensibles como API keys y credenciales. Estas variables **NO deben ser subidas al repositorio**.
+
+### Archivo `.env`
+
+El archivo `.env` en el directorio `TP_ESPECIAL/` contiene todas las variables de entorno necesarias:
+
+```env
+# API Key de Groq para el servicio de chat con IA
+GROQ_API_KEY=tu_api_key_aqui
+```
+
+### Configuración Inicial
+
+1. **Copiar el archivo de ejemplo:**
+   ```bash
+   cd TP_ESPECIAL
+   cp .env.example .env
+   ```
+
+2. **Editar el archivo `.env`:**
+   ```bash
+   nano .env
+   ```
+
+3. **Agregar tu API key de Groq:**
+   - Obtén tu API key en: https://console.groq.com/keys
+   - Reemplaza `tu_api_key_de_groq_aqui` con tu clave real
+
+### Archivos de Configuración
+
+- **`.env`** - Contiene valores reales (excluido de Git)
+- **`.env.example`** - Plantilla con placeholders 
+
+### Variables Disponibles
+
+| Variable | Descripción | Requerida |
+|----------|-------------|-----------|
+| `GROQ_API_KEY` | API key de Groq para el servicio de chat con IA | ✅ Sí |
 
 ## 🛠️ Tecnologías Utilizadas
 

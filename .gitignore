@@ -22,3 +22,7 @@ Thumbs.db
 # Archivos generados por Gradle o Maven (si los tenés)
 .gradle/
 target/
+
+# Variables de entorno sensibles
+.env
+*/.env

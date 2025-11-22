@@ -32,7 +32,7 @@ eureka:
 
 # Configuración de Groq
 groq:
-  api-key: ${GROQ_API_KEY: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}
+  api-key: ${GROQ_API_KEY}
   base-url: https://api.groq.com/openai
   model: llama-3.3-70b-versatile
 

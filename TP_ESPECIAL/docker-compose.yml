@@ -280,7 +280,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - CONFIG_SERVER_URL=http://config-service:8081
       - EUREKA_SERVER_URL=http://eureka-service:8761/eureka
-      - GROQ_API_KEY=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
+      - GROQ_API_KEY=${GROQ_API_KEY}
       - DB_HOST=mysql
       - DB_PORT=3306
     networks:
