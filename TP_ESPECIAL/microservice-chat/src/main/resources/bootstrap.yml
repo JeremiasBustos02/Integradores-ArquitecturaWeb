@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: microservice-chat
+  cloud:
+    config:
+      enabled: true
+      uri: ${CONFIG_SERVER_URL:http://localhost:8081}
+      fail-fast: true
+      retry:
+        initial-interval: 1500
+        max-attempts: 10
+        max-interval: 5000
+        multiplier: 1.2
+  config:
+    import: optional:configserver:${spring.cloud.config.uri}
+

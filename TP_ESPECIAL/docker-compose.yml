@@ -262,6 +262,31 @@ services:
     networks:
       - microservices-network
 
+  microservice-chat:
+    build:
+      context: .
+      dockerfile: microservice-chat/Dockerfile
+    container_name: microservice-chat
+    ports:
+      - "8088:8088"
+    depends_on:
+      config-service:
+        condition: service_healthy
+      eureka-service:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVER_URL=http://config-service:8081
+      - EUREKA_SERVER_URL=http://eureka-service:8761/eureka
+      - GROQ_API_KEY=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
+      - DB_HOST=mysql
+      - DB_PORT=3306
+    networks:
+      - microservices-network
+    restart: on-failure:5
+
 volumes:
   mysql_data:
   mongo_data:

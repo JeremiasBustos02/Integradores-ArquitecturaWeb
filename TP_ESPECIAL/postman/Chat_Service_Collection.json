@@ -1,0 +1,274 @@
+{
+	"info": {
+		"_postman_id": "chat-service-collection",
+		"name": "Chat Service - Sistema Monopatines",
+		"description": "Colección de peticiones para el microservicio de chat con IA",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8088/api/chat/health",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api",
+						"chat",
+						"health"
+					]
+				},
+				"description": "Verifica que el servicio de chat esté funcionando"
+			},
+			"response": []
+		},
+		{
+			"name": "Chat - Listar Paradas",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"usuarioId\": 1,\n  \"mensaje\": \"¿Cuáles son las paradas disponibles?\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8088/api/chat",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api",
+						"chat"
+					]
+				},
+				"description": "Consulta natural sobre las paradas del sistema"
+			},
+			"response": []
+		},
+		{
+			"name": "Chat - Mis Viajes",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"usuarioId\": 1,\n  \"mensaje\": \"Muéstrame mis viajes\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8088/api/chat",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api",
+						"chat"
+					]
+				},
+				"description": "Consulta natural sobre los viajes del usuario"
+			},
+			"response": []
+		},
+		{
+			"name": "Chat - ¿Dónde devolver monopatín?",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"usuarioId\": 1,\n  \"mensaje\": \"¿Dónde puedo devolver un monopatín?\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8088/api/chat",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api",
+						"chat"
+					]
+				},
+				"description": "Pregunta sobre ubicaciones de devolución"
+			},
+			"response": []
+		},
+		{
+			"name": "Chat - Estadísticas de viajes",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"usuarioId\": 1,\n  \"mensaje\": \"¿Cuántos viajes he realizado y qué distancia total?\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8088/api/chat",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api",
+						"chat"
+					]
+				},
+				"description": "Consulta sobre estadísticas de viajes"
+			},
+			"response": []
+		},
+		{
+			"name": "Chat - Información general",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"usuarioId\": 1,\n  \"mensaje\": \"¿Qué información puedes darme sobre el sistema de monopatines?\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8088/api/chat",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api",
+						"chat"
+					]
+				},
+				"description": "Pregunta general sobre el sistema"
+			},
+			"response": []
+		},
+		{
+			"name": "Chat - Consulta combinada",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"usuarioId\": 1,\n  \"mensaje\": \"Dame un resumen de mis viajes y dime dónde hay paradas\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8088/api/chat",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api",
+						"chat"
+					]
+				},
+				"description": "Consulta que requiere múltiples tools"
+			},
+			"response": []
+		},
+		{
+			"name": "Chat - Usuario no premium (debe fallar)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"usuarioId\": 999,\n  \"mensaje\": \"¿Cuáles son las paradas?\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8088/api/chat",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"api",
+						"chat"
+					]
+				},
+				"description": "Test con usuario que no existe o no es premium (debe devolver 403)"
+			},
+			"response": []
+		},
+		{
+			"name": "Actuator Health",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8088/actuator/health",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088",
+					"path": [
+						"actuator",
+						"health"
+					]
+				},
+				"description": "Health check a través de Spring Actuator"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8088"
+		},
+		{
+			"key": "usuario_id",
+			"value": "1"
+		}
+	]
+}
+

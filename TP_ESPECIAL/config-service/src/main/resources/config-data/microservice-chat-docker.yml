@@ -1,0 +1,64 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: microservice-chat
+  
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://mysql:3306/chat_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+    username: root
+    password: password
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database: mysql
+    properties:
+      hibernate:
+        format_sql: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://eureka-service:8761/eureka/}
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
+    hostname: microservice-chat
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+# Configuración de Groq
+groq:
+  api-key: ${GROQ_API_KEY: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}
+  base-url: https://api.groq.com/openai
+  model: llama-3.3-70b-versatile
+
+# Feign configuration
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 10000
+        readTimeout: 60000
+        loggerLevel: full
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+# Logging
+logging:
+  level:
+    com.microservices.chat: INFO
+    org.springframework.cloud.openfeign: DEBUG
+

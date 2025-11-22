@@ -1,0 +1,51 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: microservice-chat
+  cloud:
+    config:
+      enabled: true
+      uri: ${CONFIG_SERVER_URL:http://localhost:8081}
+      fail-fast: false
+  config:
+    import: optional:configserver:${spring.cloud.config.uri}
+  
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/chat_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+    username: root
+    password: password
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database: mysql
+    properties:
+      hibernate:
+        format_sql: true
+
+# Configuración de Groq
+groq:
+  api-key: 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
+  base-url: https://api.groq.com/openai
+  model: llama-3.3-70b-versatile
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# Logging
+logging:
+  level:
+    com.microservices.chat: DEBUG
+    org.springframework.cloud.openfeign: DEBUG
+

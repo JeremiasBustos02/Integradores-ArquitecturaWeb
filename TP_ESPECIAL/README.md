@@ -30,6 +30,7 @@ El sistema incluye los siguientes servicios:
 | **Microservice Facturación** | 8085 | `facturacion_db` | Gestión de facturación y reportes financieros |
 | **Microservice Viajes** | 8086 | `viajes_db` (MongoDB) | Gestión de viajes, pausas y validación GPS |
 | **Microservice Parada** | 8087 | `parada_db` | Gestión de paradas |
+| **Microservice Chat** | 8088 | - | Chat con IA (Groq) para usuarios premium - consultas en lenguaje natural |
 | **MySQL** | 3306 | - | Servidor de base de datos relacional |
 | **MongoDB** | 27017 | - | Servidor de base de datos NoSQL |
 
@@ -70,6 +71,7 @@ El sistema utiliza múltiples bases de datos (una por microservicio):
 - 🔄 **Ajustes de Precio Programados** - Scheduler automático
 - 🗺️ **Búsqueda por Proximidad** - Monopatines cercanos con cálculo GPS
 - 🔧 **Gestión de Mantenimiento** - Estados y trazabilidad de monopatines
+- 🤖 **Chat con IA** - Consultas en lenguaje natural con Groq para usuarios premium
 
 ## 📋 Prerrequisitos
 
@@ -371,6 +373,7 @@ curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
 | **Microservice Monopatin** | http://localhost:8082 | Acceso directo (dev) |
 | **Microservice Tarifas** | http://localhost:8084 | Acceso directo (dev) |
 | **Microservice Facturación** | http://localhost:8085 | Acceso directo (dev) |
+| **Microservice Chat** | http://localhost:8088 | Acceso directo (dev) |
 
 > **Nota**: En producción, todos los microservicios deben accederse **solo a través del Gateway** (puerto 8080)
 
@@ -743,6 +746,41 @@ El `JwtFilter` intercepta todas las requests y:
 
 ---
 
+### 🤖 Microservice Chat (Puerto 8088)
+
+#### **Chat con IA para Usuarios Premium**
+- `POST /api/chat` - Enviar mensaje al asistente (solo usuarios PREMIUM)
+- `GET /api/chat/health` - Health check del servicio
+
+**Características:**
+- 🧠 **IA Conversacional**: Integración con Groq (llama-3.3-70b-versatile)
+- 🔧 **Function Calling**: El LLM puede ejecutar funciones para obtener datos en tiempo real
+- 🔐 **Solo Premium**: Validación automática de rol PREMIUM
+- 📊 **Consultas disponibles**:
+  - Listar paradas disponibles
+  - Obtener viajes de un usuario
+
+**Ejemplo de petición:**
+```json
+{
+  "usuarioId": 1,
+  "mensaje": "¿Cuáles son las paradas disponibles?"
+}
+```
+
+**Ejemplo de respuesta:**
+```json
+{
+  "exito": true,
+  "mensaje": "Hay 5 paradas disponibles en el sistema:\n\n1. **Parada Central** - Ubicada en Av. Principal 123...",
+  "datos": null
+}
+```
+
+> 📚 Ver `microservice-chat/README.md` y `microservice-chat/EJEMPLOS_USO.md` para más información
+
+---
+
 ### 📄 Microservice Facturación (Puerto 8085)
 
 #### **CRUD de Facturas**
@@ -928,6 +966,7 @@ Docker Compose configura automáticamente todos los servicios necesarios:
 | Microservice Monopatin | `microservice-monopatin` | 8082 | ✅ |
 | Microservice Tarifas | `microservice-tarifas` | 8084 | ✅ |
 | Microservice Facturación | `microservice-facturacion` | 8085 | ✅ |
+| Microservice Chat | `microservice-chat` | 8088 | ✅ |
 
 ### Características de Docker Compose
 
