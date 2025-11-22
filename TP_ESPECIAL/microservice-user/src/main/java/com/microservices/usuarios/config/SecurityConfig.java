@@ -33,7 +33,7 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers("/actuator/**").permitAll()
                     // Permitir endpoint de autenticación y creación de usuarios
-                    .requestMatchers("/api/usuarios/email/**/auth").permitAll()
+                    .requestMatchers("/api/usuarios/email/*/auth").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
                     .anyRequest().authenticated()
             )
