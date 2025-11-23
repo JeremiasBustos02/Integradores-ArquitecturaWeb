@@ -296,16 +296,23 @@ La colección cubre **todas las 8 funcionalidades** requeridas (100%) ✅:
 
 ## 🧪 Pruebas de la API
 
-### 1. Crear un Usuario
+Esta API utiliza autenticación basada en **JWT (JSON Web Token)**. A continuación se detallan los pasos para crear un usuario, obtener un token y acceder a los recursos protegidos.
+
+### 1. Crear un Nuevo Usuario (Sign Up)
+El registro es público. La contraseña debe enviarse en el cuerpo de la petición.
+
+**Petición:**
+`POST /api/usuarios`
 
 ```bash
-curl -X POST "http://localhost:8080/api/usuarios?password=testpass123" \
+curl -X POST "http://localhost:8080/api/usuarios" \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "testuser",
-    "firstName": "Test",
-    "lastName": "User",
-    "email": "test@example.com"
+    "nombre": "testuser",
+    "apellido": "test",
+    "email": "test@example.com",
+    "password": "testpass123",
+    "celular": "1122334455"
   }'
 ```
 
@@ -313,22 +320,25 @@ curl -X POST "http://localhost:8080/api/usuarios?password=testpass123" \
 ```json
 {
   "id": 1,
-  "username": "testuser",
-  "firstName": "Test",
-  "lastName": "User",
+  "nombre": "testuser",
+  "apellido": "test",
   "email": "test@example.com",
-  "activated": true,
-  "authorities": ["ROLE_USER"]
+  "rol": "USUARIO",
+  "fechaAlta": "2025-11-22T..."
 }
 ```
 
-### 2. Autenticarse y Obtener JWT Token
+### 2. Iniciar Sesión (Login)
+Para obtener el token, se debe utilizar el email registrado como nombre de usuario.
+
+**Petición:**
+`POST /api/authenticate`
 
 ```bash
 curl -X POST http://localhost:8080/api/authenticate \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "testuser",
+    "username": "test@example.com",
     "password": "testpass123"
   }'
 ```
@@ -336,49 +346,25 @@ curl -X POST http://localhost:8080/api/authenticate \
 **Respuesta esperada:**
 ```json
 {
-  "id_token": "eyJhbGciOiJIUzUxMiJ9...",
-  "username": "testuser"
+  "id_token": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqc..."
 }
 ```
 
-### 3. Probar Acceso Sin Token (Debe Fallar)
+### 3. Acceder a Recursos Protegidos
+Cualquier endpoint que no sea de registro o login requiere el token en la cabecera Authorization.
+#### Debes reemplazar <TU_TOKEN_JWT> por el token obtenido en el paso 2.
+**Petición:**
+`GET /api/monopatines`
 
 ```bash
-curl -w "\nStatus: %{http_code}\n" http://localhost:8080/api/samples
+curl -X GET "http://localhost:8080/api/monopatines" \
+  -H "Authorization: Bearer <TU_TOKEN_JWT>"
 ```
 
-**Respuesta esperada:** `401 Unauthorized`
-
-### 4. Probar Acceso Con Token JWT
-
-```bash
-# Reemplaza YOUR_JWT_TOKEN con el token obtenido en el paso 2
-curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  http://localhost:8080/api/samples
-```
-
-**Respuesta esperada:** `200 OK` con `[]`
-
-### 5. Crear Datos de Prueba
-
-```bash
-curl -X POST \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Sample Test 1",
-    "description": "This is a test sample",
-    "active": true
-  }' \
-  http://localhost:8080/api/samples
-```
-
-### 6. Verificar Datos Creados
-
-```bash
-curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  http://localhost:8080/api/samples
-```
+**Posibles respuestas:** 
+  - `200 OK`: Acceso permitido. Devuelve la lista de monopatines.
+  - `401 Unauthorized`: El token no es válido, ha expirado o no se envió.
+  - `403 Forbidden`: El usuario está autenticado pero no tiene permisos (Rol insuficiente).
 
 ## 🌐 URLs de Servicios
 
@@ -404,30 +390,30 @@ El sistema utiliza **autenticación basada en JWT (JSON Web Tokens)** para prote
 #### 1. **Flujo de Autenticación**
 
 ```
-┌─────────┐         ┌──────────┐         ┌─────────────────┐
-│ Cliente │────────▶│  Gateway │────────▶│ Microservice-User│
-└─────────┘         └──────────┘         └─────────────────┘
-     │                    │                        │
-     │  1. POST /api/     │                        │
-     │     authenticate   │                        │
-     │───────────────────▶│                        │
-     │                    │  2. Validar credenciales│
-     │                    │───────────────────────▶│
-     │                    │                        │
-     │                    │  3. Usuario + Rol      │
-     │                    │◀───────────────────────│
-     │                    │                        │
-     │  4. JWT Token      │                        │
-     │◀───────────────────│                        │
-     │                    │                        │
-     │  5. Request con    │                        │
-     │     Bearer Token   │                        │
-     │───────────────────▶│                        │
-     │                    │  6. Validar Token     │
-     │                    │     y extraer rol      │
-     │                    │                        │
-     │  7. Response       │                        │
-     │◀───────────────────│                        │
+┌─────────┐         ┌──────────┐         ┌──────────────────┐
+│ Cliente │───────▶│  Gateway  │────────▶│ Microservice-User│
+└─────────┘         └──────────┘         └──────────────────┘
+     │                    │                          │
+     │  1. POST /api/     │                          │
+     │     authenticate   │                          │
+     │───────────────────▶│                           │
+     │                    │  2. Validar credenciales │
+     │                    │────────────────────────▶│
+     │                    │                          │
+     │                    │  3. Usuario + Rol        │
+     │                    │◀────────────────────────│
+     │                    │                          │
+     │  4. JWT Token      │                          │
+     │◀──────────────────│                          │
+     │                    │                          │
+     │  5. Request con    │                          │
+     │     Bearer Token   │                          │
+     │──────────────────▶│                          │
+     │                    │  6. Validar Token        │
+     │                    │     y extraer rol        │
+     │                    │                          │
+     │  7. Response       │                          │
+     │◀──────────────────│                          │
 ```
 
 #### 2. **Proceso Detallado**
