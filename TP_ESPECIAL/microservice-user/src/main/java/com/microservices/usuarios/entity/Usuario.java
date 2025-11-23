@@ -46,6 +46,7 @@ public class Usuario {
 
     @ManyToMany(mappedBy = "usuarios", fetch = FetchType.LAZY)
     @JsonBackReference
+    @ToString.Exclude
     @Builder.Default
     private Set<Cuenta> cuentas = new HashSet<>();
     

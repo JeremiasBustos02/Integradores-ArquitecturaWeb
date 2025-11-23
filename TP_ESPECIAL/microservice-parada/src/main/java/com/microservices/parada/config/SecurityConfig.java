@@ -32,6 +32,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers("/actuator/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/paradas/**").permitAll()
+
                     .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtFilter(this.tokenProvider), UsernamePasswordAuthenticationFilter.class);

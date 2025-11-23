@@ -46,7 +46,8 @@ public class ViajeService implements ViajeServiceI {
         try {
             paradaClient.getParadaById(paradaInicioId);
         } catch (Exception e) {
-            throw new InvalidViajeException("La parada de inicio no existe");
+            log.error("ERROR CONECTANDO CON PARADA: ", e);
+            throw new InvalidViajeException("La parada de inicio no existe (Error real: " + e.getMessage() + ")");
         }
         try {
             List<CuentaResponseDTO> cuentas = usuarioClient.getCuentasUsuario(usuarioId);
