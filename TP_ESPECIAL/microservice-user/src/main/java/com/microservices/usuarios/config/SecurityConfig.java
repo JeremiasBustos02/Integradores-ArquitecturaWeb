@@ -35,6 +35,12 @@ public class SecurityConfig {
                     // Permitir endpoint de autenticación y creación de usuarios
                     .requestMatchers("/api/usuarios/email/*/auth").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
+                    .requestMatchers(
+                            "/v3/api-docs/**",
+                            "/swagger-ui/**",
+                            "/swagger-ui.html",
+                            "/actuator/**"  // Para health checks
+                    ).permitAll()
                     .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtFilter(this.tokenProvider), UsernamePasswordAuthenticationFilter.class);

@@ -1,5 +1,10 @@
-    spring:
-        application:
-            name: microservice-parada
-        config:
-            import: "optional:configserver:${CONFIG_SERVER_URL:http://config-service:8081}"
+spring:
+  application:
+    name: microservice-parada
+  config:
+    import: "optional:configserver:${CONFIG_SERVER_URL:http://config-service:8081}"
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true

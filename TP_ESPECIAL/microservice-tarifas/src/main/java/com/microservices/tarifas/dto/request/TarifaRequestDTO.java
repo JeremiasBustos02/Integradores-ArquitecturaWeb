@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TarifaRequestDTO {
-    @Schema(description = "Monto base de la tarifa", example = "500.0")
+    @Schema(description = "Monto base de la tarifa", example = "50.0")
     @NotNull(message = "El monto base es obligatorio")
     @Positive(message = "El monto base debe ser positivo")
     private Double montoBase;
@@ -21,13 +21,13 @@ public class TarifaRequestDTO {
     @NotNull(message = "El monto extra es obligatorio")
     @Positive(message = "El monto extra debe ser positivo")
     private Double montoExtra;
-    @Schema(description = "Vigencia de la tarifa", example = "2025-12-01")
+    @Schema(description = "Vigencia de la tarifa", example = "2025-01-01")
     @NotNull(message = "La fecha de vigencia es obligatoria")
     private LocalDate fechaVigencia;
     @Schema(description = "Indica si la tarifa está activa", example = "true")
     @NotNull(message = "El estado activo es obligatorio")
     private Boolean activa;
-    @Schema(description = "Descripcion de la tarifa", example = "Tarifa Verano 2025")
+    @Schema(description = "Descripcion de la tarifa", example = "Tarifa Inicial 2025")
     private String descripcion;
 }
 

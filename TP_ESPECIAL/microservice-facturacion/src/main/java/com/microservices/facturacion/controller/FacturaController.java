@@ -133,10 +133,10 @@ public class FacturaController {
     })
     @GetMapping("/rango-fechas")
     public ResponseEntity<List<FacturaResponseDTO>> obtenerFacturasPorRangoFechas(
-            @Parameter(description = "Fecha de inicio", example = "2")
+            @Parameter(description = "Fecha de inicio", example = "2025-11-23T10:00:00")
 
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,
-            @Parameter(description = "Fecha de fin", example = "3")
+            @Parameter(description = "Fecha de fin", example = "2025-11-23T10:00:00")
 
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaFin) {
         List<FacturaResponseDTO> facturas = facturaService.obtenerFacturasPorRangoFechas(fechaInicio, fechaFin);

@@ -178,10 +178,10 @@ public class ViajeController {
     public ResponseEntity<List<ViajeResponseDTO>> getViajesPorUsuarioEnPeriodo(
             @Parameter(description = "ID del usuario")
             @PathVariable @NotNull @Positive Long usuarioId,
-            @Parameter(description = "Fecha de inicio", example = "2")
+            @Parameter(description = "Fecha de inicio", example = "2025-11-23T10:00:00")
 
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicio,
-            @Parameter(description = "Fecha de fin", example = "3")
+            @Parameter(description = "Fecha de fin", example = "2025-11-23T10:00:00")
 
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fin) {
 

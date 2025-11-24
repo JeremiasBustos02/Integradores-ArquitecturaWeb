@@ -4,6 +4,54 @@ spring:
   config:
     import: optional:configserver:${CONFIG_SERVER_URL:http://config-service:8081}
   cloud:
+    gateway:
+      cloud:
+        gateway:
+          mvc:
+            routes:
+              - id: usuarios
+                uri: lb://MICROSERVICE-USER
+                predicates:
+                  - Path=/api/usuarios/**
+
+              - id: cuentas
+                uri: lb://MICROSERVICE-USER
+                predicates:
+                  - Path=/api/cuentas/**
+
+              - id: viajes
+                uri: lb://MICROSERVICE-VIAJES
+                predicates:
+                  - Path=/api/viajes/**
+
+              - id: monopatines
+                uri: lb://MICROSERVICE-MONOPATIN
+                predicates:
+                  - Path=/api/monopatines/**
+
+              - id: tarifas
+                uri: lb://MICROSERVICE-TARIFAS
+                predicates:
+                  - Path=/api/tarifas/**
+
+              - id: paradas
+                uri: lb://MICROSERVICE-PARADA
+                predicates:
+                  - Path=/api/paradas/**
+
+              - id: chat
+                uri: lb://MICROSERVICE-CHAT
+                predicates:
+                  - Path=/api/chat/**
+
+              - id: facturacion
+                uri: lb://MICROSERVICE-FACTURACION
+                predicates:
+                  - Path=/api/facturas/**
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
     config:
       fail-fast: false
       retry:
@@ -12,6 +60,29 @@ spring:
         multiplier: 1.2
         max-interval: 3000
 
+    springdoc:
+      swagger-ui:
+        urls:
+          - name: 1. Gateway (Auth)
+            url: /v3/api-docs
+          - name: 2. Usuarios
+            url: /v3/api-docs/usuarios
+          - name: 3. Viajes
+            url: /v3/api-docs/viajes
+          - name: 4. Monopatines
+            url: /v3/api-docs/monopatin
+          - name: 5. Tarifas
+            url: /v3/api-docs/tarifas
+          - name: 6. Paradas
+            url: /v3/api-docs/paradas
+          - name: 7. Chat
+            url: /v3/api-docs/chat
+          - name: 8. Facturación
+            url: /v3/api-docs/facturacion
+        path: /swagger-ui.html
+        config-url: /v3/api-docs/swagger-config
+      api-docs:
+        enabled: true
 server:
   port: 8080
 

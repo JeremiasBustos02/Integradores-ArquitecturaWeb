@@ -36,25 +36,28 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
         http
-            .csrf(AbstractHttpConfigurer::disable);
+                .csrf(AbstractHttpConfigurer::disable);
         http
-            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http
-            .securityMatcher("/api/**")
-            .authorizeHttpRequests(authz -> authz
-                    .requestMatchers(HttpMethod.POST, "/api/authenticate").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
-                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                    // Endpoints de reportes requieren rol ADMIN
-                    .requestMatchers("/api/monopatines/reporte/**").hasAuthority(AuthorityConstant.ADMIN)
-                    .requestMatchers("/api/usuarios/reporte/**").hasAuthority(AuthorityConstant.ADMIN)
-                    .requestMatchers("/api/tarifas/**").hasAuthority(AuthorityConstant.ADMIN)
-                    .requestMatchers("/api/facturas/**").hasAuthority(AuthorityConstant.ADMIN)
-                    // Resto de endpoints requieren autenticación (cualquier rol)
-                    .anyRequest().authenticated()
-            )
-            .httpBasic(Customizer.withDefaults())
-            .addFilterBefore(new JwtFilter(this.tokenProvider), UsernamePasswordAuthenticationFilter.class);
+                .securityMatcher("/api/**")
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers(HttpMethod.POST, "/api/authenticate").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // Endpoints de reportes requieren rol ADMIN
+                        .requestMatchers("/api/monopatines/reporte/**").hasAuthority(AuthorityConstant.ADMIN)
+                        .requestMatchers("/api/usuarios/reporte/**").hasAuthority(AuthorityConstant.ADMIN)
+                        .requestMatchers("/api/tarifas/**").hasAuthority(AuthorityConstant.ADMIN)
+                        .requestMatchers("/api/facturas/**").hasAuthority(AuthorityConstant.ADMIN)
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/webjars/**").permitAll()
+                        // Resto de endpoints requieren autenticación (cualquier rol)
+                        .anyRequest().authenticated()
+
+                )
+
+                .httpBasic(Customizer.withDefaults())
+                .addFilterBefore(new JwtFilter(this.tokenProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }

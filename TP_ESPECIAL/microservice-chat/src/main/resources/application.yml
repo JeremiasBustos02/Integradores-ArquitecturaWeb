@@ -17,7 +17,12 @@ spring:
     url: jdbc:mysql://localhost:3306/chat_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
     username: root
     password: password
-  
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+
   jpa:
     hibernate:
       ddl-auto: update

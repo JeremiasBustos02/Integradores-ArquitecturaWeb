@@ -7,6 +7,7 @@ import lombok.Data;
 
 @Data
 public class LoginDTO {
+
     @NotNull(message = "El email es un campo requerido.")
     @NotEmpty(message = "El email es un campo requerido.")
     @Schema(description = "Nombre de usuario", example = "admin@test.com")
@@ -14,7 +15,7 @@ public class LoginDTO {
 
     @NotNull(message = "La contraseña es un campo requerido.")
     @NotEmpty(message = "La contraseña es un campo requerido.")
-    @Schema(description = "Contraseña", example = "1234")
+    @Schema(description = "Contraseña", example = "admin123")
     private String password;
 }
 

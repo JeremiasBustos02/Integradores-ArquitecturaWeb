@@ -32,6 +32,6 @@ public class UsuarioRequestDTO {
     @NotBlank(message = "La contraseña es obligatoria")
     private String password;
 
-    @Schema(description = "Rol", example = "ADMIN")
+    @Schema(description = "Rol", example = "USUARIO")
     private Rol rol = Rol.USUARIO;
 }

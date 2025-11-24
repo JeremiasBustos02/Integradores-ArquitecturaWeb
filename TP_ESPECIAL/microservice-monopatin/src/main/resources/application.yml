@@ -13,6 +13,10 @@ spring:
         initial-interval: 1500
         multiplier: 1.2
         max-interval: 3000
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
 
 microservice:
   viaje:
