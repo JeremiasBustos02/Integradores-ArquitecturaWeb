@@ -808,7 +808,49 @@ El `JwtFilter` intercepta todas las requests y:
 ---
 
 > 📚 **Documentación completa:** Ver [postman/Sistema_Monopatines_Collection.json](./postman/) para todos los endpoints con ejemplos
+# 📚 Documentación de la API (Swagger UI)
 
+## 📋 Tabla de Contenidos
+- [Acceso a la Documentación](#acceso-a-la-documentación)
+- [Autenticación en Swagger](#autenticación-en-swagger)
+- [Endpoints por Microservicio](#endpoints-por-microservicio)
+- [Consideraciones y Solución de Problemas](#consideraciones-y-solución-de-problemas)
+
+## 🔗 Acceso a la Documentación
+
+El sistema centraliza toda la documentación a través del **API Gateway**.  
+Aunque cada microservicio expone su propia documentación OpenAPI, **se recomienda usar siempre la vista unificada** en el puerto `8080`.
+
+| Servicio                | Ruta Swagger (JSON)                  | Interfaz UI                                    | Descripción                                 |
+|-------------------------|--------------------------------------|------------------------------------------------|---------------------------------------------|
+| **Gateway (Unificado)** | `/v3/api-docs`                       | http://localhost:8080/swagger-ui.html         | Vista global del sistema completo           |
+| Microservice User       | `/v3/api-docs/usuarios`              | -                                              | Gestión de usuarios y cuentas               |
+| Microservice Monopatin  | `/v3/api-docs/monopatin`             | -                                              | Gestión de flota y ubicación                |
+| Microservice Viajes     | `/v3/api-docs/viajes`                | -                                              | Gestión de viajes (MongoDB)                 |
+| Microservice Tarifas    | `/v3/api-docs/tarifas`               | -                                              | Precios y ajustes (Solo Admin)              |
+| Microservice Facturación| `/v3/api-docs/facturacion`           | -                                              | Facturas y pagos                            |
+| Microservice Parada     | `/v3/api-docs/paradas`               | -                                              | Estaciones de monopatines                   |
+| Microservice Chat       | `/v3/api-docs/chat`                  | -                                              | Asistente IA                                |
+
+**URL principal recomendada:**  
+👉 **http://localhost:8080/swagger-ui.html**
+
+## 🔐 Autenticación en Swagger
+
+La API está protegida mediante **JWT**. Para probar los endpoints protegidos directamente desde Swagger UI:
+
+### Pasos para autenticarse
+
+1. **Obtener el Token**
+    - Ejecuta el endpoint:  
+      `POST /api/authenticate`
+    - Body (JSON):
+      ```json
+      {
+        "username": "admin@example.com",
+        "password": "admin123"
+      }
+      
 ## ⚙️ Configuración
 
 ### Configuración de Base de Datos
