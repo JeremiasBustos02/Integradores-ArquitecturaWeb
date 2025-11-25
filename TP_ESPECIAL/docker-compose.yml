@@ -262,6 +262,18 @@ services:
     networks:
       - microservices-network
 
+  mock-mercadopago:
+    build:
+      context: ./mock-mercadopago
+      dockerfile: Dockerfile
+    container_name: mock-mercadopago
+    ports:
+      - "8090:8088"
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+
   microservice-chat:
     build:
       context: .
