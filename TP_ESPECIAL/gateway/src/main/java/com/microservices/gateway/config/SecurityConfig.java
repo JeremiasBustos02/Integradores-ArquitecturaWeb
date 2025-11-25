@@ -65,6 +65,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/webjars/**").permitAll()
+                        .requestMatchers("/api/chat/**").permitAll()
                         // Endpoints de reportes requieren rol ADMIN
                         .requestMatchers("/api/monopatines/reporte/**").hasAuthority(AuthorityConstant.ADMIN)
                         .requestMatchers("/api/usuarios/reporte/**").hasAuthority(AuthorityConstant.ADMIN)
