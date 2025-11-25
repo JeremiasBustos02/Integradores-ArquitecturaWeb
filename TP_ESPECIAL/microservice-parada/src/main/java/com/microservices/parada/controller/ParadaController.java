@@ -33,7 +33,6 @@ public class ParadaController {
     @Operation(summary = "Obtener parada por id", description = "Devuelve una parada dado un id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Parada encontrada"),
-            @ApiResponse(responseCode = "400", description = "ID inválido"),
             @ApiResponse(responseCode = "404", description = "No se encontró la parada"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })

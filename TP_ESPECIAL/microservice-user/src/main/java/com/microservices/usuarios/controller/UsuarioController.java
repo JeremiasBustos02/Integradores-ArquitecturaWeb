@@ -42,6 +42,7 @@ public class UsuarioController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Usuario creado exitosamente"),
             @ApiResponse(responseCode = "400", description = "Datos de usuario inválidos"),
+            @ApiResponse(responseCode = "409", description = "Email o celular ya registrado"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     @PostMapping
@@ -171,6 +172,7 @@ public class UsuarioController {
             @ApiResponse(responseCode = "200", description = "Usuario actualizado correctamente"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos"),
             @ApiResponse(responseCode = "404", description = "No se encontró el usuario"),
+            @ApiResponse(responseCode = "409", description = "Email o celular ya existe"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     @PutMapping("/{id}")

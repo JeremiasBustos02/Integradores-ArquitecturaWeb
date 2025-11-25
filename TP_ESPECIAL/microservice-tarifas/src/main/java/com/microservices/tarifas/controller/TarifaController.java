@@ -81,7 +81,7 @@ public class TarifaController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Tarifa obtenida correctamente"),
             @ApiResponse(responseCode = "404", description = "No se encontro el recurso"),
-            @ApiResponse(responseCode = "500", description = "Error interno en el servidor"),
+            @ApiResponse(responseCode = "500", description = "Error interno en el servidor")
 
 
     })
@@ -94,7 +94,7 @@ public class TarifaController {
     @Operation(summary = "Obtener tarifas", description = "Obtener todas las tarifas")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Tarifas obtenidas correctamente"),
-            @ApiResponse(responseCode = "500", description = "Error interno en el servidor"),
+            @ApiResponse(responseCode = "500", description = "Error interno en el servidor")
 
 
     })
@@ -108,7 +108,7 @@ public class TarifaController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Tarifa eliminada correctamente"),
             @ApiResponse(responseCode = "404", description = "No se encontró la tarifa"),
-            @ApiResponse(responseCode = "500", description = "Error interno en el servidor"),
+            @ApiResponse(responseCode = "500", description = "Error interno en el servidor")
 
 
     })
@@ -122,7 +122,7 @@ public class TarifaController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Tarifa obtenida correctamente"),
             @ApiResponse(responseCode = "404", description = "No hay ninguna tarifa activa"),
-            @ApiResponse(responseCode = "500", description = "Error interno en el servidor"),
+            @ApiResponse(responseCode = "500", description = "Error interno en el servidor")
 
 
     })
@@ -136,7 +136,7 @@ public class TarifaController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Tarifa obtenida correctamente"),
             @ApiResponse(responseCode = "404", description = "No se encontró tarifa para esa fecha"),
-            @ApiResponse(responseCode = "500", description = "Error interno en el servidor"),
+            @ApiResponse(responseCode = "500", description = "Error interno en el servidor")
 
 
     })
@@ -151,7 +151,7 @@ public class TarifaController {
     @Operation(summary = "Obtener tarifas por fecha", description = "Obtener una tarifa dado dos fechas")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Tarifas obtenidas correctamente"),
-            @ApiResponse(responseCode = "500", description = "Error interno en el servidor"),
+            @ApiResponse(responseCode = "500", description = "Error interno en el servidor")
 
 
     })

@@ -40,8 +40,9 @@ public class ViajeController {
     @Operation(summary = "Crear viaje", description = "Crear un viaje")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Viaje creado correctamente"),
-            @ApiResponse(responseCode = "400", description = "Error en los datos introducidos")
-            , @ApiResponse(responseCode = "500", description = "Error interno en el servidor")
+            @ApiResponse(responseCode = "400", description = "Error en los datos introducidos"),
+            @ApiResponse(responseCode = "404", description = "Monopatín, usuario, tarifa o parada no encontrada"),
+            @ApiResponse(responseCode = "500", description = "Error interno en el servidor")
     })
     @PostMapping
     public ResponseEntity<ViajeResponseDTO> createViaje(@RequestBody @Valid ViajeRequestDTO request) {
@@ -85,9 +86,9 @@ public class ViajeController {
 
     @Operation(summary = "Iniciar pausa", description = "Creacion de una pausa en el viaje")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Pausa creada correctamente"),
-            @ApiResponse(responseCode = "404", description = "No se encontro el viaje")
-            , @ApiResponse(responseCode = "500", description = "Error interno en el servidor")
+            @ApiResponse(responseCode = "200", description = "Pausa iniciada correctamente"),
+            @ApiResponse(responseCode = "404", description = "No se encontro el viaje"),
+            @ApiResponse(responseCode = "500", description = "Error interno en el servidor")
     })
     @PostMapping("/{id}/pausa/iniciar")
     public ResponseEntity<ViajeResponseDTO> iniciarPausa(

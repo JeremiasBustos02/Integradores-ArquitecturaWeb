@@ -43,6 +43,7 @@ public class ChatController {
      * Endpoint de health check
      */
     @Operation(summary = "Verificar el estado del servicio", description = "Responde con el estado en el que se encuentra el servicio")
+    @ApiResponse(responseCode = "200", description = "Servicio operativo")
     @GetMapping("/health")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("Chat service is running");

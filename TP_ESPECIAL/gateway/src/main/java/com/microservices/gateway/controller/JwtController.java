@@ -34,9 +34,9 @@ public class JwtController {
 
     @Operation(summary = "Validar tokens", description = "Crea y valida tokens jwt")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Token JWT creado exitosamente"),
-            @ApiResponse(responseCode = "400", description = "No se pudo crear o validar el token"),
-            @ApiResponse(responseCode = "404", description = "No se encontro token")
+            @ApiResponse(responseCode = "200", description = "Token JWT creado exitosamente"),
+            @ApiResponse(responseCode = "401", description = "Credenciales inválidas"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     @PostMapping()
     public ResponseEntity<JWTToken> authenticate(@Valid @RequestBody LoginDTO request) {
@@ -54,8 +54,13 @@ public class JwtController {
         return new ResponseEntity<>(new JWTToken(jwt), httpHeaders, HttpStatus.OK);
     }
 
+    @Schema(description = "Respuesta con token JWT")
     static class JWTToken {
-        @Schema(description = "Token de acceso JWT", example = "eyJhbGciOiJIUzI1NiJ9...")
+        @Schema(
+                description = "Token JWT de acceso",
+                example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U"
+        )
+        @JsonProperty("id_token")
         private String idToken;
 
         JWTToken(String idToken) {

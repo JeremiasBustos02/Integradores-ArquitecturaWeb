@@ -37,7 +37,10 @@ public class CuentaController {
     @Operation(summary = "Crear nueva cuenta", description = "Crea una cuenta asociada a un usuario de Mercado Pago")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Cuenta creada exitosamente"),
+
             @ApiResponse(responseCode = "400", description = "Datos de la cuenta inválidos"),
+            @ApiResponse(responseCode = "409", description = "ID de Mercado Pago ya registrado"),
+
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
 
@@ -199,7 +202,8 @@ public class CuentaController {
     @Operation(summary = "Descontar saldo", description = "Resta saldo de la cuenta (Pago de viajes/servicios)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Saldo descontado correctamente"),
-            @ApiResponse(responseCode = "400", description = "Saldo insuficiente o monto inválido"),
+            @ApiResponse(responseCode = "400", description = "Monto inválido (debe ser positivo)"),
+            @ApiResponse(responseCode = "422", description = "Saldo insuficiente"),
             @ApiResponse(responseCode = "404", description = "No se encontró la cuenta"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })

@@ -134,6 +134,7 @@ public class MonopatinController {
             @ApiResponse(responseCode = "200", description = "Estado de monopatin cambiado correctamente"),
             @ApiResponse(responseCode = "404", description = "Error al obtener el recurso"),
             @ApiResponse(responseCode = "400", description = "Error al cambiar el recurso"),
+            @ApiResponse(responseCode = "409", description = "No se puede cambiar al estado solicitado"),
 
             @ApiResponse(responseCode = "500", description = "Error interno en el servidor"),
 
